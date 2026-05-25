@@ -40,6 +40,9 @@ Rules:
 - Each question must have EXACTLY 4 answer options (A, B, C, D).
 - Exactly ONE option per question must be correct.
 - Questions and options must be based solely on the article provided.
+- Focus the questions on principles, teachings, values, lessons, and philosophy from the article.
+- Avoid questions that mainly test memory of character names, identity, or minor story details.
+- Use characters or events only when needed to test the underlying principle or philosophical point.
 - Keep language simple and clear.
 - Return ONLY valid JSON in this exact structure (no markdown, no extra keys):
 

@@ -52,6 +52,13 @@
   </style>
 {% endblock %}
 
+{% block form_top %}
+  {{ block.super }}
+  {% if copy_image_from_story_id %}
+    <input type="hidden" name="_copy_image_from_story_id" value="{{ copy_image_from_story_id }}" />
+  {% endif %}
+{% endblock %}
+
 {% block submit_buttons_bottom %}
   {{ block.super }}
   {% if original.pk %}
@@ -63,5 +70,22 @@
       &#129302; Add / Regenerate MCQs via OpenAI
     </a>
   </div>
+  {% if original.language == 'en' %}
+  <div class="submit-row" style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <form method="post" action="{% url 'admin:stories_story_translate_story' original.pk %}" style="display:flex;align-items:center;gap:10px;">
+      {% csrf_token %}
+      <label for="id_target_language" style="font-weight:600;">Translate this story to:</label>
+      <select id="id_target_language" name="target_language" required style="min-width:170px;">
+        <option value="" selected disabled>Select language</option>
+        {% for code, label in translation_language_choices %}
+          <option value="{{ code }}">{{ label }} ({{ code }})</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="button" style="background:#2f6f3e;color:#fff;">
+        &#127760; Translate this story
+      </button>
+    </form>
+  </div>
+  {% endif %}
   {% endif %}
 {% endblock %}

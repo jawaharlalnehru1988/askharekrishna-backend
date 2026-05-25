@@ -3,7 +3,10 @@ from django import forms
 from django.urls import path
 from django.http import HttpResponseRedirect
 from django.utils.html import format_html, format_html_join
+from django.utils.text import slugify
 from django.contrib import messages
+from django.urls import reverse
+from urllib.parse import urlencode
 from .models import Story, StoryMainTopic, StoryQuestion, StoryQuestionOption
 
 
@@ -52,6 +55,13 @@ class StoryQuestionInline(admin.StackedInline):
 @admin.register(Story)
 class StoryAdmin(admin.ModelAdmin):
     change_form_template = 'admin/stories/story/change_form.html'
+    translation_language_choices = (
+        ('ta', 'Tamil'),
+        ('te', 'Telugu'),
+        ('kn', 'Kannada'),
+        ('hi', 'Hindi'),
+        ('ml', 'Malayalam'),
+    )
 
     list_display = (
         'subTopic',
@@ -94,8 +104,114 @@ class StoryAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.generate_mcqs_view),
                 name='stories_story_generate_mcqs',
             ),
+            path(
+                '<int:pk>/translate-story/',
+                self.admin_site.admin_view(self.translate_story_view),
+                name='stories_story_translate_story',
+            ),
         ]
         return custom + urls
+
+    def _build_transliterated_slug(self, main_topic_name: str, sub_topic: str, target_language: str) -> str:
+        base_slug = slugify(f"{main_topic_name} {sub_topic}", allow_unicode=False) or "story"
+        base_slug = f"{base_slug}-{target_language}"
+        base_slug = base_slug[:280]
+        slug = base_slug
+        counter = 1
+
+        while Story.objects.filter(slug=slug).exists():
+            suffix = f"-{counter}"
+            slug = f"{base_slug[:280 - len(suffix)]}{suffix}"
+            counter += 1
+
+        return slug
+
+    def translate_story_view(self, request, pk):
+        story = self.get_object(request, pk)
+        if story is None:
+            messages.error(request, "Story not found.")
+            return HttpResponseRedirect("../../")
+
+        if request.method != 'POST':
+            return HttpResponseRedirect(f"../../{pk}/change/")
+
+        if (story.language or '').lower() != 'en':
+            messages.error(request, "Translation is allowed only from English source stories.")
+            return HttpResponseRedirect(f"../../{pk}/change/")
+
+        target_language = (request.POST.get('target_language') or '').strip().lower()
+        allowed_codes = {code for code, _ in self.translation_language_choices}
+        if target_language not in allowed_codes:
+            messages.error(request, "Please select a valid target language.")
+            return HttpResponseRedirect(f"../../{pk}/change/")
+
+        if target_language == 'en':
+            messages.error(request, "Target language cannot be English.")
+            return HttpResponseRedirect(f"../../{pk}/change/")
+
+        if not story.article or not story.article.strip():
+            messages.error(request, "Source story has no article text to translate.")
+            return HttpResponseRedirect(f"../../{pk}/change/")
+
+        try:
+            from .translation_generator import translate_story_content
+
+            translated = translate_story_content(
+                main_topic=story.mainTopic.name if story.mainTopic else '',
+                sub_topic=story.subTopic,
+                article_text=story.article,
+                target_language=target_language,
+            )
+
+            translated_main_topic = (translated.get('mainTopic') or '').strip()
+            translated_sub_topic = (translated.get('subTopic') or '').strip()
+            translated_article = (translated.get('article') or '').strip()
+
+            if not translated_main_topic or not translated_sub_topic or not translated_article:
+                raise ValueError("AI translation returned empty required fields.")
+
+            translated_topic, _ = StoryMainTopic.objects.get_or_create(name=translated_main_topic)
+            generated_slug = self._build_transliterated_slug(
+                main_topic_name=translated_topic.name,
+                sub_topic=translated_sub_topic,
+                target_language=target_language,
+            )
+
+            duplicate_topic_subtopic = Story.objects.filter(
+                language=target_language,
+                mainTopic=translated_topic,
+                subTopic__iexact=translated_sub_topic,
+            ).exists()
+            duplicate_slug = Story.objects.filter(slug=generated_slug).exists()
+
+            if duplicate_topic_subtopic or duplicate_slug:
+                messages.error(
+                    request,
+                    "A translated story already exists for this target language with the same topic/subtopic or slug.",
+                )
+                return HttpResponseRedirect(f"../../{pk}/change/")
+
+            params = {
+                'language': target_language,
+                'mainTopic': translated_topic.pk,
+                'subTopic': translated_sub_topic,
+                'article': translated_article,
+                'slug': generated_slug,
+                'order': story.order,
+                '_copy_image_from_story_id': story.pk,
+            }
+
+            messages.success(
+                request,
+                "Translation draft prepared. Review it and click Save to create the translated story.",
+            )
+            return HttpResponseRedirect(f"{reverse('admin:stories_story_add')}?{urlencode(params)}")
+        except ValueError as exc:
+            messages.error(request, f"Story translation failed: {exc}")
+        except Exception as exc:
+            messages.error(request, f"Unexpected error during translation: {exc}")
+
+        return HttpResponseRedirect(f"../../{pk}/change/")
 
     def generate_mcqs_view(self, request, pk):
         from .mcq_generator import generate_mcqs, save_mcqs
@@ -133,6 +249,20 @@ class StoryAdmin(admin.ModelAdmin):
                 }
             )
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        context['translation_language_choices'] = self.translation_language_choices
+        context['copy_image_from_story_id'] = request.GET.get('_copy_image_from_story_id', '')
+        return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
+
+    def save_model(self, request, obj, form, change):
+        if not change and not obj.imagePath:
+            source_story_id = (request.POST.get('_copy_image_from_story_id') or '').strip()
+            if source_story_id.isdigit():
+                source_story = Story.objects.filter(pk=int(source_story_id), language='en').first()
+                if source_story and source_story.imagePath:
+                    obj.imagePath = source_story.imagePath
+        super().save_model(request, obj, form, change)
 
     def image_preview(self, obj):
         if obj.imagePath:
