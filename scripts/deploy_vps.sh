@@ -21,7 +21,22 @@ echo ">>> Installing backend dependencies"
 "$PYTHON_BIN" -m pip install -r requirements.txt
 
 echo ">>> Applying migrations"
-"$PYTHON_BIN" manage.py migrate --noinput
+set +e
+MIGRATE_OUTPUT=$("$PYTHON_BIN" manage.py migrate --noinput 2>&1)
+MIGRATE_EXIT=$?
+set -e
+echo "$MIGRATE_OUTPUT"
+
+if [[ $MIGRATE_EXIT -ne 0 ]]; then
+  if echo "$MIGRATE_OUTPUT" | grep -q 'relation "kirtan_kirtancategory" already exists'; then
+    echo ">>> Detected schema/history drift for kirtan.0002, applying one-time fake migration"
+    "$PYTHON_BIN" manage.py migrate kirtan 0002_kirtancategory_alter_kirtan_options_and_more --fake
+    "$PYTHON_BIN" manage.py migrate --noinput
+  else
+    echo ">>> Migration failed with an unexpected error"
+    exit $MIGRATE_EXIT
+  fi
+fi
 
 echo ">>> Collecting static files"
 "$PYTHON_BIN" manage.py collectstatic --noinput
