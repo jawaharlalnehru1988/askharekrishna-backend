@@ -1,0 +1,67 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    /* Put label above field and let article editor span full content width. */
+    .form-row.field-article .flex-container,
+    .form-row.field-article .fieldBox,
+    .form-row.field-article > div,
+    .form-row.field-article .related-widget-wrapper {
+      display: block !important;
+      width: 100% !important;
+      max-width: none !important;
+    }
+
+    .form-row.field-article label {
+      display: block !important;
+      width: auto !important;
+      float: none !important;
+      margin-bottom: 8px !important;
+    }
+
+    textarea.article-editor-fullwidth#id_article {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 100% !important;
+      box-sizing: border-box;
+    }
+
+    .aligned textarea.article-editor-fullwidth#id_article,
+    .module.aligned textarea.article-editor-fullwidth#id_article {
+      width: calc(100vw - 560px) !important;
+      max-width: 100% !important;
+      min-width: 780px !important;
+    }
+
+    @media (max-width: 1024px) {
+      textarea.article-editor-fullwidth#id_article {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+      }
+
+      .aligned textarea.article-editor-fullwidth#id_article,
+      .module.aligned textarea.article-editor-fullwidth#id_article {
+        width: 100% !important;
+        min-width: 100% !important;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+  {{ block.super }}
+  {% if original.pk %}
+  <div class="submit-row" style="margin-top:8px;">
+    <a href="{% url 'admin:stories_story_generate_mcqs' original.pk %}"
+       class="button"
+       style="background:#417690;color:#fff;padding:8px 16px;border-radius:4px;text-decoration:none;font-size:13px;margin-right:8px;display:inline-block;"
+       onclick="return confirm('This will REPLACE all existing MCQs for this story. Continue?');">
+      &#129302; Add / Regenerate MCQs via OpenAI
+    </a>
+  </div>
+  {% endif %}
+{% endblock %}

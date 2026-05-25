@@ -1,0 +1,50 @@
+{% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        .password-toggle {
+            position: relative;
+        }
+        .password-toggle-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 2;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var pwdField = document.getElementById('id_password');
+            if (pwdField) {
+                var wrapper = document.createElement('div');
+                wrapper.className = 'password-toggle';
+                pwdField.parentNode.insertBefore(wrapper, pwdField);
+                wrapper.appendChild(pwdField);
+
+                var icon = document.createElement('span');
+                icon.className = 'password-toggle-icon';
+                icon.innerHTML = '\u{1F441}'; // Eye unicode
+                icon.title = 'Show/Hide Password';
+                wrapper.appendChild(icon);
+
+                icon.addEventListener('click', function() {
+                    if (pwdField.type === 'password') {
+                        pwdField.type = 'text';
+                        icon.innerHTML = '\u{1F441}\u{200D}\u{1F5E8}'; // Eye with slash
+                    } else {
+                        pwdField.type = 'password';
+                        icon.innerHTML = '\u{1F441}';
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

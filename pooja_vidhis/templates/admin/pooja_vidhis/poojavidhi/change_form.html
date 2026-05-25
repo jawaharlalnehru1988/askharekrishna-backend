@@ -1,0 +1,16 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block submit_buttons_bottom %}
+  {{ block.super }}
+  {% if original.pk %}
+  <div class="submit-row" style="margin-top:8px;">
+    <a href="{% url 'admin:pooja_vidhis_poojavidhi_generate_mcqs' original.pk %}"
+       class="button"
+       style="background:#417690;color:#fff;padding:8px 16px;border-radius:4px;text-decoration:none;font-size:13px;margin-right:8px;display:inline-block;"
+       onclick="return confirm('This will REPLACE all existing MCQs for this article. Continue?');">
+      &#129302; Add / Regenerate MCQs via OpenAI
+    </a>
+  </div>
+  {% endif %}
+{% endblock %}
