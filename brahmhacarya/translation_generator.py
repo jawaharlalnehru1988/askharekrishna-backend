@@ -1,6 +1,6 @@
 """
-AI-powered translation helper for story content.
-Returns translated main topic, sub topic, and article body.
+AI-powered translation helper for Brahmhacarya articles.
+Returns translated title, excerpt, and content body.
 """
 import json
 from typing import List
@@ -23,8 +23,7 @@ LANGUAGE_NAMES = {
     "sa": "Sanskrit",
 }
 
-# Hard limits to prevent runaway requests.
-MAX_ARTICLE_CHARS = 50000
+MAX_CONTENT_CHARS = 50000
 MAX_CHUNK_CHARS = 3500
 MAX_CHUNKS = 25
 MAX_ATTEMPTS_PER_CALL = 2
@@ -51,28 +50,29 @@ def _build_meta_system_prompt(target_language: str) -> str:
     lang_name = LANGUAGE_NAMES.get(target_language.lower(), target_language)
     language_rules = _language_specific_rules(target_language)
     return f"""You are an expert devotional content translator.
-Translate only short labels from English into {lang_name}.
+Translate the provided English Brahmacharya article title and excerpt into {lang_name}.
 
 Rules:
-- Preserve meaning and devotional tone.
+- Preserve meaning, tone, and spiritual context.
 - Keep output concise and natural.
 {language_rules}- Use strict {lang_name} output for the translated text unless the source includes a proper noun that should remain recognizable.
+- If the source excerpt is empty, return an empty string for the excerpt.
 - Return ONLY valid JSON with exactly these keys:
 {{
-  \"mainTopic\": \"<translated main topic in {lang_name}>\",
-  \"subTopic\": \"<translated sub topic in {lang_name}>\"
+  \"title\": \"<translated title in {lang_name}>\",
+  \"excerpt\": \"<translated excerpt in {lang_name}>\"
 }}
 """
 
 
-def _build_chunk_system_prompt(target_language: str) -> str:
+def _build_content_system_prompt(target_language: str) -> str:
     lang_name = LANGUAGE_NAMES.get(target_language.lower(), target_language)
     language_rules = _language_specific_rules(target_language)
     return f"""You are an expert devotional content translator.
-Translate the provided English article chunk into {lang_name}.
+Translate the provided English Brahmacharya article chunk into {lang_name}.
 
 Rules:
-- Preserve meaning, tone, and devotional context.
+- Preserve meaning, tone, and spiritual context.
 - Keep paragraphs natural and readable.
 - Do not add new facts and do not omit meaning.
 - Keep the translation strictly in {lang_name} script/style for normal translated text.
@@ -122,7 +122,6 @@ def _split_into_chunks(text: str, max_chunk_chars: int) -> List[str]:
             continue
 
         if len(para) > max_chunk_chars:
-            # Fallback for very long single paragraph.
             if current:
                 chunks.append(current)
                 current = ""
@@ -145,19 +144,19 @@ def _split_into_chunks(text: str, max_chunk_chars: int) -> List[str]:
     return chunks
 
 
-def translate_story_content(main_topic: str, sub_topic: str, article_text: str, target_language: str) -> dict:
+def translate_brahmhacarya_article(title: str, excerpt: str, content: str, target_language: str) -> dict:
     api_key = settings.OPENAI_API_KEY
     if not api_key:
         raise ValueError("OPENAI_API_KEY is not configured in settings.")
 
-    if not article_text or not article_text.strip():
-        raise ValueError("Article text is empty.")
+    if not content or not content.strip():
+        raise ValueError("Article content is empty.")
 
     model = getattr(settings, "OPENAI_MODEL", "gpt-4o-mini")
     base_url = getattr(settings, "OPENAI_BASE_URL", "https://api.openai.com/v1/")
     client = OpenAI(api_key=api_key, base_url=base_url)
 
-    article = article_text.strip()[:MAX_ARTICLE_CHARS]
+    article = content.strip()[:MAX_CONTENT_CHARS]
     article_chunks = _split_into_chunks(article, MAX_CHUNK_CHARS)
 
     if len(article_chunks) > MAX_CHUNKS:
@@ -173,17 +172,17 @@ def translate_story_content(main_topic: str, sub_topic: str, article_text: str, 
         model=model,
         system_prompt=_build_meta_system_prompt(target_language),
         user_message=(
-            f"Target language: {lang_name}\\n\\n"
-            f"Main topic (English):\\n{main_topic}\\n\\n"
-            f"Sub topic (English):\\n{sub_topic}"
+            f"Target language: {lang_name}\n\n"
+            f"Title (English):\n{title}\n\n"
+            f"Excerpt (English):\n{excerpt or ''}"
         ),
     )
 
-    translated_main_topic = (meta_payload.get("mainTopic") or "").strip()
-    translated_sub_topic = (meta_payload.get("subTopic") or "").strip()
+    translated_title = (meta_payload.get("title") or "").strip()
+    translated_excerpt = (meta_payload.get("excerpt") or "").strip() if (excerpt or "").strip() else ""
 
-    if not translated_main_topic or not translated_sub_topic:
-        raise ValueError("Missing or empty translated main topic/sub topic.")
+    if not translated_title:
+        raise ValueError("Missing or empty translated title.")
 
     translated_chunks: List[str] = []
     total_chunks = len(article_chunks)
@@ -192,11 +191,11 @@ def translate_story_content(main_topic: str, sub_topic: str, article_text: str, 
         chunk_payload = _call_json_completion(
             client=client,
             model=model,
-            system_prompt=_build_chunk_system_prompt(target_language),
+            system_prompt=_build_content_system_prompt(target_language),
             user_message=(
-                f"Target language: {lang_name}\\n"
-                f"Chunk {idx} of {total_chunks}\\n\\n"
-                f"English article chunk:\\n{chunk}"
+                f"Target language: {lang_name}\n"
+                f"Chunk {idx} of {total_chunks}\n\n"
+                f"English article chunk:\n{chunk}"
             ),
         )
 
@@ -206,12 +205,12 @@ def translate_story_content(main_topic: str, sub_topic: str, article_text: str, 
 
         translated_chunks.append(translated_chunk)
 
-    translated_article = "\n\n".join(translated_chunks).strip()
-    if not translated_article:
-        raise ValueError("Translated article is empty.")
+    translated_content = "\n\n".join(translated_chunks).strip()
+    if not translated_content:
+        raise ValueError("Translated article content is empty.")
 
     return {
-        "mainTopic": translated_main_topic,
-        "subTopic": translated_sub_topic,
-        "article": translated_article,
+        "title": translated_title,
+        "excerpt": translated_excerpt,
+        "content": translated_content,
     }

@@ -6,8 +6,26 @@ from django.utils.html import format_html, format_html_join
 from django.utils.text import slugify
 from django.contrib import messages
 from django.urls import reverse
-from urllib.parse import urlencode
+from django.db.models import Q
 from .models import Story, StoryMainTopic, StoryQuestion, StoryQuestionOption
+
+
+STORY_LANGUAGE_NAMES = {
+    "en": "English",
+    "ta": "Tamil",
+    "hi": "Hindi",
+    "te": "Telugu",
+    "kn": "Kannada",
+    "ml": "Malayalam",
+    "mr": "Marathi",
+    "bn": "Bengali",
+    "gu": "Gujarati",
+    "pa": "Punjabi",
+    "or": "Odia",
+    "sa": "Sanskrit",
+}
+
+STORY_LANGUAGE_CHOICES = tuple((code, f"{name} ({code})") for code, name in STORY_LANGUAGE_NAMES.items())
 
 
 @admin.register(StoryMainTopic)
@@ -153,6 +171,8 @@ class StoryAdmin(admin.ModelAdmin):
             messages.error(request, "Source story has no article text to translate.")
             return HttpResponseRedirect(f"../../{pk}/change/")
 
+        replace_existing = (request.POST.get('_replace_existing_translation') or '').strip() in {'1', 'true', 'yes'}
+
         try:
             from .translation_generator import translate_story_content
 
@@ -177,41 +197,74 @@ class StoryAdmin(admin.ModelAdmin):
                 target_language=target_language,
             )
 
-            duplicate_topic_subtopic = Story.objects.filter(
+            existing_story = Story.objects.filter(language=target_language).filter(
+                Q(mainTopic=translated_topic, subTopic__iexact=translated_sub_topic) |
+                Q(slug=generated_slug)
+            ).order_by('id').first()
+
+            if existing_story and not replace_existing:
+                language_name = dict(self.translation_language_choices).get(target_language, target_language)
+                messages.warning(
+                    request,
+                    (
+                        f"A {language_name} translation already exists "
+                        f"(Story ID: {existing_story.pk}). Click Translate again and confirm to replace it."
+                    ),
+                )
+                return HttpResponseRedirect(
+                    f"../../{pk}/change/?replace_lang={target_language}&replace_story_id={existing_story.pk}"
+                )
+
+            if existing_story and replace_existing:
+                existing_story.mainTopic = translated_topic
+                existing_story.subTopic = translated_sub_topic
+                existing_story.article = translated_article
+                existing_story.order = story.order
+                if story.imagePath:
+                    existing_story.imagePath = story.imagePath
+                existing_story.save()
+
+                messages.success(
+                    request,
+                    (
+                        f"Existing {target_language} translation was replaced successfully. "
+                        "Review and edit it if needed."
+                    ),
+                )
+                return HttpResponseRedirect(
+                    reverse('admin:stories_story_change', args=[existing_story.pk])
+                )
+
+            translated_story = Story(
                 language=target_language,
                 mainTopic=translated_topic,
-                subTopic__iexact=translated_sub_topic,
-            ).exists()
-            duplicate_slug = Story.objects.filter(slug=generated_slug).exists()
-
-            if duplicate_topic_subtopic or duplicate_slug:
-                messages.error(
-                    request,
-                    "A translated story already exists for this target language with the same topic/subtopic or slug.",
-                )
-                return HttpResponseRedirect(f"../../{pk}/change/")
-
-            params = {
-                'language': target_language,
-                'mainTopic': translated_topic.pk,
-                'subTopic': translated_sub_topic,
-                'article': translated_article,
-                'slug': generated_slug,
-                'order': story.order,
-                '_copy_image_from_story_id': story.pk,
-            }
+                subTopic=translated_sub_topic,
+                article=translated_article,
+                slug=generated_slug,
+                order=story.order,
+            )
+            if story.imagePath:
+                translated_story.imagePath = story.imagePath
+            translated_story.save()
 
             messages.success(
                 request,
-                "Translation draft prepared. Review it and click Save to create the translated story.",
+                "Translated story created successfully. Review and edit it if needed.",
             )
-            return HttpResponseRedirect(f"{reverse('admin:stories_story_add')}?{urlencode(params)}")
+            return HttpResponseRedirect(
+                reverse('admin:stories_story_change', args=[translated_story.pk])
+            )
         except ValueError as exc:
             messages.error(request, f"Story translation failed: {exc}")
         except Exception as exc:
             messages.error(request, f"Unexpected error during translation: {exc}")
 
         return HttpResponseRedirect(f"../../{pk}/change/")
+
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        if request.method == 'POST' and request.POST.get('_translate_story'):
+            return self.translate_story_view(request, object_id)
+        return super().changeform_view(request, object_id, form_url, extra_context)
 
     def generate_mcqs_view(self, request, pk):
         from .mcq_generator import generate_mcqs, save_mcqs
@@ -239,6 +292,9 @@ class StoryAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(f"../../{pk}/change/")
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'language':
+            kwargs['widget'] = forms.Select(choices=STORY_LANGUAGE_CHOICES)
+
         if db_field.name == 'article':
             kwargs['widget'] = forms.Textarea(
                 attrs={
@@ -253,6 +309,13 @@ class StoryAdmin(admin.ModelAdmin):
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         context['translation_language_choices'] = self.translation_language_choices
         context['copy_image_from_story_id'] = request.GET.get('_copy_image_from_story_id', '')
+        replace_lang = (request.GET.get('replace_lang') or '').strip().lower()
+        replace_story_id = (request.GET.get('replace_story_id') or '').strip()
+        if replace_lang:
+            context['replace_translation_language'] = replace_lang
+            context['replace_translation_language_name'] = dict(self.translation_language_choices).get(replace_lang, replace_lang)
+        if replace_story_id.isdigit():
+            context['replace_translation_story_id'] = replace_story_id
         return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
     def save_model(self, request, obj, form, change):

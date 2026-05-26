@@ -7,7 +7,7 @@ from .serializers import BrahmhacaryaArticleSerializer, BrahmhacaryaRegistration
 
 
 class BrahmhacaryaArticleViewSet(viewsets.ModelViewSet):
-    queryset = BrahmhacaryaArticle.objects.all()
+    queryset = BrahmhacaryaArticle.objects.prefetch_related('questions__options').all()
     serializer_class = BrahmhacaryaArticleSerializer
     lookup_field = 'slug'
     authentication_classes = [SessionAuthentication, BasicAuthentication]

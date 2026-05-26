@@ -12,6 +12,24 @@ from .models import (
 )
 
 
+POOJA_VIDHI_LANGUAGE_NAMES = {
+    "en": "English",
+    "ta": "Tamil",
+    "hi": "Hindi",
+    "te": "Telugu",
+    "kn": "Kannada",
+    "ml": "Malayalam",
+    "mr": "Marathi",
+    "bn": "Bengali",
+    "gu": "Gujarati",
+    "pa": "Punjabi",
+    "or": "Odia",
+    "sa": "Sanskrit",
+}
+
+POOJA_VIDHI_LANGUAGE_CHOICES = [(code, f"{name} ({code})") for code, name in POOJA_VIDHI_LANGUAGE_NAMES.items()]
+
+
 class PoojaVidhiAdminForm(forms.ModelForm):
     mainTopic = forms.ChoiceField(required=True)
 
@@ -21,6 +39,16 @@ class PoojaVidhiAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        language_choices = list(POOJA_VIDHI_LANGUAGE_CHOICES)
+        current_language = (getattr(self.instance, 'language', '') or '').strip()
+        if current_language and current_language not in {code for code, _ in language_choices}:
+            language_choices.append((current_language, current_language))
+
+        self.fields['language'].widget = forms.Select(choices=language_choices)
+        if not self.instance or not self.instance.pk:
+            self.fields['language'].initial = 'en'
+
         topic_names = list(
             PoojaVidhiTopic.objects.filter(is_active=True).order_by('order', 'name').values_list('name', flat=True)
         )

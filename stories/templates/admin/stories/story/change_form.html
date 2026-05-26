@@ -49,7 +49,174 @@
         min-width: 100% !important;
       }
     }
+
+    .translate-story-row {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .translate-story-label {
+      font-weight: 600;
+    }
+
+    .translate-story-select {
+      min-width: 170px;
+    }
+
+    .translate-story-button {
+      background: #2f6f3e;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .translate-story-button.is-loading {
+      opacity: 0.8;
+      cursor: wait;
+      pointer-events: none;
+    }
+
+    .translate-story-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      display: none;
+      animation: translate-spin 0.8s linear infinite;
+    }
+
+    .translate-story-button.is-loading .translate-story-spinner {
+      display: inline-block;
+    }
+
+    .translate-story-note {
+      width: 100%;
+      margin: 2px 0 0;
+      color: #5f6b7a;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .translate-story-warning {
+      width: 100%;
+      margin: 2px 0 0;
+      color: #8a1e1e;
+      font-size: 12px;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    @keyframes translate-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
   </style>
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script>
+    function updateTranslationEstimate() {
+      var articleEl = document.getElementById('id_article');
+      var minutesEl = document.getElementById('translate_estimated_minutes');
+      var unitEl = document.getElementById('translate_estimated_minutes_unit');
+      if (!articleEl || !minutesEl || !unitEl) {
+        return;
+      }
+
+      var articleLength = (articleEl.value || '').trim().length;
+      var maxChunkChars = 3500;
+      var chunks = Math.max(1, Math.ceil(articleLength / maxChunkChars));
+
+      // One additional AI call is used for title/topic metadata translation.
+      var estimatedMinutes = Math.max(1, chunks + 1);
+      minutesEl.textContent = String(estimatedMinutes);
+      unitEl.textContent = estimatedMinutes === 1 ? 'minute' : 'minutes';
+    }
+
+    function submitStoryTranslation(buttonEl) {
+      var selectEl = document.getElementById('id_target_language');
+      if (!selectEl || !selectEl.value) {
+        alert('Please select a target language before translating.');
+        return false;
+      }
+
+      var formEl = buttonEl.form || document.getElementById('story_form');
+      if (!formEl) {
+        return false;
+      }
+
+      var translateAction = buttonEl.getAttribute('data-translate-action') || buttonEl.getAttribute('formaction');
+      if (translateAction) {
+        formEl.setAttribute('action', translateAction);
+      }
+      formEl.setAttribute('method', 'post');
+
+      var intentEl = document.getElementById('id_translate_story_intent');
+      if (!intentEl) {
+        intentEl = document.createElement('input');
+        intentEl.type = 'hidden';
+        intentEl.id = 'id_translate_story_intent';
+        intentEl.name = '_translate_story';
+        formEl.appendChild(intentEl);
+      }
+      intentEl.value = '1';
+
+      var replaceLangEl = document.getElementById('id_replace_translation_language');
+      var replaceStoryEl = document.getElementById('id_replace_translation_story_id');
+      var replaceIntentEl = document.getElementById('id_replace_existing_translation');
+      if (!replaceIntentEl) {
+        replaceIntentEl = document.createElement('input');
+        replaceIntentEl.type = 'hidden';
+        replaceIntentEl.id = 'id_replace_existing_translation';
+        replaceIntentEl.name = '_replace_existing_translation';
+        formEl.appendChild(replaceIntentEl);
+      }
+      replaceIntentEl.value = '';
+
+      if (
+        replaceLangEl && replaceStoryEl &&
+        replaceLangEl.value && replaceStoryEl.value &&
+        replaceLangEl.value === selectEl.value
+      ) {
+        var shouldReplace = window.confirm(
+          'A translation already exists in this language (Story ID ' + replaceStoryEl.value + '). Replace it?'
+        );
+        if (!shouldReplace) {
+          return false;
+        }
+        replaceIntentEl.value = '1';
+      }
+
+      buttonEl.classList.add('is-loading');
+      buttonEl.disabled = true;
+      var labelEl = buttonEl.querySelector('.translate-story-button-label');
+      if (labelEl) {
+        labelEl.textContent = 'Translating...';
+      }
+
+      if (typeof formEl.requestSubmit === 'function') {
+        formEl.requestSubmit();
+      } else {
+        formEl.submit();
+      }
+      return false;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var articleEl = document.getElementById('id_article');
+      if (articleEl) {
+        articleEl.addEventListener('input', updateTranslationEstimate);
+      }
+      updateTranslationEstimate();
+    });
+  </script>
 {% endblock %}
 
 {% block form_top %}
@@ -71,20 +238,42 @@
     </a>
   </div>
   {% if original.language == 'en' %}
-  <div class="submit-row" style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-    <form method="post" action="{% url 'admin:stories_story_translate_story' original.pk %}" style="display:flex;align-items:center;gap:10px;">
-      {% csrf_token %}
-      <label for="id_target_language" style="font-weight:600;">Translate this story to:</label>
-      <select id="id_target_language" name="target_language" required style="min-width:170px;">
-        <option value="" selected disabled>Select language</option>
-        {% for code, label in translation_language_choices %}
-          <option value="{{ code }}">{{ label }} ({{ code }})</option>
-        {% endfor %}
-      </select>
-      <button type="submit" class="button" style="background:#2f6f3e;color:#fff;">
-        &#127760; Translate this story
-      </button>
-    </form>
+  <div class="submit-row translate-story-row">
+    {% if replace_translation_language and replace_translation_story_id %}
+      <input type="hidden" id="id_replace_translation_language" value="{{ replace_translation_language }}" />
+      <input type="hidden" id="id_replace_translation_story_id" value="{{ replace_translation_story_id }}" />
+    {% endif %}
+    <label for="id_target_language" class="translate-story-label">Translate this story to:</label>
+    <select id="id_target_language" name="target_language" required class="translate-story-select">
+      <option value="" selected disabled>Select language</option>
+      {% for code, label in translation_language_choices %}
+        <option value="{{ code }}">{{ label }} ({{ code }})</option>
+      {% endfor %}
+    </select>
+    <button
+      type="submit"
+      class="button translate-story-button"
+      formaction="{% url 'admin:stories_story_translate_story' original.pk %}"
+      data-translate-action="{% url 'admin:stories_story_translate_story' original.pk %}"
+      formmethod="post"
+      name="_translate_story"
+      value="1"
+      onclick="return submitStoryTranslation(this);"
+    >
+      <span aria-hidden="true">&#127760;</span>
+      <span class="translate-story-spinner" aria-hidden="true"></span>
+      <span class="translate-story-button-label">Translate this story</span>
+    </button>
+    <p class="translate-story-note">
+      Large articles are translated in parts; this may take up to
+      <strong><span id="translate_estimated_minutes">1</span> <span id="translate_estimated_minutes_unit">minute</span></strong>.
+    </p>
+    {% if replace_translation_language and replace_translation_story_id %}
+    <p class="translate-story-warning">
+      A {{ replace_translation_language_name }} translation already exists (Story ID: {{ replace_translation_story_id }}).
+      Click Translate this story and confirm to replace it.
+    </p>
+    {% endif %}
   </div>
   {% endif %}
   {% endif %}
