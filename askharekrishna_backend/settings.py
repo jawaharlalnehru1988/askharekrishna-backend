@@ -70,6 +70,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'askharekrishna_backend.image_fallback_middleware.ApiImageFallbackMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -163,6 +164,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 PUBLIC_MEDIA_BASE_URL = os.environ.get('PUBLIC_MEDIA_BASE_URL', 'https://api.askharekrishna.com')
+DEFAULT_FALLBACK_IMAGE_PATH = os.environ.get(
+    'DEFAULT_FALLBACK_IMAGE_PATH',
+    '/media/debate/article/harekrishnaPreaching.jpg',
+)
 
 # OpenAI
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')

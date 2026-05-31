@@ -1,0 +1,123 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script>
+    function submitDebateTranslation(buttonEl) {
+      var formEl = buttonEl && buttonEl.form ? buttonEl.form : document.querySelector('form');
+      if (!formEl) {
+        return false;
+      }
+
+      var selectEl = document.getElementById('id_target_language');
+      if (!selectEl || !selectEl.value) {
+        alert('Please select a target language before translating.');
+        return false;
+      }
+
+      var translateAction = buttonEl.getAttribute('data-translate-action') || buttonEl.getAttribute('formaction');
+      if (translateAction) {
+        formEl.setAttribute('action', translateAction);
+      }
+
+      var intentEl = document.getElementById('id_translate_article_intent');
+      if (!intentEl) {
+        intentEl = document.createElement('input');
+        intentEl.type = 'hidden';
+        intentEl.id = 'id_translate_article_intent';
+        intentEl.name = '_translate_article';
+        formEl.appendChild(intentEl);
+      }
+      intentEl.value = '1';
+
+      var replaceLangEl = document.getElementById('id_replace_translation_language');
+      var replaceArticleEl = document.getElementById('id_replace_translation_article_id');
+      var replaceIntentEl = document.getElementById('id_replace_existing_translation');
+      if (!replaceIntentEl) {
+        replaceIntentEl = document.createElement('input');
+        replaceIntentEl.type = 'hidden';
+        replaceIntentEl.id = 'id_replace_existing_translation';
+        replaceIntentEl.name = '_replace_existing_translation';
+        formEl.appendChild(replaceIntentEl);
+      }
+      replaceIntentEl.value = '';
+
+      if (
+        replaceLangEl && replaceArticleEl &&
+        replaceLangEl.value && replaceArticleEl.value &&
+        replaceLangEl.value === selectEl.value
+      ) {
+        var shouldReplace = confirm(
+          'A translation already exists in this language (Article ID ' + replaceArticleEl.value + '). Replace it?'
+        );
+        if (!shouldReplace) {
+          return false;
+        }
+        replaceIntentEl.value = '1';
+      }
+
+      var labelEl = buttonEl.querySelector('.translate-article-button-label');
+      if (labelEl) {
+        labelEl.textContent = 'Translating...';
+      }
+      buttonEl.disabled = true;
+      formEl.submit();
+      return false;
+    }
+  </script>
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+  {{ block.super }}
+  {% if original.pk %}
+  <div class="submit-row" style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    {% if replace_translation_language and replace_translation_article_id %}
+      <input type="hidden" id="id_replace_translation_language" value="{{ replace_translation_language }}" />
+      <input type="hidden" id="id_replace_translation_article_id" value="{{ replace_translation_article_id }}" />
+      <input type="hidden" id="id_replace_translation_article_change_url" value="{{ replace_translation_article_change_url }}" />
+    {% endif %}
+
+    <label for="id_target_language" style="font-weight:600;">Translate this article to:</label>
+    <select id="id_target_language" name="target_language" required style="min-width:180px;">
+      <option value="" selected disabled>Select language</option>
+      {% for code, label in translation_language_choices %}
+        {% if code != original.language %}
+          <option value="{{ code }}">{{ label }}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
+
+    <button
+      type="submit"
+      class="button"
+      formaction="{% url 'admin:debate_debatearticle_translate_article' original.pk %}"
+      data-translate-action="{% url 'admin:debate_debatearticle_translate_article' original.pk %}"
+      name="_translate_article"
+      value="1"
+      onclick="return submitDebateTranslation(this);"
+      style="background:#5b21b6;color:#fff;padding:8px 14px;border-radius:4px;"
+    >
+      <span class="translate-article-button-label">Translate this article</span>
+    </button>
+  </div>
+
+  {% if replace_translation_language and replace_translation_article_id %}
+  <div class="submit-row" style="margin-top:6px;">
+    <span style="font-size:12px;color:#92400e;">
+      A {{ replace_translation_language_name }} translation already exists (Article ID: {{ replace_translation_article_id }}).
+      Click Translate this article and confirm to replace it.
+    </span>
+  </div>
+  {% endif %}
+
+  <div class="submit-row" style="margin-top:8px;">
+    <a href="{% url 'admin:debate_debatearticle_generate_mcqs' original.pk %}"
+       class="button"
+       style="background:#417690;color:#fff;padding:8px 16px;border-radius:4px;text-decoration:none;font-size:13px;margin-right:8px;display:inline-block;"
+       onclick="return confirm('This will REPLACE all existing MCQs for this article. Continue?');">
+      &#129302; Add / Regenerate MCQs via OpenAI
+    </a>
+  </div>
+  {% endif %}
+{% endblock %}

@@ -3,6 +3,7 @@ Shared MCQ generation helpers for devotional article modules.
 """
 
 import json
+import re
 from typing import Optional
 
 from django.conf import settings
@@ -42,6 +43,10 @@ Rules:
 - Each question must have EXACTLY 4 answer options (A, B, C, D).
 - Exactly ONE option per question must be correct.
 - Questions and options must be based solely on the article provided.
+- Questions must be standalone and directly understandable by the learner without referencing the source text.
+- Do NOT use meta-referential phrasing such as "according to the article", "in the article", "the article says", "as mentioned in the passage", or similar wording.
+- Ask directly about principles, philosophies, morals, values, key teachings, and the main theme.
+- Prefer conceptual understanding over surface wording recall.
 {normalized_extra_rules}- Make wrong options (distractors) plausible and close to the correct answer, not obviously wrong.
 - Keep all 4 options in the same semantic category and similar style/length.
 - Avoid giveaway patterns (like one option being much longer, more specific, or more devotional sounding).
@@ -68,6 +73,15 @@ Rules:
 """
 
 
+_DISALLOWED_QUESTION_PATTERNS = [
+    re.compile(r"\baccording to (the )?(article|passage|text|content)\b", re.IGNORECASE),
+    re.compile(r"\bin (the )?(article|passage|text|content)\b", re.IGNORECASE),
+    re.compile(r"\bthe (article|passage|text|content) (says|states|mentions|explains|discusses)\b", re.IGNORECASE),
+    re.compile(r"\bas (mentioned|stated|described|explained) in (the )?(article|passage|text|content)\b", re.IGNORECASE),
+    re.compile(r"\bfrom (the )?(article|passage|text|content)\b", re.IGNORECASE),
+]
+
+
 def _validate_questions(questions: list) -> None:
     if len(questions) != 10:
         raise ValueError(
@@ -76,16 +90,27 @@ def _validate_questions(questions: list) -> None:
         )
 
     for q in questions:
+        question_text = (q.get("question") or "").strip()
+        if not question_text:
+            raise ValueError("A generated question is empty.")
+
+        for pattern in _DISALLOWED_QUESTION_PATTERNS:
+            if pattern.search(question_text):
+                raise ValueError(
+                    "Generated MCQ contains meta-referential phrasing "
+                    "(e.g., 'according to the article')."
+                )
+
         options = q.get("options", [])
         if len(options) != 4:
             raise ValueError(
-                f"Question '{q.get('question', '')}' does not have 4 options."
+                f"Question '{question_text}' does not have 4 options."
             )
 
         correct_count = sum(1 for opt in options if bool(opt.get("is_correct")))
         if correct_count != 1:
             raise ValueError(
-                f"Question '{q.get('question', '')}' must have exactly one correct option."
+                f"Question '{question_text}' must have exactly one correct option."
             )
 
 
@@ -110,21 +135,30 @@ def generate_mcqs(
         f"Article:\\n{(article_text or '')[:article_char_limit]}"
     )
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": build_mcq_system_prompt(language, extra_rules=extra_rules)},
-            {"role": "user", "content": user_message},
-        ],
-        temperature=temperature,
-        response_format={"type": "json_object"},
-    )
+    max_attempts = 3
+    last_error: Optional[Exception] = None
 
-    raw = response.choices[0].message.content
-    data = json.loads(raw)
-    questions = data.get("questions", [])
-    _validate_questions(questions)
-    return questions
+    for _ in range(max_attempts):
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": build_mcq_system_prompt(language, extra_rules=extra_rules)},
+                    {"role": "user", "content": user_message},
+                ],
+                temperature=temperature,
+                response_format={"type": "json_object"},
+            )
+
+            raw = response.choices[0].message.content
+            data = json.loads(raw)
+            questions = data.get("questions", [])
+            _validate_questions(questions)
+            return questions
+        except Exception as exc:
+            last_error = exc
+
+    raise ValueError(f"MCQ generation failed after retries: {last_error}")
 
 
 def save_mcqs(

@@ -29,6 +29,8 @@ def api_root(request, format=None):
         'cooking_articles': reverse('cooking-article-list', request=request, format=format),
         'debate_articles': reverse('debate-article-list', request=request, format=format),
         'debate_categories': reverse('debate-article-categories', request=request, format=format),
+        'debate_questions': reverse('debate-question-list', request=request, format=format),
+        'debate_question_options': reverse('debate-question-option-list', request=request, format=format),
         'pooja_vidhis': reverse('pooja-vidhi-article-list', request=request, format=format),
         'vaishnava_etiquettes': reverse('vaishnava-etiquette-article-list', request=request, format=format),
         'book_distribution': reverse('book-distribution-article-list', request=request, format=format),
