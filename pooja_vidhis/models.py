@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
+from django.db.models import Q
 
 
 class PoojaVidhiTopic(models.Model):
@@ -31,6 +32,13 @@ class PoojaVidhi(models.Model):
     slug = models.SlugField(max_length=280, unique=True, blank=True, allow_unicode=True)
     order = models.PositiveIntegerField(default=0)
     language = models.CharField(max_length=10, choices=LanguageChoices.choices, default='en')
+    source_vidhi = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='translations',
+    )
     audioPath = models.FileField(upload_to='pooja_vidhis/audio/', max_length=500, blank=True, null=True)
     articleImage = models.ImageField(upload_to='pooja_vidhis/images/', max_length=500, blank=True, null=True)
     
@@ -39,6 +47,13 @@ class PoojaVidhi(models.Model):
 
     class Meta:
         ordering = ['order', 'mainTopic', 'subTopic']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['source_vidhi', 'language'],
+                condition=Q(source_vidhi__isnull=False),
+                name='uq_pooja_vidhi_source_language',
+            ),
+        ]
         verbose_name = 'Pooja Vidhi'
         verbose_name_plural = 'Pooja Vidhis'
 

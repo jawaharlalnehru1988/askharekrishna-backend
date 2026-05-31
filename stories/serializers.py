@@ -31,8 +31,12 @@ class StorySerializer(serializers.ModelSerializer):
     mainTopicName = serializers.CharField(source='mainTopic.name', read_only=True)
     mainTopicDescription = serializers.CharField(source='mainTopic.description', read_only=True)
     mainTopicImage = serializers.ImageField(source='mainTopic.image', read_only=True)
-    imageUrl = serializers.ImageField(source='imagePath', read_only=True)
+    imageUrl = serializers.SerializerMethodField()
     questions = StoryQuestionSerializer(many=True, read_only=True)
+
+    def get_imageUrl(self, obj):
+        image = obj.effective_image_path() if hasattr(obj, 'effective_image_path') else obj.imagePath
+        return image.url if image else None
 
     class Meta:
         model = Story
@@ -41,6 +45,11 @@ class StorySerializer(serializers.ModelSerializer):
 
 class StoryListItemSerializer(serializers.ModelSerializer):
     questions = StoryQuestionSerializer(many=True, read_only=True)
+    imageUrl = serializers.SerializerMethodField()
+
+    def get_imageUrl(self, obj):
+        image = obj.effective_image_path() if hasattr(obj, 'effective_image_path') else obj.imagePath
+        return image.url if image else None
 
     class Meta:
         model = Story
@@ -54,6 +63,7 @@ class StoryListItemSerializer(serializers.ModelSerializer):
             'language',
             'audioPath',
             'imagePath',
+            'imageUrl',
             'questions',
             'created_at',
             'updated_at',

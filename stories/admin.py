@@ -6,7 +6,6 @@ from django.utils.html import format_html, format_html_join
 from django.utils.text import slugify
 from django.contrib import messages
 from django.urls import reverse
-from django.db.models import Q
 from .models import Story, StoryMainTopic, StoryQuestion, StoryQuestionOption
 
 
@@ -74,11 +73,7 @@ class StoryQuestionInline(admin.StackedInline):
 class StoryAdmin(admin.ModelAdmin):
     change_form_template = 'admin/stories/story/change_form.html'
     translation_language_choices = (
-        ('ta', 'Tamil'),
-        ('te', 'Telugu'),
-        ('kn', 'Kannada'),
-        ('hi', 'Hindi'),
-        ('ml', 'Malayalam'),
+        *STORY_LANGUAGE_CHOICES,
     )
 
     list_display = (
@@ -95,6 +90,7 @@ class StoryAdmin(admin.ModelAdmin):
     search_fields = ('mainTopic__name', 'subTopic', 'article')
     fields = (
         'language',
+        'source_story',
         'mainTopic',
         'subTopic',
         'article',
@@ -104,7 +100,7 @@ class StoryAdmin(admin.ModelAdmin):
         'imagePath',
         'image_preview',
     )
-    readonly_fields = ('image_preview',)
+    readonly_fields = ('source_story', 'image_preview')
     ordering = ('order', 'mainTopic__name', 'subTopic')
     inlines = [StoryQuestionInline]
 
@@ -153,8 +149,9 @@ class StoryAdmin(admin.ModelAdmin):
         if request.method != 'POST':
             return HttpResponseRedirect(f"../../{pk}/change/")
 
-        if (story.language or '').lower() != 'en':
-            messages.error(request, "Translation is allowed only from English source stories.")
+        source_language = (story.language or '').strip().lower()
+        if source_language not in STORY_LANGUAGE_NAMES:
+            messages.error(request, "Translation is supported only for stories whose language is configured in the system.")
             return HttpResponseRedirect(f"../../{pk}/change/")
 
         target_language = (request.POST.get('target_language') or '').strip().lower()
@@ -163,8 +160,8 @@ class StoryAdmin(admin.ModelAdmin):
             messages.error(request, "Please select a valid target language.")
             return HttpResponseRedirect(f"../../{pk}/change/")
 
-        if target_language == 'en':
-            messages.error(request, "Target language cannot be English.")
+        if target_language == source_language:
+            messages.error(request, "Source and target languages must be different.")
             return HttpResponseRedirect(f"../../{pk}/change/")
 
         if not story.article or not story.article.strip():
@@ -180,6 +177,7 @@ class StoryAdmin(admin.ModelAdmin):
                 main_topic=story.mainTopic.name if story.mainTopic else '',
                 sub_topic=story.subTopic,
                 article_text=story.article,
+                source_language=source_language,
                 target_language=target_language,
             )
 
@@ -197,9 +195,9 @@ class StoryAdmin(admin.ModelAdmin):
                 target_language=target_language,
             )
 
-            existing_story = Story.objects.filter(language=target_language).filter(
-                Q(mainTopic=translated_topic, subTopic__iexact=translated_sub_topic) |
-                Q(slug=generated_slug)
+            existing_story = Story.objects.filter(
+                source_story=story,
+                language=target_language,
             ).order_by('id').first()
 
             if existing_story and not replace_existing:
@@ -216,12 +214,15 @@ class StoryAdmin(admin.ModelAdmin):
                 )
 
             if existing_story and replace_existing:
+                existing_story.source_story = story
                 existing_story.mainTopic = translated_topic
                 existing_story.subTopic = translated_sub_topic
                 existing_story.article = translated_article
                 existing_story.order = story.order
                 if story.imagePath:
                     existing_story.imagePath = story.imagePath
+                elif not existing_story.imagePath and story.source_story and story.source_story.imagePath:
+                    existing_story.imagePath = story.source_story.imagePath
                 existing_story.save()
 
                 messages.success(
@@ -237,6 +238,7 @@ class StoryAdmin(admin.ModelAdmin):
 
             translated_story = Story(
                 language=target_language,
+                source_story=story,
                 mainTopic=translated_topic,
                 subTopic=translated_sub_topic,
                 article=translated_article,
@@ -245,6 +247,8 @@ class StoryAdmin(admin.ModelAdmin):
             )
             if story.imagePath:
                 translated_story.imagePath = story.imagePath
+            elif story.source_story and story.source_story.imagePath:
+                translated_story.imagePath = story.source_story.imagePath
             translated_story.save()
 
             messages.success(
@@ -309,6 +313,17 @@ class StoryAdmin(admin.ModelAdmin):
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         context['translation_language_choices'] = self.translation_language_choices
         context['copy_image_from_story_id'] = request.GET.get('_copy_image_from_story_id', '')
+        source_obj = obj or context.get('original')
+        source_language_code = ''
+        if source_obj and getattr(source_obj, 'language', None):
+            source_language_code = (source_obj.language or '').strip().lower()
+
+        context['translation_source_language_code'] = source_language_code
+        context['translation_source_language_name'] = STORY_LANGUAGE_NAMES.get(
+            source_language_code,
+            source_language_code,
+        )
+        context['translation_source_supported'] = source_language_code in STORY_LANGUAGE_NAMES
         replace_lang = (request.GET.get('replace_lang') or '').strip().lower()
         replace_story_id = (request.GET.get('replace_story_id') or '').strip()
         if replace_lang:
@@ -316,22 +331,27 @@ class StoryAdmin(admin.ModelAdmin):
             context['replace_translation_language_name'] = dict(self.translation_language_choices).get(replace_lang, replace_lang)
         if replace_story_id.isdigit():
             context['replace_translation_story_id'] = replace_story_id
+            context['replace_translation_story_change_url'] = reverse(
+                'admin:stories_story_change',
+                args=[int(replace_story_id)],
+            )
         return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
     def save_model(self, request, obj, form, change):
         if not change and not obj.imagePath:
             source_story_id = (request.POST.get('_copy_image_from_story_id') or '').strip()
             if source_story_id.isdigit():
-                source_story = Story.objects.filter(pk=int(source_story_id), language='en').first()
+                source_story = Story.objects.filter(pk=int(source_story_id)).first()
                 if source_story and source_story.imagePath:
                     obj.imagePath = source_story.imagePath
         super().save_model(request, obj, form, change)
 
     def image_preview(self, obj):
-        if obj.imagePath:
+        image = obj.effective_image_path() if hasattr(obj, 'effective_image_path') else obj.imagePath
+        if image:
             return format_html(
                 '<img src="{}" style="max-height:80px;max-width:120px;border-radius:4px;" />',
-                obj.imagePath.url,
+                image.url,
             )
         return '-'
 

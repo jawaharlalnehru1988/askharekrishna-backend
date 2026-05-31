@@ -7,21 +7,11 @@ from typing import List
 
 from django.conf import settings
 from openai import OpenAI
-
-LANGUAGE_NAMES = {
-    "en": "English",
-    "ta": "Tamil",
-    "hi": "Hindi",
-    "te": "Telugu",
-    "kn": "Kannada",
-    "ml": "Malayalam",
-    "mr": "Marathi",
-    "bn": "Bengali",
-    "gu": "Gujarati",
-    "pa": "Punjabi",
-    "or": "Odia",
-    "sa": "Sanskrit",
-}
+from translation_prompts import (
+    build_story_chunk_system_prompt,
+    build_story_meta_system_prompt,
+    get_language_name,
+)
 
 # Hard limits to prevent runaway requests.
 MAX_ARTICLE_CHARS = 50000
@@ -29,60 +19,6 @@ MAX_CHUNK_CHARS = 3500
 MAX_CHUNKS = 25
 MAX_ATTEMPTS_PER_CALL = 2
 REQUEST_TIMEOUT_SECONDS = 90
-
-
-def _language_specific_rules(target_language: str) -> str:
-    language_code = (target_language or "").lower()
-
-    if language_code == "ta":
-        return """Tamil-specific rules:
-- Use only Tamil script for translated Tamil text. Do NOT mix in Devanagari or any other Indic script.
-- If a Sanskrit devotional term must be retained, write it in Tamil script, not Devanagari.
-- Translate "Lord" and "God" as "பகவான்" when referring to the Supreme Lord in devotional context.
-- Do NOT translate "Lord" or "God" as "ஆண்டவர்" in this devotional context.
-- Translate "deity" as "விக்ரஹம்" in devotional temple/worship context.
-- Do NOT translate "deity" as "தெய்வம்" in this devotional context.
-"""
-
-    return ""
-
-
-def _build_meta_system_prompt(target_language: str) -> str:
-    lang_name = LANGUAGE_NAMES.get(target_language.lower(), target_language)
-    language_rules = _language_specific_rules(target_language)
-    return f"""You are an expert devotional content translator.
-Translate only short labels from English into {lang_name}.
-
-Rules:
-- Preserve meaning and devotional tone.
-- Keep output concise and natural.
-{language_rules}- Use strict {lang_name} output for the translated text unless the source includes a proper noun that should remain recognizable.
-- Return ONLY valid JSON with exactly these keys:
-{{
-  \"mainTopic\": \"<translated main topic in {lang_name}>\",
-  \"subTopic\": \"<translated sub topic in {lang_name}>\"
-}}
-"""
-
-
-def _build_chunk_system_prompt(target_language: str) -> str:
-    lang_name = LANGUAGE_NAMES.get(target_language.lower(), target_language)
-    language_rules = _language_specific_rules(target_language)
-    return f"""You are an expert devotional content translator.
-Translate the provided English article chunk into {lang_name}.
-
-Rules:
-- Preserve meaning, tone, and devotional context.
-- Keep paragraphs natural and readable.
-- Do not add new facts and do not omit meaning.
-- Keep the translation strictly in {lang_name} script/style for normal translated text.
-{language_rules}- Maintain devotional consistency for repeated sacred terms across the whole article.
-- Return ONLY valid JSON with exactly this key:
-{{
-  \"articleChunk\": \"<translated chunk in {lang_name}>\"
-}}
-"""
-
 
 def _call_json_completion(client: OpenAI, model: str, system_prompt: str, user_message: str) -> dict:
     last_error = None
@@ -145,13 +81,28 @@ def _split_into_chunks(text: str, max_chunk_chars: int) -> List[str]:
     return chunks
 
 
-def translate_story_content(main_topic: str, sub_topic: str, article_text: str, target_language: str) -> dict:
+def translate_story_content(
+    main_topic: str,
+    sub_topic: str,
+    article_text: str,
+    source_language: str,
+    target_language: str,
+) -> dict:
     api_key = settings.OPENAI_API_KEY
     if not api_key:
         raise ValueError("OPENAI_API_KEY is not configured in settings.")
 
     if not article_text or not article_text.strip():
         raise ValueError("Article text is empty.")
+
+    source_language_code = (source_language or "").lower()
+    target_language_code = (target_language or "").lower()
+    if not source_language_code:
+        raise ValueError("Source language is required.")
+    if not target_language_code:
+        raise ValueError("Target language is required.")
+    if source_language_code == target_language_code:
+        raise ValueError("Source and target languages must be different.")
 
     model = getattr(settings, "OPENAI_MODEL", "gpt-4o-mini")
     base_url = getattr(settings, "OPENAI_BASE_URL", "https://api.openai.com/v1/")
@@ -166,16 +117,18 @@ def translate_story_content(main_topic: str, sub_topic: str, article_text: str, 
             "Please shorten the article and try again."
         )
 
-    lang_name = LANGUAGE_NAMES.get(target_language.lower(), target_language)
+    source_lang_name = get_language_name(source_language_code) or source_language
+    lang_name = get_language_name(target_language_code) or target_language
 
     meta_payload = _call_json_completion(
         client=client,
         model=model,
-        system_prompt=_build_meta_system_prompt(target_language),
+        system_prompt=build_story_meta_system_prompt(target_language_code),
         user_message=(
+            f"Source language: {source_lang_name}\\n"
             f"Target language: {lang_name}\\n\\n"
-            f"Main topic (English):\\n{main_topic}\\n\\n"
-            f"Sub topic (English):\\n{sub_topic}"
+            f"Main topic ({source_lang_name}):\\n{main_topic}\\n\\n"
+            f"Sub topic ({source_lang_name}):\\n{sub_topic}"
         ),
     )
 
@@ -192,11 +145,12 @@ def translate_story_content(main_topic: str, sub_topic: str, article_text: str, 
         chunk_payload = _call_json_completion(
             client=client,
             model=model,
-            system_prompt=_build_chunk_system_prompt(target_language),
+            system_prompt=build_story_chunk_system_prompt(target_language_code),
             user_message=(
+                f"Source language: {source_lang_name}\\n"
                 f"Target language: {lang_name}\\n"
                 f"Chunk {idx} of {total_chunks}\\n\\n"
-                f"English article chunk:\\n{chunk}"
+                f"Article chunk ({source_lang_name}):\\n{chunk}"
             ),
         )
 

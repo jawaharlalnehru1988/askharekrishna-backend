@@ -1,4 +1,5 @@
 from rest_framework import permissions, status, viewsets
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Subscriber, SubscriberQuizAttempt
 from .serializers import (
@@ -6,6 +7,36 @@ from .serializers import (
     SubscriberQuizAttemptSerializer,
     SubscriberQuizAttemptCreateSerializer,
 )
+
+
+def _phone_candidates(raw_phone: str) -> list[str]:
+    trimmed = (raw_phone or '').strip()
+    if not trimmed:
+        return []
+
+    digits = ''.join(ch for ch in trimmed if ch.isdigit())
+    candidates = [trimmed]
+
+    if digits and digits not in candidates:
+        candidates.append(digits)
+
+    if len(digits) == 10:
+        prefixed = f"+91{digits}"
+        if prefixed not in candidates:
+            candidates.append(prefixed)
+        prefixed_plain = f"91{digits}"
+        if prefixed_plain not in candidates:
+            candidates.append(prefixed_plain)
+
+    return candidates
+
+
+def _find_subscriber_by_phone(raw_phone: str):
+    for candidate in _phone_candidates(raw_phone):
+        subscriber = Subscriber.objects.filter(phone_number=candidate).first()
+        if subscriber:
+            return subscriber
+    return None
 
 
 class SubscriberViewSet(viewsets.ModelViewSet):
@@ -53,9 +84,8 @@ class SubscriberQuizAttemptViewSet(viewsets.ModelViewSet):
         input_serializer.is_valid(raise_exception=True)
         validated = input_serializer.validated_data
 
-        try:
-            subscriber = Subscriber.objects.get(phone_number=validated['phone_number'])
-        except Subscriber.DoesNotExist:
+        subscriber = _find_subscriber_by_phone(validated['phone_number'])
+        if not subscriber:
             return Response(
                 {'phone_number': 'Subscriber not found. Please subscribe first.'},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -79,3 +109,32 @@ class SubscriberQuizAttemptViewSet(viewsets.ModelViewSet):
 
         output = SubscriberQuizAttemptSerializer(attempt)
         return Response(output.data, status=status.HTTP_201_CREATED)
+
+
+class SubscriberDashboardView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        phone_number = (request.query_params.get('phone_number') or '').strip()
+        if not phone_number:
+            return Response(
+                {'phone_number': 'phone_number query parameter is required.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        subscriber = _find_subscriber_by_phone(phone_number)
+        if not subscriber:
+            return Response(
+                {'detail': 'Subscriber not found. Please subscribe first.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        attempts = SubscriberQuizAttempt.objects.filter(subscriber=subscriber).order_by('-created_at')
+
+        return Response(
+            {
+                'subscriber': SubscriberSerializer(subscriber).data,
+                'attempts': SubscriberQuizAttemptSerializer(attempts, many=True).data,
+            },
+            status=status.HTTP_200_OK,
+        )

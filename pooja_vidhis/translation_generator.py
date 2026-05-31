@@ -1,6 +1,6 @@
 """
-AI-powered translation helper for Brahmhacarya articles.
-Returns translated title, excerpt, and content body.
+AI-powered translation helper for Pooja Vidhi articles.
+Returns translated main topic, sub topic, and article body.
 """
 import json
 from typing import List
@@ -8,12 +8,12 @@ from typing import List
 from django.conf import settings
 from openai import OpenAI
 from translation_prompts import (
-    build_brahmhacarya_chunk_system_prompt,
-    build_brahmhacarya_meta_system_prompt,
+    build_pooja_chunk_system_prompt,
+    build_pooja_meta_system_prompt,
     get_language_name,
 )
 
-MAX_CONTENT_CHARS = 50000
+MAX_ARTICLE_CHARS = 50000
 MAX_CHUNK_CHARS = 3500
 MAX_CHUNKS = 25
 MAX_ATTEMPTS_PER_CALL = 2
@@ -79,19 +79,34 @@ def _split_into_chunks(text: str, max_chunk_chars: int) -> List[str]:
     return chunks
 
 
-def translate_brahmhacarya_article(title: str, excerpt: str, content: str, target_language: str) -> dict:
+def translate_pooja_vidhi_content(
+    main_topic: str,
+    sub_topic: str,
+    article_text: str,
+    source_language: str,
+    target_language: str,
+) -> dict:
     api_key = settings.OPENAI_API_KEY
     if not api_key:
         raise ValueError("OPENAI_API_KEY is not configured in settings.")
 
-    if not content or not content.strip():
-        raise ValueError("Article content is empty.")
+    if not article_text or not article_text.strip():
+        raise ValueError("Article text is empty.")
+
+    source_language_code = (source_language or "").lower()
+    target_language_code = (target_language or "").lower()
+    if not source_language_code:
+        raise ValueError("Source language is required.")
+    if not target_language_code:
+        raise ValueError("Target language is required.")
+    if source_language_code == target_language_code:
+        raise ValueError("Source and target languages must be different.")
 
     model = getattr(settings, "OPENAI_MODEL", "gpt-4o-mini")
     base_url = getattr(settings, "OPENAI_BASE_URL", "https://api.openai.com/v1/")
     client = OpenAI(api_key=api_key, base_url=base_url)
 
-    article = content.strip()[:MAX_CONTENT_CHARS]
+    article = article_text.strip()[:MAX_ARTICLE_CHARS]
     article_chunks = _split_into_chunks(article, MAX_CHUNK_CHARS)
 
     if len(article_chunks) > MAX_CHUNKS:
@@ -100,24 +115,26 @@ def translate_brahmhacarya_article(title: str, excerpt: str, content: str, targe
             "Please shorten the article and try again."
         )
 
-    lang_name = get_language_name(target_language) or target_language
+    source_lang_name = get_language_name(source_language_code) or source_language
+    lang_name = get_language_name(target_language_code) or target_language
 
     meta_payload = _call_json_completion(
         client=client,
         model=model,
-        system_prompt=build_brahmhacarya_meta_system_prompt(target_language),
+        system_prompt=build_pooja_meta_system_prompt(target_language_code),
         user_message=(
-            f"Target language: {lang_name}\n\n"
-            f"Title (English):\n{title}\n\n"
-            f"Excerpt (English):\n{excerpt or ''}"
+            f"Source language: {source_lang_name}\\n"
+            f"Target language: {lang_name}\\n\\n"
+            f"Main topic ({source_lang_name}):\\n{main_topic}\\n\\n"
+            f"Sub topic ({source_lang_name}):\\n{sub_topic}"
         ),
     )
 
-    translated_title = (meta_payload.get("title") or "").strip()
-    translated_excerpt = (meta_payload.get("excerpt") or "").strip() if (excerpt or "").strip() else ""
+    translated_main_topic = (meta_payload.get("mainTopic") or "").strip()
+    translated_sub_topic = (meta_payload.get("subTopic") or "").strip()
 
-    if not translated_title:
-        raise ValueError("Missing or empty translated title.")
+    if not translated_main_topic or not translated_sub_topic:
+        raise ValueError("Missing or empty translated main topic/sub topic.")
 
     translated_chunks: List[str] = []
     total_chunks = len(article_chunks)
@@ -126,11 +143,12 @@ def translate_brahmhacarya_article(title: str, excerpt: str, content: str, targe
         chunk_payload = _call_json_completion(
             client=client,
             model=model,
-            system_prompt=build_brahmhacarya_chunk_system_prompt(target_language),
+            system_prompt=build_pooja_chunk_system_prompt(target_language_code),
             user_message=(
-                f"Target language: {lang_name}\n"
-                f"Chunk {idx} of {total_chunks}\n\n"
-                f"English article chunk:\n{chunk}"
+                f"Source language: {source_lang_name}\\n"
+                f"Target language: {lang_name}\\n"
+                f"Chunk {idx} of {total_chunks}\\n\\n"
+                f"Article chunk ({source_lang_name}):\\n{chunk}"
             ),
         )
 
@@ -140,12 +158,12 @@ def translate_brahmhacarya_article(title: str, excerpt: str, content: str, targe
 
         translated_chunks.append(translated_chunk)
 
-    translated_content = "\n\n".join(translated_chunks).strip()
-    if not translated_content:
-        raise ValueError("Translated article content is empty.")
+    translated_article = "\n\n".join(translated_chunks).strip()
+    if not translated_article:
+        raise ValueError("Translated article is empty.")
 
     return {
-        "title": translated_title,
-        "excerpt": translated_excerpt,
-        "content": translated_content,
+        "mainTopic": translated_main_topic,
+        "subTopic": translated_sub_topic,
+        "article": translated_article,
     }
