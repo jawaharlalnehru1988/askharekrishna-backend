@@ -5,8 +5,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from askharekrishna_backend.permissions import IsAdminOrReadOnly
-from .models import BrahmhacaryaArticle, BrahmhacaryaRegistration
-from .serializers import BrahmhacaryaArticleSerializer, BrahmhacaryaRegistrationSerializer
+from .models import BrahmhacaryaArticle, BrahmhacaryaRegistration, BrahmhacaryaUserScore
+from .serializers import BrahmhacaryaArticleSerializer, BrahmhacaryaRegistrationSerializer, BrahmhacaryaUserScoreSerializer
 
 
 class BrahmhacaryaArticleViewSet(viewsets.ModelViewSet):
@@ -26,6 +26,12 @@ class BrahmhacaryaArticleViewSet(viewsets.ModelViewSet):
 class BrahmhacaryaRegistrationCreateAPIView(generics.CreateAPIView):
     queryset = BrahmhacaryaRegistration.objects.all()
     serializer_class = BrahmhacaryaRegistrationSerializer
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAdminOrReadOnly]
+
+class BrahmhacaryaUserScoreCreateAPIView(generics.CreateAPIView):
+    queryset = BrahmhacaryaUserScore.objects.all()
+    serializer_class = BrahmhacaryaUserScoreSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAdminOrReadOnly]
 

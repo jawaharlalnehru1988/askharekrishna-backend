@@ -4,6 +4,7 @@ from .models import (
     BrahmhacaryaRegistration,
     BrahmhacaryaQuestion,
     BrahmhacaryaQuestionOption,
+    BrahmhacaryaUserScore,
 )
 
 
@@ -53,4 +54,15 @@ class BrahmhacaryaRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = BrahmhacaryaRegistration
         fields = ['id', 'full_name', 'email', 'phoneNumber', 'whatsappNumber', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+class BrahmhacaryaUserScoreSerializer(serializers.ModelSerializer):
+    userName = serializers.CharField(source='user_name')
+    phoneNumber = serializers.CharField(source='phone_number')
+    articleTitle = serializers.CharField(source='article_title')
+    totalQuestions = serializers.IntegerField(source='total_questions')
+
+    class Meta:
+        model = BrahmhacaryaUserScore
+        fields = ['id', 'userName', 'phoneNumber', 'articleTitle', 'score', 'totalQuestions', 'created_at']
         read_only_fields = ['id', 'created_at']

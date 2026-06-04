@@ -106,3 +106,20 @@ class BrahmhacaryaRegistration(models.Model):
 
     def __str__(self):
         return f"{self.full_name} ({self.email})"
+
+
+class BrahmhacaryaUserScore(models.Model):
+    user_name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=30)
+    article_title = models.CharField(max_length=255)
+    score = models.PositiveSmallIntegerField()
+    total_questions = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Brahmhacarya User Score'
+        verbose_name_plural = 'Brahmhacarya User Scores'
+
+    def __str__(self):
+        return f"{self.user_name} - {self.article_title} ({self.score}/{self.total_questions})"
