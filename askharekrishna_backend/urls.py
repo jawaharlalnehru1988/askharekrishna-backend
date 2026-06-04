@@ -18,11 +18,14 @@ from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path, include
 from .views import api_root
+from brahmhacarya.views import BrahmhacaryaBulkAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('health/', lambda request: JsonResponse({'status': 'ok'})),
     path('api/', api_root, name='api-root'),
+    path('api/v1/brahmhacarya/bulk/', BrahmhacaryaBulkAPIView.as_view(), name='brahmhacarya-bulk-root'),
+    path('api/v1/brahmhacarya/bulk-translate/', BrahmhacaryaBulkAPIView.as_view(), name='brahmhacarya-bulk-translate'),
     path('api/', include('audios.urls')),
     path('api/', include('DocumentLibrary.urls')),
     path('api/', include('kirtan.urls')),
