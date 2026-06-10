@@ -9,6 +9,7 @@ from .models import (
     PoojaVidhiTopic,
     PoojaVidhiQuestion,
     PoojaVidhiQuestionOption,
+    Language,
 )
 
 
@@ -40,15 +41,6 @@ class PoojaVidhiAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        language_choices = list(POOJA_VIDHI_LANGUAGE_CHOICES)
-        current_language = (getattr(self.instance, 'language', '') or '').strip()
-        if current_language and current_language not in {code for code, _ in language_choices}:
-            language_choices.append((current_language, current_language))
-
-        self.fields['language'].widget = forms.Select(choices=language_choices)
-        if not self.instance or not self.instance.pk:
-            self.fields['language'].initial = 'en'
-
         topic_names = list(
             PoojaVidhiTopic.objects.filter(is_active=True).order_by('order', 'name').values_list('name', flat=True)
         )
@@ -59,6 +51,7 @@ class PoojaVidhiAdminForm(forms.ModelForm):
             choices.append((current_value, current_value))
 
         self.fields['mainTopic'].choices = choices
+
 
 class PoojaVidhiQuestionInline(admin.StackedInline):
     model = PoojaVidhiQuestion
@@ -95,19 +88,38 @@ class PoojaVidhiQuestionInline(admin.StackedInline):
     options_preview.short_description = 'Options'
 
 
+@admin.register(Language)
+class LanguageAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name')
+    search_fields = ('code', 'name')
+    ordering = ('name',)
+
+
 @admin.register(PoojaVidhi)
 class PoojaVidhiAdmin(admin.ModelAdmin):
     change_form_template = 'admin/pooja_vidhis/poojavidhi/change_form.html'
     translation_language_choices = tuple(POOJA_VIDHI_LANGUAGE_CHOICES)
     form = PoojaVidhiAdminForm
-    list_display = ('subTopic', 'mainTopic', 'language', 'mcq_exists', 'audioPath', 'articleImage', 'created_at')
+    list_display = ('subTopic', 'mainTopic', 'mcq_exists', 'id', 'source_id', 'image_preview', 'audioPath')
+    list_display_links = ('subTopic',)
     list_filter = ('language', 'mainTopic', 'subTopic')
     search_fields = ('mainTopic', 'subTopic', 'article')
-    fields = ('language', 'mainTopic', 'subTopic', 'article', 'slug', 'order', 'audioPath', 'articleImage')
-    readonly_fields = ('slug',)
+    fields = ('id', 'language', 'translated_from', 'source_vidhi', 'mainTopic', 'subTopic', 'article', 'slug', 'order', 'audioPath', 'articleImage', 'image_preview')
+    readonly_fields = ('id', 'slug', 'image_preview')
     ordering = ('order', 'mainTopic', 'subTopic')
     save_as = True
     inlines = [PoojaVidhiQuestionInline]
+
+    def image_preview(self, obj):
+        image = obj.effective_image()
+        if image:
+            return format_html('<img src="{}" style="max-height: 80px; max-width: 150px; border-radius: 4px; border: 1px solid #ccc;" />', image.url)
+        return '-'
+    image_preview.short_description = 'Image Preview'
+
+    def source_id(self, obj):
+        return obj.source_vidhi_id or '-'
+    source_id.short_description = 'Source ID'
 
     def mcq_exists(self, obj):
         return obj.questions.exists()
@@ -143,7 +155,7 @@ class PoojaVidhiAdmin(admin.ModelAdmin):
         if request.method != 'POST':
             return HttpResponseRedirect(f'../../{pk}/change/')
 
-        source_language = (article.language or '').strip().lower()
+        source_language = (article.language.code if article.language_id else '').strip().lower()
         if source_language not in POOJA_VIDHI_LANGUAGE_NAMES:
             messages.error(request, 'Translation is supported only for configured source languages.')
             return HttpResponseRedirect(f'../../{pk}/change/')
@@ -163,9 +175,11 @@ class PoojaVidhiAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(f'../../{pk}/change/')
 
         replace_existing = (request.POST.get('_replace_existing_translation') or '').strip() in {'1', 'true', 'yes'}
+        chosen_main_topic = (request.POST.get('translate_main_topic') or '').strip()
 
         try:
             from .translation_generator import translate_pooja_vidhi_content
+            from .models import Language
 
             translated = translate_pooja_vidhi_content(
                 main_topic=article.mainTopic,
@@ -176,16 +190,21 @@ class PoojaVidhiAdmin(admin.ModelAdmin):
             )
 
             translated_main_topic = (translated.get('mainTopic') or '').strip()
+            if chosen_main_topic:
+                translated_main_topic = chosen_main_topic
             translated_sub_topic = (translated.get('subTopic') or '').strip()
             translated_article = (translated.get('article') or '').strip()
 
             if not translated_main_topic or not translated_sub_topic or not translated_article:
                 raise ValueError('AI translation returned empty required fields.')
 
+            target_lang_obj = Language.objects.get(code=target_language)
+            source_lang_obj = Language.objects.get(code=source_language)
             source_vidhi = self._resolve_source_vidhi(article)
+            
             existing_article = PoojaVidhi.objects.filter(
                 source_vidhi=source_vidhi,
-                language=target_language,
+                language=target_lang_obj,
             ).order_by('id').first()
 
             if existing_article and not replace_existing:
@@ -206,12 +225,13 @@ class PoojaVidhiAdmin(admin.ModelAdmin):
                 existing_article.subTopic = translated_sub_topic
                 existing_article.article = translated_article
                 existing_article.order = source_vidhi.order
-                existing_article.language = target_language
+                existing_article.language = target_lang_obj
                 existing_article.source_vidhi = source_vidhi
+                existing_article.translated_from = source_lang_obj
                 if article.audioPath:
                     existing_article.audioPath = article.audioPath
-                if article.articleImage:
-                    existing_article.articleImage = article.articleImage
+                # Do NOT copy articleImage to save space; it will fallback dynamically
+                existing_article.articleImage = None
                 existing_article.save()
 
                 messages.success(
@@ -228,13 +248,13 @@ class PoojaVidhiAdmin(admin.ModelAdmin):
                 subTopic=translated_sub_topic,
                 article=translated_article,
                 order=source_vidhi.order,
-                language=target_language,
+                language=target_lang_obj,
                 source_vidhi=source_vidhi,
+                translated_from=source_lang_obj,
+                articleImage=None, # Inherits from source_vidhi
             )
             if article.audioPath:
                 translated_article_obj.audioPath = article.audioPath
-            if article.articleImage:
-                translated_article_obj.articleImage = article.articleImage
             translated_article_obj.save()
 
             messages.success(
@@ -262,7 +282,7 @@ class PoojaVidhiAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(f'../../{pk}/change/')
 
         try:
-            questions = generate_mcqs(pooja_vidhi.article, language=pooja_vidhi.language or 'en')
+            questions = generate_mcqs(pooja_vidhi.article, language=pooja_vidhi.language.code if pooja_vidhi.language_id else 'en')
             count = save_mcqs(pooja_vidhi, questions)
             messages.success(
                 request,
@@ -282,6 +302,9 @@ class PoojaVidhiAdmin(admin.ModelAdmin):
 
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         context['translation_language_choices'] = self.translation_language_choices
+        context['active_topics'] = list(
+            PoojaVidhiTopic.objects.filter(is_active=True).order_by('order', 'name').values_list('name', flat=True)
+        )
         replace_lang = (request.GET.get('replace_lang') or '').strip().lower()
         replace_article_id = (request.GET.get('replace_article_id') or '').strip()
         if replace_lang:

@@ -17,6 +17,11 @@ class PoojaVidhiQuestionSerializer(serializers.ModelSerializer):
 
 class PoojaVidhiSerializer(serializers.ModelSerializer):
     questions = PoojaVidhiQuestionSerializer(many=True, read_only=True)
+    imageUrl = serializers.SerializerMethodField()
+
+    def get_imageUrl(self, obj):
+        image = obj.effective_image()
+        return image.url if image else None
 
     class Meta:
         model = PoojaVidhi
@@ -25,6 +30,11 @@ class PoojaVidhiSerializer(serializers.ModelSerializer):
 
 class PoojaVidhiListItemSerializer(serializers.ModelSerializer):
     questions = PoojaVidhiQuestionSerializer(many=True, read_only=True)
+    imageUrl = serializers.SerializerMethodField()
+
+    def get_imageUrl(self, obj):
+        image = obj.effective_image()
+        return image.url if image else None
 
     class Meta:
         model = PoojaVidhi
@@ -36,8 +46,11 @@ class PoojaVidhiListItemSerializer(serializers.ModelSerializer):
             'slug',
             'order',
             'language',
+            'translated_from',
+            'source_vidhi',
             'audioPath',
             'articleImage',
+            'imageUrl',
             'questions',
         ]
 

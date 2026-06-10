@@ -78,18 +78,20 @@ class StoryAdmin(admin.ModelAdmin):
 
     list_display = (
         'subTopic',
-        'mcq_exists',
         'mainTopic',
-        'language',
-        'audioPath',
-        'imagePath',
+        'mcq_exists',
+        'id',
+        'source_id',
         'image_preview',
-        'created_at',
+        'audioPath',
     )
+    list_display_links = ('subTopic',)
     list_filter = ('language', 'mainTopic', 'subTopic')
     search_fields = ('mainTopic__name', 'subTopic', 'article')
     fields = (
+        'id',
         'language',
+        'translated_from',
         'source_story',
         'mainTopic',
         'subTopic',
@@ -100,9 +102,13 @@ class StoryAdmin(admin.ModelAdmin):
         'imagePath',
         'image_preview',
     )
-    readonly_fields = ('source_story', 'image_preview')
+    readonly_fields = ('id', 'slug', 'image_preview')
     ordering = ('order', 'mainTopic__name', 'subTopic')
     inlines = [StoryQuestionInline]
+
+    def source_id(self, obj):
+        return obj.source_story_id or '-'
+    source_id.short_description = 'Source ID'
 
     def mcq_exists(self, obj):
         return obj.questions.exists()
@@ -149,7 +155,7 @@ class StoryAdmin(admin.ModelAdmin):
         if request.method != 'POST':
             return HttpResponseRedirect(f"../../{pk}/change/")
 
-        source_language = (story.language or '').strip().lower()
+        source_language = (story.language.code if story.language_id else '').strip().lower()
         if source_language not in STORY_LANGUAGE_NAMES:
             messages.error(request, "Translation is supported only for stories whose language is configured in the system.")
             return HttpResponseRedirect(f"../../{pk}/change/")
@@ -169,9 +175,11 @@ class StoryAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(f"../../{pk}/change/")
 
         replace_existing = (request.POST.get('_replace_existing_translation') or '').strip() in {'1', 'true', 'yes'}
+        chosen_main_topic = (request.POST.get('translate_main_topic') or '').strip()
 
         try:
             from .translation_generator import translate_story_content
+            from pooja_vidhis.models import Language
 
             translated = translate_story_content(
                 main_topic=story.mainTopic.name if story.mainTopic else '',
@@ -182,6 +190,8 @@ class StoryAdmin(admin.ModelAdmin):
             )
 
             translated_main_topic = (translated.get('mainTopic') or '').strip()
+            if chosen_main_topic:
+                translated_main_topic = chosen_main_topic
             translated_sub_topic = (translated.get('subTopic') or '').strip()
             translated_article = (translated.get('article') or '').strip()
 
@@ -195,9 +205,12 @@ class StoryAdmin(admin.ModelAdmin):
                 target_language=target_language,
             )
 
+            target_lang_obj = Language.objects.get(code=target_language)
+            source_lang_obj = Language.objects.get(code=source_language)
+            
             existing_story = Story.objects.filter(
                 source_story=story,
-                language=target_language,
+                language=target_lang_obj,
             ).order_by('id').first()
 
             if existing_story and not replace_existing:
@@ -219,10 +232,10 @@ class StoryAdmin(admin.ModelAdmin):
                 existing_story.subTopic = translated_sub_topic
                 existing_story.article = translated_article
                 existing_story.order = story.order
-                if story.imagePath:
-                    existing_story.imagePath = story.imagePath
-                elif not existing_story.imagePath and story.source_story and story.source_story.imagePath:
-                    existing_story.imagePath = story.source_story.imagePath
+                existing_story.language = target_lang_obj
+                existing_story.translated_from = source_lang_obj
+                # Set imagePath to None so it dynamically inherits the source image via effective_image_path
+                existing_story.imagePath = None
                 existing_story.save()
 
                 messages.success(
@@ -237,18 +250,16 @@ class StoryAdmin(admin.ModelAdmin):
                 )
 
             translated_story = Story(
-                language=target_language,
+                language=target_lang_obj,
+                translated_from=source_lang_obj,
                 source_story=story,
                 mainTopic=translated_topic,
                 subTopic=translated_sub_topic,
                 article=translated_article,
                 slug=generated_slug,
                 order=story.order,
+                imagePath=None, # Inherits from source_story
             )
-            if story.imagePath:
-                translated_story.imagePath = story.imagePath
-            elif story.source_story and story.source_story.imagePath:
-                translated_story.imagePath = story.source_story.imagePath
             translated_story.save()
 
             messages.success(
@@ -282,7 +293,7 @@ class StoryAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(f"../../{pk}/change/")
 
         try:
-            questions = generate_mcqs(story.article, language=story.language or "en")
+            questions = generate_mcqs(story.article, language=story.language.code if story.language_id else "en")
             count = save_mcqs(story, questions)
             messages.success(
                 request,
@@ -296,9 +307,6 @@ class StoryAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(f"../../{pk}/change/")
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name == 'language':
-            kwargs['widget'] = forms.Select(choices=STORY_LANGUAGE_CHOICES)
-
         if db_field.name == 'article':
             kwargs['widget'] = forms.Textarea(
                 attrs={
@@ -312,11 +320,14 @@ class StoryAdmin(admin.ModelAdmin):
 
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         context['translation_language_choices'] = self.translation_language_choices
+        context['active_topics'] = list(
+            StoryMainTopic.objects.all().order_by('name').values_list('name', flat=True)
+        )
         context['copy_image_from_story_id'] = request.GET.get('_copy_image_from_story_id', '')
         source_obj = obj or context.get('original')
         source_language_code = ''
-        if source_obj and getattr(source_obj, 'language', None):
-            source_language_code = (source_obj.language or '').strip().lower()
+        if source_obj and getattr(source_obj, 'language_id', None):
+            source_language_code = (source_obj.language.code or '').strip().lower()
 
         context['translation_source_language_code'] = source_language_code
         context['translation_source_language_name'] = STORY_LANGUAGE_NAMES.get(

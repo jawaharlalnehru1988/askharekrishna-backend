@@ -52,22 +52,24 @@ class StoryListItemSerializer(serializers.ModelSerializer):
         return image.url if image else None
 
     class Meta:
-        model = Story
-        fields = [
-            'id',
-            'mainTopic',
-            'subTopic',
-            'article',
-            'slug',
-            'order',
-            'language',
-            'audioPath',
-            'imagePath',
-            'imageUrl',
-            'questions',
-            'created_at',
-            'updated_at',
-        ]
+      model = Story
+      fields = [
+          'id',
+          'mainTopic',
+          'subTopic',
+          'article',
+          'slug',
+          'order',
+          'language',
+          'translated_from',
+          'source_story',
+          'audioPath',
+          'imagePath',
+          'imageUrl',
+          'questions',
+          'created_at',
+          'updated_at',
+      ]
 
 
 class StoryMainTopicGroupedSerializer(serializers.ModelSerializer):

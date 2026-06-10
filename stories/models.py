@@ -44,7 +44,18 @@ class Story(models.Model):
     article = models.TextField()
     slug = models.SlugField(max_length=280, unique=True, blank=True, allow_unicode=True)
     order = models.PositiveIntegerField(default=0)
-    language = models.CharField(max_length=10, default='en', db_index=True)
+    language = models.ForeignKey(
+        'pooja_vidhis.Language',
+        on_delete=models.PROTECT,
+        related_name='stories',
+    )
+    translated_from = models.ForeignKey(
+        'pooja_vidhis.Language',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='translated_stories',
+    )
     source_story = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
@@ -75,7 +86,8 @@ class Story(models.Model):
         verbose_name_plural = 'Stories'
 
     def __str__(self):
-        return f"[{self.language.upper()}] {self.mainTopic} - {self.subTopic}"
+        lang_code = self.language.code if self.language_id else ''
+        return f"[{lang_code.upper()}] {self.mainTopic} - {self.subTopic}"
 
     def effective_image_path(self):
         if self.imagePath:
@@ -115,6 +127,16 @@ class Story(models.Model):
         return family_ids
 
     def save(self, *args, **kwargs):
+        if self.source_story_id and self.imagePath:
+            storage = self._meta.get_field('imagePath').storage
+            image_name = self.imagePath.name
+            if image_name:
+                source_image_name = self.source_story.imagePath.name if (self.source_story and self.source_story.imagePath) else None
+                if source_image_name != image_name:
+                    if storage.exists(image_name):
+                        storage.delete(image_name)
+            self.imagePath = None
+
         if not self.slug:
             base_slug = slugify(f"{self.mainTopic} {self.subTopic}", allow_unicode=True)[:280] or "story"
             slug = base_slug

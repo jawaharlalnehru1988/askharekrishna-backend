@@ -303,6 +303,33 @@
       unitEl.textContent = estimatedMinutes === 1 ? 'minute' : 'minutes';
     }
 
+    var pendingButtonEl = null;
+
+    function closeMainTopicModal() {
+      document.getElementById('id_story_maintopic_modal').style.display = 'none';
+      pendingButtonEl = null;
+    }
+
+    function confirmMainTopicTranslation() {
+      if (!pendingButtonEl) return;
+      var formEl = pendingButtonEl.form || document.getElementById('story_form') || document.querySelector('form');
+      if (!formEl) return;
+
+      var chosenTopic = document.getElementById('modal_main_topic_select').value;
+      var mainTopicInput = document.getElementById('id_translate_main_topic');
+      if (!mainTopicInput) {
+        mainTopicInput = document.createElement('input');
+        mainTopicInput.type = 'hidden';
+        mainTopicInput.id = 'id_translate_main_topic';
+        mainTopicInput.name = 'translate_main_topic';
+        formEl.appendChild(mainTopicInput);
+      }
+      mainTopicInput.value = chosenTopic;
+
+      closeMainTopicModal();
+      startStoryTranslationSubmit(pendingButtonEl, formEl);
+    }
+
     function submitStoryTranslation(buttonEl) {
       var selectEl = document.getElementById('id_target_language');
       if (!selectEl || !selectEl.value) {
@@ -356,7 +383,8 @@
           visitUrl,
           function() {
             replaceIntentEl.value = '1';
-            startStoryTranslationSubmit(buttonEl, formEl);
+            pendingButtonEl = buttonEl;
+            document.getElementById('id_story_maintopic_modal').style.display = 'flex';
           },
           function() {
             if (visitUrl) {
@@ -373,7 +401,8 @@
         }
       }
 
-      startStoryTranslationSubmit(buttonEl, formEl);
+      pendingButtonEl = buttonEl;
+      document.getElementById('id_story_maintopic_modal').style.display = 'flex';
       return false;
     }
 
@@ -396,6 +425,32 @@
 
 {% block submit_buttons_bottom %}
   {{ block.super }}
+  
+  <!-- Modal Popup for choosing Main Topic -->
+  <div id="id_story_maintopic_modal" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+    <div style="background:#ffffff; padding:24px; border-radius:8px; max-width:440px; width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.15); box-sizing:border-box; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <h3 style="margin-top:0; margin-bottom:8px; color:#1e293b; font-size:18px; font-weight:600;">Select Target Main Topic</h3>
+      <p style="font-size:13px; color:#64748b; margin-bottom:20px; line-height:1.5;">
+        Select which Main Topic this translated story should belong to, or choose the auto-translation option to automatically translate the current main topic.
+      </p>
+      
+      <div>
+        <label for="modal_main_topic_select" style="font-weight:600; font-size:13px; color:#334155; display:block; margin-bottom:6px;">Main Topic:</label>
+        <select id="modal_main_topic_select" style="width:100%; padding:10px; border-radius:6px; border:1px solid #cbd5e1; font-size:14px; background:#f8fafc; color:#0f172a; box-sizing:border-box; margin-bottom:24px;">
+          <option value="">-- Auto-translate Main Topic via AI --</option>
+          {% for topic in active_topics %}
+            <option value="{{ topic }}">{{ topic }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="translation-conflict-btn" onclick="closeMainTopicModal();">Cancel</button>
+        <button type="button" class="translation-conflict-btn replace" onclick="confirmMainTopicTranslation();">Translate</button>
+      </div>
+    </div>
+  </div>
+
   <div id="translation_conflict_modal" class="translation-conflict-modal" aria-hidden="true">
     <div id="translation_conflict_backdrop" class="translation-conflict-backdrop"></div>
     <div class="translation-conflict-dialog" role="dialog" aria-modal="true" aria-labelledby="translation_conflict_title">
@@ -425,12 +480,14 @@
       <input type="hidden" id="id_replace_translation_story_change_url" value="{{ replace_translation_story_change_url }}" />
     {% endif %}
     <label for="id_target_language" class="translate-story-label">
-      Translate this story from {{ translation_source_language_name|default:original.language|upper }} to:
+      Translate this story from {{ translation_source_language_name|default:original.language.code|upper }} to:
     </label>
     <select id="id_target_language" name="target_language" required class="translate-story-select">
       <option value="" selected disabled>Select language</option>
       {% for code, label in translation_language_choices %}
-        <option value="{{ code }}">{{ label }} ({{ code }})</option>
+        {% if code != original.language.code %}
+          <option value="{{ code }}">{{ label }} ({{ code }})</option>
+        {% endif %}
       {% endfor %}
     </select>
     <button

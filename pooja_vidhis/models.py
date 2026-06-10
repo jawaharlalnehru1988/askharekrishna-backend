@@ -20,9 +20,17 @@ class PoojaVidhiTopic(models.Model):
         return self.name
 
 
-class LanguageChoices(models.TextChoices):
-    EN = 'en', 'en'
-    TA = 'ta', 'ta'
+class Language(models.Model):
+    code = models.CharField(max_length=10, unique=True, primary_key=True)
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Language'
+        verbose_name_plural = 'Languages'
+
+    def __str__(self):
+        return f"{self.name} ({self.code})"
 
 
 class PoojaVidhi(models.Model):
@@ -31,7 +39,18 @@ class PoojaVidhi(models.Model):
     article = models.TextField()
     slug = models.SlugField(max_length=280, unique=True, blank=True, allow_unicode=True)
     order = models.PositiveIntegerField(default=0)
-    language = models.CharField(max_length=10, choices=LanguageChoices.choices, default='en')
+    language = models.ForeignKey(
+        Language,
+        on_delete=models.PROTECT,
+        related_name='pooja_vidhis',
+    )
+    translated_from = models.ForeignKey(
+        Language,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='translated_pooja_vidhis',
+    )
     source_vidhi = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
@@ -58,7 +77,15 @@ class PoojaVidhi(models.Model):
         verbose_name_plural = 'Pooja Vidhis'
 
     def __str__(self):
-        return f"[{self.language.upper()}] {self.mainTopic} - {self.subTopic}"
+        lang_code = self.language.code if self.language_id else ''
+        return f"[{lang_code.upper()}] {self.mainTopic} - {self.subTopic}"
+
+    def effective_image(self):
+        if self.articleImage:
+            return self.articleImage
+        if self.source_vidhi and self.source_vidhi.articleImage:
+            return self.source_vidhi.articleImage
+        return None
 
     def _build_unique_slug(self, base_slug):
         candidate = base_slug[:280]
@@ -72,6 +99,16 @@ class PoojaVidhi(models.Model):
         return candidate
 
     def save(self, *args, **kwargs):
+        if self.source_vidhi_id and self.articleImage:
+            storage = self._meta.get_field('articleImage').storage
+            image_name = self.articleImage.name
+            if image_name:
+                source_image_name = self.source_vidhi.articleImage.name if self.source_vidhi.articleImage else None
+                if source_image_name != image_name:
+                    if storage.exists(image_name):
+                        storage.delete(image_name)
+            self.articleImage = None
+
         base_slug = slugify(f"{self.mainTopic} {self.subTopic}", allow_unicode=True)
         if not base_slug:
             base_slug = "pooja-vidhi"
