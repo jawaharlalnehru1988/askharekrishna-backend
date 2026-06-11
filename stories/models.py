@@ -99,7 +99,11 @@ class Story(models.Model):
     @staticmethod
     def _resolve_root_story_id(source_story_id, story_id=None):
         root_id = source_story_id or story_id
+        visited = set()
         while root_id:
+            if root_id in visited:
+                break
+            visited.add(root_id)
             parent_id = Story.objects.filter(pk=root_id).values_list('source_story_id', flat=True).first()
             if not parent_id:
                 break
@@ -126,16 +130,39 @@ class Story(models.Model):
 
         return family_ids
 
+    def clean(self):
+        super().clean()
+        if self.source_story_id:
+            if self.pk and self.source_story_id == self.pk:
+                raise ValidationError("A story cannot be a translation of itself.")
+            
+            visited = {self.pk} if self.pk else set()
+            curr = self.source_story_id
+            while curr:
+                if curr in visited:
+                    raise ValidationError("Circular dependency detected in translations: a story cannot be a translation of itself or its translations.")
+                visited.add(curr)
+                curr = Story.objects.filter(pk=curr).values_list('source_story_id', flat=True).first()
+
     def save(self, *args, **kwargs):
-        if self.source_story_id and self.imagePath:
-            storage = self._meta.get_field('imagePath').storage
-            image_name = self.imagePath.name
-            if image_name:
-                source_image_name = self.source_story.imagePath.name if (self.source_story and self.source_story.imagePath) else None
-                if source_image_name != image_name:
-                    if storage.exists(image_name):
-                        storage.delete(image_name)
-            self.imagePath = None
+        if self.source_story_id:
+            if not self.mainTopic_id:
+                self.mainTopic = self.source_story.mainTopic
+
+            if self.imagePath:
+                source = self.source_story
+                if not source.imagePath:
+                    source.imagePath = self.imagePath
+                    source.save()
+
+                storage = self._meta.get_field('imagePath').storage
+                image_name = self.imagePath.name
+                if image_name:
+                    source_image_name = source.imagePath.name if source.imagePath else None
+                    if source_image_name != image_name:
+                        if storage.exists(image_name):
+                            storage.delete(image_name)
+                self.imagePath = None
 
         if not self.slug:
             base_slug = slugify(f"{self.mainTopic} {self.subTopic}", allow_unicode=True)[:280] or "story"

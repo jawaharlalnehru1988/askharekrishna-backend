@@ -99,15 +99,24 @@ class PoojaVidhi(models.Model):
         return candidate
 
     def save(self, *args, **kwargs):
-        if self.source_vidhi_id and self.articleImage:
-            storage = self._meta.get_field('articleImage').storage
-            image_name = self.articleImage.name
-            if image_name:
-                source_image_name = self.source_vidhi.articleImage.name if self.source_vidhi.articleImage else None
-                if source_image_name != image_name:
-                    if storage.exists(image_name):
-                        storage.delete(image_name)
-            self.articleImage = None
+        if self.source_vidhi_id:
+            if not self.mainTopic:
+                self.mainTopic = self.source_vidhi.mainTopic
+
+            if self.articleImage:
+                source = self.source_vidhi
+                if not source.articleImage:
+                    source.articleImage = self.articleImage
+                    source.save()
+
+                storage = self._meta.get_field('articleImage').storage
+                image_name = self.articleImage.name
+                if image_name:
+                    source_image_name = source.articleImage.name if source.articleImage else None
+                    if source_image_name != image_name:
+                        if storage.exists(image_name):
+                            storage.delete(image_name)
+                self.articleImage = None
 
         base_slug = slugify(f"{self.mainTopic} {self.subTopic}", allow_unicode=True)
         if not base_slug:

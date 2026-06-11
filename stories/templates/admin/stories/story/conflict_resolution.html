@@ -1,0 +1,193 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .conflict-container {
+        max-width: 900px;
+        margin: 30px auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .conflict-title {
+        color: #1e293b;
+        font-size: 24px;
+        margin-top: 0;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 10px;
+        font-weight: 600;
+    }
+    .conflict-description {
+        font-size: 15px;
+        color: #475569;
+        margin-bottom: 25px;
+        line-height: 1.6;
+    }
+    .conflict-options {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    .conflict-card {
+        flex: 1;
+        min-width: 280px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        background: #f8fafc;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .conflict-card:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 4px 12px rgba(59,130,246,0.1);
+    }
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-top: 0;
+        margin-bottom: 12px;
+    }
+    .image-preview-wrapper {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 15px;
+        border: 1px dashed #cbd5e1;
+    }
+    .image-preview-wrapper img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+    .image-details {
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 20px;
+        word-break: break-all;
+    }
+    .select-btn {
+        background: #3b82f6;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        width: 100%;
+    }
+    .select-btn:hover {
+        background: #2563eb;
+    }
+    .cancel-btn {
+        background: #e2e8f0;
+        color: #475569;
+        border: none;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        display: inline-block;
+        text-decoration: none;
+        text-align: center;
+    }
+    .cancel-btn:hover {
+        background: #cbd5e1;
+    }
+    .actions-bar {
+        display: flex;
+        justify-content: flex-end;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 20px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="conflict-container">
+    <h2 class="conflict-title">Image Conflict Resolution</h2>
+    <p class="conflict-description">
+        You are linking <strong>"{{ story.subTopic }}"</strong> with source story <strong>"{{ source_story.subTopic }}"</strong>. 
+        Both stories currently have different images uploaded. Please select which image you want to <strong>keep</strong>. 
+        The other image will be permanently deleted, and the kept image will be shared across all translations in this family.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="_resolve_image_conflict" value="1">
+        <input type="hidden" name="source_story" value="{{ source_story.id }}">
+        
+        <!-- Pass through other modified fields so they aren't lost -->
+        {% for field_name, field_value in post_data.items %}
+            {% if field_name != 'csrfmiddlewaretoken' and field_name != 'source_story' %}
+                <input type="hidden" name="{{ field_name }}" value="{{ field_value }}">
+            {% endif %}
+        {% endfor %}
+
+        <div class="conflict-options">
+            <!-- Option 1: Current Story's Image -->
+            <div class="conflict-card">
+                <div>
+                    <h3 class="card-title">Keep Current Story's Image</h3>
+                    <div class="image-preview-wrapper">
+                        {% if story.imagePath %}
+                            <img src="{{ story.imagePath.url }}" alt="Current Story Image">
+                        {% else %}
+                            <span style="color: #94a3b8;">No Image</span>
+                        {% endif %}
+                    </div>
+                    <div class="image-details">
+                        <strong>File:</strong> {{ story.imagePath.name }}
+                    </div>
+                </div>
+                <button type="submit" name="keep_image_choice" value="current" class="select-btn">
+                    Keep This Image
+                </button>
+            </div>
+
+            <!-- Option 2: Source Story's Image -->
+            <div class="conflict-card">
+                <div>
+                    <h3 class="card-title">Keep Source Story's Image</h3>
+                    <div class="image-preview-wrapper">
+                        {% if source_story.imagePath %}
+                            <img src="{{ source_story.imagePath.url }}" alt="Source Story Image">
+                        {% else %}
+                            <span style="color: #94a3b8;">No Image</span>
+                        {% endif %}
+                    </div>
+                    <div class="image-details">
+                        <strong>File:</strong> {{ source_story.imagePath.name }}
+                    </div>
+                </div>
+                <button type="submit" name="keep_image_choice" value="source" class="select-btn" style="background-color: #10b981;">
+                    Keep This Image
+                </button>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            <a href="{% url 'admin:stories_story_change' story.id %}" class="cancel-btn">Cancel & Go Back</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

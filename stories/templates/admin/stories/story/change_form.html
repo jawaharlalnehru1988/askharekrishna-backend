@@ -412,6 +412,10 @@
         articleEl.addEventListener('input', updateTranslationEstimate);
       }
       updateTranslationEstimate();
+
+      {% if show_no_images_popup %}
+        alert("Note: Both stories do not have any images.");
+      {% endif %}
     });
   </script>
 {% endblock %}

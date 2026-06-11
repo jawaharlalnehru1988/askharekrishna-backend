@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework import viewsets, filters, generics, status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -24,16 +25,19 @@ class BrahmhacaryaArticleViewSet(viewsets.ModelViewSet):
 
 
 class BrahmhacaryaRegistrationCreateAPIView(generics.CreateAPIView):
+    """Public endpoint — allows anonymous users to register for the Sangha."""
     queryset = BrahmhacaryaRegistration.objects.all()
     serializer_class = BrahmhacaryaRegistrationSerializer
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAdminOrReadOnly]
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
 
 class BrahmhacaryaUserScoreCreateAPIView(generics.CreateAPIView):
+    """Public endpoint — allows anonymous users to save their quiz score."""
     queryset = BrahmhacaryaUserScore.objects.all()
     serializer_class = BrahmhacaryaUserScoreSerializer
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAdminOrReadOnly]
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
 
 class BrahmhacaryaBulkAPIView(APIView):

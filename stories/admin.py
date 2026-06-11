@@ -277,8 +277,101 @@ class StoryAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(f"../../{pk}/change/")
 
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        if request.method == 'POST' and request.POST.get('_translate_story'):
-            return self.translate_story_view(request, object_id)
+        if request.method == 'POST':
+            if request.POST.get('_translate_story'):
+                return self.translate_story_view(request, object_id)
+
+            if request.POST.get('_resolve_image_conflict'):
+                keep_choice = request.POST.get('keep_image_choice')
+                source_id = request.POST.get('source_story')
+                temp_image_path = request.POST.get('temp_image_path')
+                
+                story = Story.objects.get(pk=object_id) if object_id else None
+                source_story = Story.objects.filter(pk=source_id).first()
+                
+                if source_story:
+                    post_data = request.POST.copy()
+                    
+                    if keep_choice == 'current':
+                        # Keep current, delete source
+                        if source_story.imagePath:
+                            storage = source_story._meta.get_field('imagePath').storage
+                            if storage.exists(source_story.imagePath.name):
+                                storage.delete(source_story.imagePath.name)
+                            source_story.imagePath = None
+                            source_story.save()
+                        
+                        if temp_image_path:
+                            post_data['_resolved_temp_image_path'] = temp_image_path
+                            
+                    elif keep_choice == 'source':
+                        # Keep source, delete current
+                        if story and story.imagePath:
+                            storage = story._meta.get_field('imagePath').storage
+                            if storage.exists(story.imagePath.name):
+                                storage.delete(story.imagePath.name)
+                        
+                        # Clear imagePath
+                        post_data['imagePath'] = ''
+                        if 'imagePath-clear' not in post_data:
+                            post_data['imagePath-clear'] = 'on'
+                            
+                        if temp_image_path:
+                            from django.core.files.storage import default_storage
+                            if default_storage.exists(temp_image_path):
+                                default_storage.delete(temp_image_path)
+                                
+                    request.POST = post_data
+            else:
+                source_story_id = request.POST.get('source_story')
+                if source_story_id:
+                    source_story = Story.objects.filter(pk=source_story_id).first()
+                    
+                    current_image = None
+                    if request.FILES.get('imagePath'):
+                        current_image = request.FILES['imagePath']
+                    elif object_id:
+                        story = Story.objects.filter(pk=object_id).first()
+                        if story and story.imagePath and not request.POST.get('imagePath-clear'):
+                            current_image = story.imagePath
+                            
+                    source_image = source_story.imagePath if source_story else None
+                    
+                    if current_image and source_image and current_image.name != source_image.name:
+                        # Conflict detected!
+                        temp_image_path = ''
+                        if request.FILES.get('imagePath'):
+                            from django.core.files.storage import default_storage
+                            from django.core.files.base import ContentFile
+                            uploaded_file = request.FILES['imagePath']
+                            temp_image_path = default_storage.save(
+                                f"stories/temp/{uploaded_file.name}", 
+                                ContentFile(uploaded_file.read())
+                            )
+                        
+                        story_instance = Story.objects.filter(pk=object_id).first() if object_id else Story()
+                        if not story_instance.pk:
+                            story_instance.subTopic = request.POST.get('subTopic', '')
+                            
+                        from django.shortcuts import render
+                        context = {
+                            'story': story_instance,
+                            'source_story': source_story,
+                            'post_data': request.POST,
+                            'temp_image_path': temp_image_path,
+                        }
+                        if temp_image_path:
+                            from django.core.files.storage import default_storage
+                            story_instance.imagePath = default_storage.open(temp_image_path)
+                        elif story_instance.imagePath:
+                            # Use current image if it exists and wasn't cleared
+                            pass
+                            
+                        return render(request, 'admin/stories/story/conflict_resolution.html', context)
+                    
+                    elif not current_image and not source_image:
+                        request.session['show_no_images_popup'] = True
+
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def generate_mcqs_view(self, request, pk):
@@ -319,6 +412,10 @@ class StoryAdmin(admin.ModelAdmin):
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        if request.session.get('show_no_images_popup'):
+            context['show_no_images_popup'] = True
+            request.session.pop('show_no_images_popup', None)
+
         context['translation_language_choices'] = self.translation_language_choices
         context['active_topics'] = list(
             StoryMainTopic.objects.all().order_by('name').values_list('name', flat=True)
@@ -349,6 +446,22 @@ class StoryAdmin(admin.ModelAdmin):
         return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
     def save_model(self, request, obj, form, change):
+        # Handle resolved temp image from conflict resolution
+        temp_image_path = request.POST.get('_resolved_temp_image_path')
+        if temp_image_path:
+            import os
+            from django.core.files.storage import default_storage
+            from django.core.files import File
+            if default_storage.exists(temp_image_path):
+                f = default_storage.open(temp_image_path)
+                obj.imagePath.save(os.path.basename(temp_image_path), File(f), save=False)
+                
+                # Delete the temp file now that it is saved
+                try:
+                    default_storage.delete(temp_image_path)
+                except Exception:
+                    pass
+
         if not change and not obj.imagePath:
             source_story_id = (request.POST.get('_copy_image_from_story_id') or '').strip()
             if source_story_id.isdigit():
