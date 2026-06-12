@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     'kirtan',
     'brahmhacarya',
     'image_gallery',
-    'video_gallery',
     'carnatic_questions',
     'ourOtherSites',
     'chanting',
@@ -65,6 +64,7 @@ INSTALLED_APPS = [
     'kirtan_tutorials',
     'weburlResource',
     'subscribers',
+    'videos',
 ]
 
 MIDDLEWARE = [

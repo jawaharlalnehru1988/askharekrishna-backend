@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class VideoGalleryConfig(AppConfig):
+class VideosConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'video_gallery'
+    name = 'videos'

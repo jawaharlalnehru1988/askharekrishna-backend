@@ -31,7 +31,6 @@ urlpatterns = [
     path('api/', include('kirtan.urls')),
     path('api/', include('brahmhacarya.urls')),
     path('api/', include('image_gallery.urls')),
-    path('api/', include('video_gallery.urls')),
     path('api/', include('carnatic_questions.urls')),
     path('api/', include('ourOtherSites.urls')),
     path('api/', include('chanting.urls')),
@@ -44,4 +43,5 @@ urlpatterns = [
     path('api/', include('kirtan_tutorials.urls')),
     path('api/', include('weburlResource.urls')),
     path('api/', include('subscribers.urls')),
+    path('api/', include('videos.urls')),
 ]
