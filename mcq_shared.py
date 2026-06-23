@@ -140,15 +140,19 @@ def generate_mcqs(
 
     for _ in range(max_attempts):
         try:
-            response = client.chat.completions.create(
-                model=model,
-                messages=[
+            kwargs = {
+                "model": model,
+                "messages": [
                     {"role": "system", "content": build_mcq_system_prompt(language, extra_rules=extra_rules)},
                     {"role": "user", "content": user_message},
                 ],
-                temperature=temperature,
-                response_format={"type": "json_object"},
-            )
+                "response_format": {"type": "json_object"},
+            }
+
+            if not model.startswith('o1') and not model.startswith('o3'):
+                kwargs["temperature"] = temperature
+
+            response = client.chat.completions.create(**kwargs)
 
             raw = response.choices[0].message.content
             data = json.loads(raw)

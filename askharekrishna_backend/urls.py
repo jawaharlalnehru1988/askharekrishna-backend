@@ -43,4 +43,5 @@ urlpatterns = [
     path('api/', include('weburlResource.urls')),
     path('api/', include('subscribers.urls')),
     path('api/', include('videos.urls')),
+    path('api/course-roadmap/', include('courseRoadmap.urls')),
 ]
