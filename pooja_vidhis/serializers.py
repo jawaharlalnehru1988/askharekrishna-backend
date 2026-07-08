@@ -18,10 +18,20 @@ class PoojaVidhiQuestionSerializer(serializers.ModelSerializer):
 class PoojaVidhiSerializer(serializers.ModelSerializer):
     questions = PoojaVidhiQuestionSerializer(many=True, read_only=True)
     imageUrl = serializers.SerializerMethodField()
+    articleImage = serializers.SerializerMethodField()
 
     def get_imageUrl(self, obj):
         image = obj.effective_image()
         return image.url if image else None
+
+    def get_articleImage(self, obj):
+        image = obj.effective_image()
+        if image:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        return None
 
     class Meta:
         model = PoojaVidhi
@@ -31,10 +41,20 @@ class PoojaVidhiSerializer(serializers.ModelSerializer):
 class PoojaVidhiListItemSerializer(serializers.ModelSerializer):
     questions = PoojaVidhiQuestionSerializer(many=True, read_only=True)
     imageUrl = serializers.SerializerMethodField()
+    articleImage = serializers.SerializerMethodField()
 
     def get_imageUrl(self, obj):
         image = obj.effective_image()
         return image.url if image else None
+
+    def get_articleImage(self, obj):
+        image = obj.effective_image()
+        if image:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        return None
 
     class Meta:
         model = PoojaVidhi

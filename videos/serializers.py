@@ -15,9 +15,10 @@ class VideoSerializer(serializers.ModelSerializer):
             'language_display',
             'chapter_number',
             'sloka_number',
+            'sloka_start',
             'book_name',
             'book_name_display',
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['id', 'book_name_display', 'language_display', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'sloka_start', 'book_name_display', 'language_display', 'created_at', 'updated_at']

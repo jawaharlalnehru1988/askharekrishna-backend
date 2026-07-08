@@ -34,7 +34,15 @@ class Video(models.Model):
         default='tamil',
     )
     chapter_number = models.PositiveIntegerField()
-    sloka_number = models.PositiveIntegerField()
+    sloka_number = models.CharField(
+        max_length=20,
+        help_text="Sloka number or hyphen-separated range (e.g. '17-18', '1-2-3')."
+    )
+    sloka_start = models.PositiveIntegerField(
+        default=0,
+        help_text="Auto-populated: the first sloka in the range. Used for correct numeric ordering.",
+        editable=False,
+    )
     book_name = models.CharField(
         max_length=100,
         choices=BOOK_CHOICES,
@@ -44,10 +52,19 @@ class Video(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['book_name', 'chapter_number', 'sloka_number', 'language']
+        ordering = ['book_name', 'chapter_number', 'sloka_start', 'language']
         verbose_name = 'Video'
         verbose_name_plural = 'Videos'
         unique_together = ('book_name', 'chapter_number', 'sloka_number', 'language')
+
+    def save(self, *args, **kwargs):
+        """Auto-populate sloka_start from the first number in sloka_number."""
+        try:
+            first = str(self.sloka_number).split('-')[0]
+            self.sloka_start = int(first)
+        except (ValueError, IndexError):
+            self.sloka_start = 0
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return (
