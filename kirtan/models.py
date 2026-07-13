@@ -10,6 +10,8 @@ LANGUAGE_CHOICES = [
     ('kn', 'Kannada'),
     ('te', 'Telugu'),
     ('hi', 'Hindi'),
+    ('ml', 'Malayalam'),
+    ('bn', 'Bengali'),
 ]
 
 
