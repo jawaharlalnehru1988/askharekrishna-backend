@@ -18,12 +18,7 @@ DEBATE_LANGUAGE_NAMES = {
     "te": "Telugu",
     "kn": "Kannada",
     "ml": "Malayalam",
-    "mr": "Marathi",
     "bn": "Bengali",
-    "gu": "Gujarati",
-    "pa": "Punjabi",
-    "or": "Odia",
-    "sa": "Sanskrit",
 }
 
 DEBATE_LANGUAGE_CHOICES = tuple((code, f"{name} ({code})") for code, name in DEBATE_LANGUAGE_NAMES.items())

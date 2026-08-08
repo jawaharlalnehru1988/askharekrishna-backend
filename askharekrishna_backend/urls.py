@@ -43,5 +43,8 @@ urlpatterns = [
     path('api/', include('weburlResource.urls')),
     path('api/', include('subscribers.urls')),
     path('api/', include('videos.urls')),
+    path('api/auth/', include('djoser.urls')),
+    path('api/auth/', include('djoser.urls.jwt')),
     path('api/course-roadmap/', include('courseRoadmap.urls')),
+    path('api/vaishnava-calendar/', include('vaishnava_calendar.urls')),
 ]

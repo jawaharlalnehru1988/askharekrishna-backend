@@ -13,12 +13,7 @@ LANGUAGE_NAMES = {
     "te": "Telugu",
     "kn": "Kannada",
     "ml": "Malayalam",
-    "mr": "Marathi",
     "bn": "Bengali",
-    "gu": "Gujarati",
-    "pa": "Punjabi",
-    "or": "Odia",
-    "sa": "Sanskrit",
 }
 
 
@@ -107,5 +102,54 @@ Rules:
 - Return ONLY valid JSON with exactly this key:
 {{
   \"articleChunk\": \"<translated chunk in {lang_name}>\"
+}}
+"""
+
+def build_kirtan_category_prompt(target_language: str) -> str:
+    lang_name = get_language_name(target_language)
+    language_rules = get_language_specific_rules(target_language)
+    return f"""You are an expert devotional content translator.
+Translate the Kirtan Category name into {lang_name}.
+
+Rules:
+- Preserve meaning and devotional tone.
+{language_rules}- Use strict {lang_name} output for the translated text unless the source includes a proper noun that should remain recognizable.
+- Return ONLY valid JSON with exactly this key:
+{{
+  "name": "<translated category name in {lang_name}>"
+}}
+"""
+
+def build_kirtan_meta_prompt(target_language: str) -> str:
+    lang_name = get_language_name(target_language)
+    language_rules = get_language_specific_rules(target_language)
+    return f"""You are an expert devotional content translator.
+Translate the English Kirtan title and description, and transliterate the author's name into {lang_name} script.
+
+Rules:
+- Preserve meaning, tone, and spiritual context for the title and description.
+- Transliterate the author's name precisely into the {lang_name} alphabet/script (e.g. Bhaktivinoda Thakura -> {lang_name} equivalent).
+{language_rules}- Return ONLY valid JSON with exactly these keys:
+{{
+  "title": "<translated title in {lang_name}>",
+  "description": "<translated description in {lang_name}>",
+  "authorName": "<transliterated author name in {lang_name}>"
+}}
+"""
+
+def build_kirtan_lyrics_chunk_prompt(target_language: str) -> str:
+    lang_name = get_language_name(target_language)
+    language_rules = get_language_specific_rules(target_language)
+    return f"""You are an expert devotional content translator.
+Translate the provided English Kirtan lyrics chunk into {lang_name}.
+
+Rules:
+- Preserve the poetic flow, meter (if possible), meaning, tone, and devotional context of the song.
+- Keep the translation strictly in {lang_name} script.
+- Maintain formatting, line breaks, and stanzas.
+{language_rules}- Maintain devotional consistency for repeated sacred terms across the lyrics.
+- Return ONLY valid JSON with exactly this key:
+{{
+  "lyricsChunk": "<translated lyrics chunk in {lang_name}>"
 }}
 """

@@ -10,14 +10,14 @@ def generate_mcqs(article_text: str, language: str = "en") -> list:
     return shared_generate_mcqs(article_text, language=language)
 
 
-def save_mcqs(pooja_vidhi, questions: list) -> int:
+def save_mcqs(translation, questions: list) -> int:
     from .models import PoojaVidhiQuestion, PoojaVidhiQuestionOption
 
     return shared_save_mcqs(
-        pooja_vidhi,
+        translation,
         questions,
         question_model=PoojaVidhiQuestion,
         option_model=PoojaVidhiQuestionOption,
-        parent_field_name="pooja_vidhi",
+        parent_field_name="translation",
         question_field_name="question_text",
     )

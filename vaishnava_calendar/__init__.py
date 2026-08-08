@@ -1,0 +1,1 @@
+# Vaishnava Calendar Django App

@@ -17,12 +17,7 @@ LANGUAGE_NAMES = {
     "te": "Telugu",
     "kn": "Kannada",
     "ml": "Malayalam",
-    "mr": "Marathi",
     "bn": "Bengali",
-    "gu": "Gujarati",
-    "pa": "Punjabi",
-    "or": "Odia",
-    "sa": "Sanskrit",
 }
 
 

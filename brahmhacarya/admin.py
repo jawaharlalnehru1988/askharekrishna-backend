@@ -20,12 +20,7 @@ BRAHMHACARYA_LANGUAGE_NAMES = {
     "te": "Telugu",
     "kn": "Kannada",
     "ml": "Malayalam",
-    "mr": "Marathi",
     "bn": "Bengali",
-    "gu": "Gujarati",
-    "pa": "Punjabi",
-    "or": "Odia",
-    "sa": "Sanskrit",
 }
 
 BRAHMHACARYA_LANGUAGE_CHOICES = tuple(

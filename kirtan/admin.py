@@ -126,18 +126,30 @@ class KirtanCategoryAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
 
+class KirtanLanguageFilter(admin.SimpleListFilter):
+    title = 'Language'
+    parameter_name = 'language'
+
+    def lookups(self, request, queryset):
+        from .models import LANGUAGE_CHOICES
+        return LANGUAGE_CHOICES
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(translations__language_code=self.value()).distinct()
+        return queryset
+
+
 @admin.register(Kirtan)
 class KirtanAdmin(admin.ModelAdmin):
     form = KirtanAdminForm
     list_display = (
-        'id',
         'get_title',
         'category',
+        'id',
         'order',
-        'created_at',
-        'updated_at'
     )
-    list_filter = ('category', 'created_at')
+    list_filter = ('category', KirtanLanguageFilter, 'created_at')
     search_fields = ('translations__title', 'translations__authorName', 'category__name')
     readonly_fields = ('created_at', 'updated_at')
     inlines = [KirtanTranslationInline]
@@ -157,12 +169,26 @@ class KirtanAdmin(admin.ModelAdmin):
     )
     ordering = ['order', '-created_at']
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        self._current_request = request
+        return qs
+
     def get_title(self, obj):
+        request = getattr(self, '_current_request', None)
+        selected_lang = request.GET.get('language') if request else None
+
+        if selected_lang:
+            trans = obj.translations.filter(language_code=selected_lang).first()
+            if trans and trans.title:
+                return trans.title
+
         trans = obj.translations.filter(language_code='en').first()
         if not trans:
             trans = obj.translations.first()
         return trans.title if trans else f"Kirtan {obj.id}"
     get_title.short_description = 'Title'
+    get_title.admin_order_field = 'translations__title'
 
     @admin.action(description='Duplicate selected kirtans')
     def duplicate_selected_kirtans(self, request, queryset):

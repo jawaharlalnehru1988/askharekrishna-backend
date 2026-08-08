@@ -65,6 +65,10 @@ INSTALLED_APPS = [
     'subscribers',
     'videos',
     'courseRoadmap',
+    'vaishnava_calendar',
+    'rest_framework_simplejwt',
+    'djoser',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -180,6 +184,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500MB
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
@@ -221,3 +226,20 @@ CSRF_TRUSTED_ORIGINS = os.environ.get(
     'DJANGO_CSRF_TRUSTED_ORIGINS',
     'https://askharekrishna.com,https://audio.askharekrishna.com,https://api.askharekrishna.com,https://admin.askharekrishna.com,http://localhost:3000,http://localhost:5173,http://localhost:8080,http://127.0.0.1:3000,http://127.0.0.1:5173,http://127.0.0.1:8080'
 ).split(',')
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+DJOSER = {
+    'LOGIN_FIELD': 'email',
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    'SERIALIZERS': {
+        'user_create': 'users.serializers.CustomUserCreateSerializer',
+        'current_user': 'users.serializers.CustomUserSerializer',
+    },
+}
+

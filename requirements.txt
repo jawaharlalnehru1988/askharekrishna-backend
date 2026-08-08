@@ -9,3 +9,5 @@ packaging==25.0
 Pillow>=11.1.0
 psycopg2-binary==2.9.11
 sqlparse==0.5.5
+djoser==2.3.3
+djangorestframework-simplejwt==5.5.1

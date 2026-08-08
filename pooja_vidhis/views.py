@@ -7,23 +7,35 @@ from .serializers import (
     PoojaVidhiTopicGroupedSerializer,
 )
 
+
 class PoojaVidhiViewSet(viewsets.ModelViewSet):
-    queryset = PoojaVidhi.objects.prefetch_related('questions__options').all().order_by(
-        'order', 'mainTopic', 'subTopic', 'id'
-    )
+    queryset = PoojaVidhi.objects.prefetch_related('translations__questions__options').all().order_by('order', 'id')
     serializer_class = PoojaVidhiSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['mainTopic', 'subTopic', 'slug', 'language']
-    search_fields = ['mainTopic', 'subTopic', 'article']
-    ordering_fields = ['order', 'created_at', 'mainTopic', 'subTopic']
-    ordering = ['order', 'mainTopic', 'subTopic', 'id']
+    filterset_fields = ['slug']
+    search_fields = ['translations__mainTopic', 'translations__subTopic', 'translations__article']
+    ordering_fields = ['order', 'created_at', 'id']
+    ordering = ['order', 'id']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == 'list':
+            language = self.request.query_params.get('language') or self.request.query_params.get('lang')
+            if language:
+                qs = qs.filter(translations__language_code=language.strip().lower()).distinct()
+        return qs
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        lang = request.query_params.get('language') or request.query_params.get('lang') or 'en'
+        lang = lang.strip().lower()
 
         grouped_articles = {}
         for article in queryset:
-            grouped_articles.setdefault(article.mainTopic, []).append(article)
+            trans = article.get_translation(lang)
+            main_topic = trans.mainTopic if trans else ''
+            if main_topic:
+                grouped_articles.setdefault(main_topic, []).append(article)
 
         existing_topic_names = set(
             PoojaVidhiTopic.objects.filter(name__in=grouped_articles.keys()).values_list('name', flat=True)
@@ -33,7 +45,6 @@ class PoojaVidhiViewSet(viewsets.ModelViewSet):
 
         missing_topic_names = sorted(name for name in grouped_articles.keys() if name not in existing_topic_names)
         for name in missing_topic_names:
-            # Build lightweight topic-like objects for mainTopic values without a PoojaVidhiTopic row.
             topic = PoojaVidhiTopic(name=name, is_active=True)
             topic.pk = None
             topics.append(topic)
