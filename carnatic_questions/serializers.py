@@ -5,24 +5,80 @@ from .models import (
     Category,
     CarnaticKacheri,
     CarnaticLessonPractice,
+    CarnaticLessonPracticeAudio,
+    CarnaticLessonPracticeVideo,
     CarnaticQuestion,
     CarnaticSyllabus,
     CarnaticSyllabusVideoSample,
 )
 
 
+class CarnaticLessonPracticeAudioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CarnaticLessonPracticeAudio
+        fields = ['id', 'audioPathName', 'audioPath', 'sort_order', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class CarnaticLessonPracticeVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CarnaticLessonPracticeVideo
+        fields = ['id', 'youtubevideoUrl', 'sort_order', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
 class CarnaticLessonPracticeSerializer(serializers.ModelSerializer):
+    category_name = serializers.SerializerMethodField(read_only=True)
+    category_colorCode = serializers.SerializerMethodField(read_only=True)
+    PracticeCategory = serializers.SerializerMethodField(read_only=True)
+    audios = CarnaticLessonPracticeAudioSerializer(many=True, read_only=True)
+    videos = CarnaticLessonPracticeVideoSerializer(many=True, read_only=True)
+    audioPath = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = CarnaticLessonPractice
         fields = [
             'id',
+            'orderNumber',
+            'category',
+            'category_name',
+            'category_colorCode',
             'PracticeCategory',
             'lessonName',
             'audioPath',
+            'audios',
+            'videos',
             'created_at',
             'updated_at',
         ]
         read_only_fields = ['created_at', 'updated_at']
+        extra_kwargs = {
+            'category': {'required': False, 'allow_null': True}
+        }
+
+    def get_PracticeCategory(self, obj):
+        return obj.category.name if obj.category else ""
+
+    def get_category_name(self, obj):
+        return obj.category.name if obj.category else None
+
+    def get_category_colorCode(self, obj):
+        return obj.category.colorCode if obj.category else None
+
+    def get_audioPath(self, obj):
+        first_audio = obj.audios.order_by('sort_order', 'id').first()
+        if first_audio and first_audio.audioPath:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(first_audio.audioPath.url)
+            return first_audio.audioPath.url
+        if obj.audioPath:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.audioPath.url)
+            return obj.audioPath.url
+        return None
+
 
 
 class CategorySerializer(serializers.ModelSerializer):

@@ -31,9 +31,24 @@ class CarnaticSyllabusPagination(PageNumberPagination):
 
 
 class CarnaticLessonPracticeViewSet(viewsets.ModelViewSet):
-    queryset = CarnaticLessonPractice.objects.all()
+    queryset = CarnaticLessonPractice.objects.select_related('category').prefetch_related('audios', 'videos').all()
     serializer_class = CarnaticLessonPracticeSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        category = self.request.query_params.get('category') or self.request.query_params.get('division')
+        query = self.request.query_params.get('query')
+
+        queryset = filter_by_category(queryset, category)
+
+        if query:
+            queryset = queryset.filter(
+                Q(lessonName__icontains=query)
+                | Q(category__name__icontains=query)
+            )
+
+        return queryset
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

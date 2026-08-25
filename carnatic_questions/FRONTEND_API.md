@@ -13,6 +13,8 @@ Module endpoints:
 - `GET /api/v1/carnatic-syllabus/categories/`
 - `GET, POST /api/v1/carnatic-kacheri/`
 - `GET, PUT, PATCH, DELETE /api/v1/carnatic-kacheri/:id/`
+- `GET, POST /api/v1/carnatic-lesson-practice/`
+- `GET, PUT, PATCH, DELETE /api/v1/carnatic-lesson-practice/:id/`
 
 All module endpoints are public and currently use `AllowAny`.
 
@@ -398,6 +400,68 @@ Supported query params:
 - `ragam=<text>`
 - `query=<text>` searches title, singer, ragam, and description
 
+## Carnatic Lesson Practice API
+
+Use this API for lesson practice tracks (e.g. Sarali Varisaigal, Jantai Varisaigal, etc.).
+
+### Response shape (List / Detail)
+
+`GET /api/v1/carnatic-lesson-practice/`
+`GET /api/v1/carnatic-lesson-practice/:id/`
+
+```json
+[
+  {
+    "id": 1,
+    "PracticeCategory": "Sarali Varisaigal",
+    "lessonName": "Sarali Varisai 1",
+    "audioPath": "https://admin.askharekrishna.com/media/carnatic_lesson_practice/sarali_varisai_1.mp3",
+    "audios": [
+      {
+        "id": 1,
+        "audioPathName": "1st Speed (Prathama Kaalam)",
+        "audioPath": "https://admin.askharekrishna.com/media/carnatic_lesson_practice/audio/sarali_1_speed1.mp3",
+        "sort_order": 0,
+        "created_at": "2026-08-25T15:22:17.842105Z",
+        "updated_at": "2026-08-25T15:22:17.842117Z"
+      },
+      {
+        "id": 2,
+        "audioPathName": "2nd Speed (Dvithiya Kaalam)",
+        "audioPath": "https://admin.askharekrishna.com/media/carnatic_lesson_practice/audio/sarali_1_speed2.mp3",
+        "sort_order": 1,
+        "created_at": "2026-08-25T15:22:17.842105Z",
+        "updated_at": "2026-08-25T15:22:17.842117Z"
+      }
+    ],
+    "videos": [
+      {
+        "id": 1,
+        "youtubevideoUrl": "https://www.youtube.com/watch?v=example123",
+        "sort_order": 0,
+        "created_at": "2026-08-25T15:22:17.842105Z",
+        "updated_at": "2026-08-25T15:22:17.842117Z"
+      }
+    ],
+    "created_at": "2026-05-12T15:55:51.970293Z",
+    "updated_at": "2026-05-12T15:55:51.970302Z"
+  }
+]
+```
+
+### Frontend Implementation Guide
+
+#### 1. Home Page / Lesson List: Navigator Card
+On the home page under "Listening Focused Practice":
+- Display the `PracticeCategory` and `lessonName`.
+- Render the card as a navigational link pointing to `/practice/[id]` (or `href={`/practice/${lesson.id}`}`).
+- An arrow icon / "Open Practice" indicator can replace the inline audio play button.
+
+#### 2. Dedicated Lesson Detail Page (`/practice/[id]`)
+- Display `PracticeCategory` and `lessonName`.
+- Render the list of `audios`, each with its `audioPathName` and an interactive audio player.
+- If `videos` are present, render embedded YouTube video players (`<iframe src="...">` from the `youtubevideoUrl`).
+
 ## Frontend implementation summary
 
 - Use category helper API to build dropdowns.
@@ -407,3 +471,4 @@ Supported query params:
 - Keep `videoPath` only as a read-only compatibility field.
 - When reordering syllabus videos, send the full `videoSamples` array.
 - Use `carnatic-kacheri` for singer/ragam/video URL based content.
+- Use `carnatic-lesson-practice` for lesson cards and detail pages with multiple `audios` and `videos`.

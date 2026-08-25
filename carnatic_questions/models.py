@@ -103,32 +103,79 @@ class CarnaticClassAudio(models.Model):
 
 
 class CarnaticLessonPractice(models.Model):
-    PRACTICE_CATEGORY_CHOICES = [
-        ("Sarali Varisaigal", "Sarali Varisaigal"),
-        ("Jantai Varisaigal", "Jantai Varisaigal"),
-        ("Dhattu Varisaigal", "Dhattu Varisaigal"),
-        ("Mel Sthayi Varisaigal", "Mel Sthayi Varisaigal"),
-        ("Keezh Sthayi Varisaigal", "Keezh Sthayi Varisaigal"),
-        ("Alankaarams", "Alankaarams"),
-        ("Gitam Lessons", "Gitam Lessons"),
-    ]
-    PracticeCategory = models.CharField(
-        max_length=50,
-        choices=PRACTICE_CATEGORY_CHOICES,
-        default="Sarali Varisaigal",
+    orderNumber = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Order Number")
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='lesson_practices',
+        blank=True,
+        null=True,
+        verbose_name="Practice Category",
     )
     lessonName = models.CharField(max_length=255)
-    audioPath = models.FileField(upload_to='carnatic_lesson_practice/', max_length=500)
+    audioPath = models.FileField(upload_to='carnatic_lesson_practice/', max_length=500, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-created_at', 'PracticeCategory', 'lessonName']
+        ordering = ['orderNumber', 'id']
         verbose_name = 'Carnatic Lesson Practice'
         verbose_name_plural = 'Carnatic Lesson Practices'
 
+    @property
+    def PracticeCategory(self):
+        return self.category.name if self.category else ""
+
     def __str__(self):
-        return f"{self.PracticeCategory} - {self.lessonName}"
+        cat_name = self.category.name if self.category else "No Category"
+        return f"{cat_name} - {self.lessonName}"
+
+
+class CarnaticLessonPracticeAudio(models.Model):
+    lesson_practice = models.ForeignKey(
+        CarnaticLessonPractice,
+        on_delete=models.CASCADE,
+        related_name='audios',
+        verbose_name='Lesson Practice',
+    )
+    audioPathName = models.CharField(max_length=255, blank=True, verbose_name='Audio Path Name')
+    audioPath = models.FileField(
+        upload_to='carnatic_lesson_practice/audio/',
+        max_length=500,
+        verbose_name='Audio Path',
+    )
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name='Sort Order')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = 'Carnatic Lesson Practice Audio'
+        verbose_name_plural = 'Carnatic Lesson Practice Audios'
+
+    def __str__(self):
+        return f"{self.audioPathName or 'Audio'} ({self.lesson_practice})"
+
+
+class CarnaticLessonPracticeVideo(models.Model):
+    lesson_practice = models.ForeignKey(
+        CarnaticLessonPractice,
+        on_delete=models.CASCADE,
+        related_name='videos',
+        verbose_name='Lesson Practice',
+    )
+    youtubevideoUrl = models.URLField(max_length=500, verbose_name='YouTube Video URL')
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name='Sort Order')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = 'Carnatic Lesson Practice Video'
+        verbose_name_plural = 'Carnatic Lesson Practice Videos'
+
+    def __str__(self):
+        return f"Video for {self.lesson_practice}"
 
 
 @receiver(post_delete, sender=CarnaticQuestion)
@@ -181,5 +228,32 @@ def auto_delete_syllabus_file_on_change(sender, instance, **kwargs):
         if not CarnaticSyllabus.objects.filter(audioPath=old_audio.name).exclude(pk=instance.pk).exists():
             if old_audio.storage.exists(old_audio.name):
                 old_audio.storage.delete(old_audio.name)
+
+
+@receiver(post_delete, sender=CarnaticLessonPracticeAudio)
+def auto_delete_lesson_practice_audio_on_delete(sender, instance, **kwargs):
+    if instance.audioPath:
+        if not CarnaticLessonPracticeAudio.objects.filter(audioPath=instance.audioPath.name).exclude(pk=instance.pk).exists():
+            if instance.audioPath.storage.exists(instance.audioPath.name):
+                instance.audioPath.storage.delete(instance.audioPath.name)
+
+
+@receiver(pre_save, sender=CarnaticLessonPracticeAudio)
+def auto_delete_lesson_practice_audio_on_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return False
+    try:
+        old_instance = CarnaticLessonPracticeAudio.objects.get(pk=instance.pk)
+    except CarnaticLessonPracticeAudio.DoesNotExist:
+        return False
+
+    old_audio = old_instance.audioPath
+    new_audio = instance.audioPath
+
+    if old_audio and old_audio != new_audio:
+        if not CarnaticLessonPracticeAudio.objects.filter(audioPath=old_audio.name).exclude(pk=instance.pk).exists():
+            if old_audio.storage.exists(old_audio.name):
+                old_audio.storage.delete(old_audio.name)
+
 
 
