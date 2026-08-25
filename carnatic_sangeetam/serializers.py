@@ -7,9 +7,11 @@ from .models import (
     CarnaticLessonPractice,
     CarnaticLessonPracticeAudio,
     CarnaticLessonPracticeVideo,
-    CarnaticQuestion,
     CarnaticSyllabus,
     CarnaticSyllabusVideoSample,
+    RagamLesson,
+    RagamLessonAudio,
+    RagamLessonVideo,
 )
 
 
@@ -86,41 +88,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'order', 'name', 'colorCode', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
-
-
-class CarnaticQuestionSerializer(serializers.ModelSerializer):
-    category_name = serializers.SerializerMethodField(read_only=True)
-    category_order = serializers.SerializerMethodField(read_only=True)
-    category_colorCode = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = CarnaticQuestion
-        fields = [
-            'id',
-            'category',
-            'category_name',
-            'category_order',
-            'category_colorCode',
-            'question',
-            'answer',
-            'audio',
-            'created_at',
-            'updated_at',
-        ]
-        read_only_fields = ['created_at', 'updated_at']
-        extra_kwargs = {
-            'category': {'required': False, 'allow_null': True},
-            'audio': {'required': False, 'allow_null': True}
-        }
-
-    def get_category_name(self, obj):
-        return obj.category.name if obj.category else None
-
-    def get_category_order(self, obj):
-        return obj.category.order if obj.category else None
-
-    def get_category_colorCode(self, obj):
-        return obj.category.colorCode if obj.category else None
 
 
 class CarnaticKacheriSerializer(serializers.ModelSerializer):
@@ -259,3 +226,40 @@ class CarnaticSyllabusSerializer(serializers.ModelSerializer):
 
         self._save_video_samples(syllabus, extracted_samples)
         return syllabus
+
+
+class RagamLessonAudioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RagamLessonAudio
+        fields = ['id', 'songName', 'audioPath', 'sort_order', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class RagamLessonVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RagamLessonVideo
+        fields = ['id', 'title', 'youtubevideoUrl', 'sort_order', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class RagamLessonSerializer(serializers.ModelSerializer):
+    audios = RagamLessonAudioSerializer(many=True, read_only=True)
+    videos = RagamLessonVideoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = RagamLesson
+        fields = [
+            'id',
+            'raga_name',
+            'swarasthanas',
+            'arohanam_avarohanam',
+            'description',
+            'famousCompositions',
+            'melakarthaNumber',
+            'audios',
+            'videos',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+

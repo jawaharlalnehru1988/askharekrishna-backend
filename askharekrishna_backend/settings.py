@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'kirtan',
     'brahmhacarya',
     'image_gallery',
-    'carnatic_questions',
+    'carnatic_sangeetam',
     'ourOtherSites',
     'chanting',
     'cooking',

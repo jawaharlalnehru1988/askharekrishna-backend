@@ -19,23 +19,6 @@ class Category(models.Model):
         return self.name
 
 
-class CarnaticQuestion(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='questions', blank=True, null=True)
-    question = models.TextField()
-    answer = models.TextField()
-    audio = models.FileField(upload_to='carnatic_questions/audio/', max_length=500, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Carnatic Question'
-        verbose_name_plural = 'Carnatic Questions'
-
-    def __str__(self):
-        return self.question[:60]
-
-
 class CarnaticSyllabus(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='syllabus_items', blank=True, null=True)
     topic = models.CharField(max_length=255)
@@ -178,32 +161,6 @@ class CarnaticLessonPracticeVideo(models.Model):
         return f"Video for {self.lesson_practice}"
 
 
-@receiver(post_delete, sender=CarnaticQuestion)
-def auto_delete_file_on_delete(sender, instance, **kwargs):
-    if instance.audio:
-        if not CarnaticQuestion.objects.filter(audio=instance.audio.name).exclude(pk=instance.pk).exists():
-            if instance.audio.storage.exists(instance.audio.name):
-                instance.audio.storage.delete(instance.audio.name)
-
-
-@receiver(pre_save, sender=CarnaticQuestion)
-def auto_delete_file_on_change(sender, instance, **kwargs):
-    if not instance.pk:
-        return False
-    try:
-        old_instance = CarnaticQuestion.objects.get(pk=instance.pk)
-    except CarnaticQuestion.DoesNotExist:
-        return False
-
-    old_file = old_instance.audio
-    new_file = instance.audio
-
-    if old_file and old_file != new_file:
-        if not CarnaticQuestion.objects.filter(audio=old_file.name).exclude(pk=instance.pk).exists():
-            if old_file.storage.exists(old_file.name):
-                old_file.storage.delete(old_file.name)
-
-
 @receiver(post_delete, sender=CarnaticSyllabus)
 def auto_delete_syllabus_file_on_delete(sender, instance, **kwargs):
     if instance.audioPath:
@@ -254,6 +211,104 @@ def auto_delete_lesson_practice_audio_on_change(sender, instance, **kwargs):
         if not CarnaticLessonPracticeAudio.objects.filter(audioPath=old_audio.name).exclude(pk=instance.pk).exists():
             if old_audio.storage.exists(old_audio.name):
                 old_audio.storage.delete(old_audio.name)
+
+
+class RagamLesson(models.Model):
+    raga_name = models.CharField(max_length=255, verbose_name="Raga Name")
+    swarasthanas = models.TextField(blank=True, verbose_name="Swarasthanas")
+    arohanam_avarohanam = models.TextField(blank=True, verbose_name="Arohanam & Avarohanam")
+    description = models.TextField(blank=True, verbose_name="Description (Raga Lakshanas)")
+    famousCompositions = models.TextField(blank=True, verbose_name="Famous Compositions")
+    melakarthaNumber = models.PositiveIntegerField(null=True, blank=True, verbose_name="Melakarta Number")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['melakarthaNumber', 'raga_name']
+        verbose_name = 'Ragam Lesson'
+        verbose_name_plural = 'Ragam Lessons'
+
+    def __str__(self):
+        if self.melakarthaNumber:
+            return f"Mela {self.melakarthaNumber}: {self.raga_name}"
+        return self.raga_name
+
+
+class RagamLessonAudio(models.Model):
+    ragam_lesson = models.ForeignKey(
+        RagamLesson,
+        on_delete=models.CASCADE,
+        related_name='audios',
+        verbose_name='Ragam Lesson',
+    )
+    songName = models.CharField(max_length=255, verbose_name="Song Name")
+    audioPath = models.FileField(
+        upload_to='carnatic_ragam_lessons/audio/',
+        max_length=500,
+        verbose_name="Audio File",
+    )
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Sort Order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = 'Ragam Lesson Audio'
+        verbose_name_plural = 'Ragam Lesson Audios'
+
+    def __str__(self):
+        return f"{self.songName} ({self.ragam_lesson.raga_name})"
+
+
+class RagamLessonVideo(models.Model):
+    ragam_lesson = models.ForeignKey(
+        RagamLesson,
+        on_delete=models.CASCADE,
+        related_name='videos',
+        verbose_name='Ragam Lesson',
+    )
+    title = models.CharField(max_length=255, blank=True, default='', verbose_name="Song / Video Title")
+    youtubevideoUrl = models.URLField(max_length=500, verbose_name="YouTube Video URL")
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Sort Order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = 'Ragam Lesson Video'
+        verbose_name_plural = 'Ragam Lesson Videos'
+
+    def __str__(self):
+        if self.title:
+            return f"{self.title} ({self.ragam_lesson.raga_name})"
+        return f"Video for {self.ragam_lesson.raga_name}"
+
+
+@receiver(post_delete, sender=RagamLessonAudio)
+def auto_delete_ragam_audio_on_delete(sender, instance, **kwargs):
+    if instance.audioPath:
+        if not RagamLessonAudio.objects.filter(audioPath=instance.audioPath.name).exclude(pk=instance.pk).exists():
+            if instance.audioPath.storage.exists(instance.audioPath.name):
+                instance.audioPath.storage.delete(instance.audioPath.name)
+
+
+@receiver(pre_save, sender=RagamLessonAudio)
+def auto_delete_ragam_audio_on_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return False
+    try:
+        old_instance = RagamLessonAudio.objects.get(pk=instance.pk)
+    except RagamLessonAudio.DoesNotExist:
+        return False
+
+    old_audio = old_instance.audioPath
+    new_audio = instance.audioPath
+
+    if old_audio and old_audio != new_audio:
+        if not RagamLessonAudio.objects.filter(audioPath=old_audio.name).exclude(pk=instance.pk).exists():
+            if old_audio.storage.exists(old_audio.name):
+                old_audio.storage.delete(old_audio.name)
+
 
 
 

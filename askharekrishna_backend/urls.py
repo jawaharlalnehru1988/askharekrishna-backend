@@ -30,7 +30,7 @@ urlpatterns = [
     path('api/', include('kirtan.urls')),
     path('api/', include('brahmhacarya.urls')),
     path('api/', include('image_gallery.urls')),
-    path('api/', include('carnatic_questions.urls')),
+    path('api/', include('carnatic_sangeetam.urls')),
     path('api/', include('ourOtherSites.urls')),
     path('api/', include('chanting.urls')),
     path('api/', include('cooking.urls')),

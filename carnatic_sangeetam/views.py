@@ -4,13 +4,13 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from askharekrishna_backend.permissions import IsAdminOrReadOnly
-from .models import CarnaticKacheri, CarnaticLessonPractice, CarnaticQuestion, CarnaticSyllabus, Category
+from .models import CarnaticKacheri, CarnaticLessonPractice, CarnaticSyllabus, Category, RagamLesson
 from .serializers import (
     CarnaticLessonPracticeSerializer,
     CategorySerializer,
     CarnaticKacheriSerializer,
-    CarnaticQuestionSerializer,
     CarnaticSyllabusSerializer,
+    RagamLessonSerializer,
 )
 
 
@@ -62,29 +62,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
         if query:
             queryset = queryset.filter(name__icontains=query)
-
-        return queryset
-
-
-class CarnaticQuestionViewSet(viewsets.ModelViewSet):
-    queryset = CarnaticQuestion.objects.select_related('category').all()
-    serializer_class = CarnaticQuestionSerializer
-    permission_classes = [IsAdminOrReadOnly]
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-
-        category = self.request.query_params.get('category') or self.request.query_params.get('division')
-        query = self.request.query_params.get('query')
-
-        queryset = filter_by_category(queryset, category)
-
-        if query:
-            queryset = queryset.filter(
-                Q(question__icontains=query)
-                | Q(answer__icontains=query)
-                | Q(category__name__icontains=query)
-            )
 
         return queryset
 
@@ -154,3 +131,30 @@ class CarnaticSyllabusViewSet(viewsets.ModelViewSet):
             'categories': [category['name'] for category in category_options],
             'category_options': category_options,
         })
+
+
+class RagamLessonViewSet(viewsets.ModelViewSet):
+    queryset = RagamLesson.objects.prefetch_related('audios', 'videos').all()
+    serializer_class = RagamLessonSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    pagination_class = CarnaticSyllabusPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        melakartha = self.request.query_params.get('melakartha')
+        query = self.request.query_params.get('query')
+
+        if melakartha:
+            queryset = queryset.filter(melakarthaNumber=melakartha)
+
+        if query:
+            queryset = queryset.filter(
+                Q(raga_name__icontains=query)
+                | Q(swarasthanas__icontains=query)
+                | Q(arohanam_avarohanam__icontains=query)
+                | Q(description__icontains=query)
+                | Q(famousCompositions__icontains=query)
+            )
+
+        return queryset
+
