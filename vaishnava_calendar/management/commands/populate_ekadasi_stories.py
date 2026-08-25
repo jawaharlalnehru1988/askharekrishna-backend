@@ -23,6 +23,7 @@ EXACT_NAME_MAP = {
     'sayana': 'Devashayani Ekadashi',
     'kamika': 'Kamika Ekadashi',
     'pavitraropana': 'Putrada Ekadashi',
+    'pavitropana': 'Putrada Ekadashi',
     'annada': 'Aja Ekadashi',
     'parsva': 'Padma Ekadashi',
     'indira': 'Indira Ekadashi',
@@ -50,7 +51,8 @@ TA_NAME_MAP = {
     'yogini': 'யோகினி',
     'sayana': 'தேவஷயனி',
     'kamika': 'காமிகா',
-    'pavitraropana': 'புத்ரதா',
+    'pavitraropana': 'பவித்ராரோபண',
+    'pavitropana': 'பவித்ரோபன',
     'annada': 'அஜா',
     'parsva': 'பத்ம',
     'indira': 'இந்திர',
@@ -93,6 +95,23 @@ def get_story_for_observance(title_or_name, lang_code='en'):
     return None
 
 
+def get_tamil_title_for_observance(title):
+    is_fasting = 'fasting' in title.lower()
+    clean = title.replace('Fasting for', '').replace('vrata', '').replace('Ekadasi', '').replace('Ekadashi', '').strip().lower()
+    ta_name = None
+    for k in sorted(TA_NAME_MAP.keys(), key=len, reverse=True):
+        if k in clean:
+            ta_name = TA_NAME_MAP[k]
+            break
+    if ta_name:
+        if not ta_name.endswith('ஏகாதசி'):
+            ta_name = f"{ta_name} ஏகாதசி"
+        if is_fasting:
+            return f"{ta_name} விரதம்"
+        return ta_name
+    return None
+
+
 def populate_stories():
     updated_en_count = 0
     updated_ta_count = 0
@@ -130,18 +149,21 @@ def populate_stories():
         # Tamil story
         ta_story = get_story_for_observance(title, 'ta')
         if ta_story:
+            derived_ta_title = get_tamil_title_for_observance(title) or ta_story.subTopic
             ta_trans, created = CalendarObservanceTranslation.objects.get_or_create(
                 observance=obs,
                 language_code='ta',
                 defaults={
-                    'title': ta_story.subTopic,
+                    'title': derived_ta_title,
                     'description': ta_story.article,
                 }
             )
             if not created:
                 ta_trans.description = ta_story.article
-                if not ta_trans.title or ta_trans.title == title:
-                    ta_trans.title = ta_story.subTopic
+                ta_trans.title = derived_ta_title
+                ta_trans.save()
+            else:
+                ta_trans.title = derived_ta_title
                 ta_trans.save()
             updated_ta_count += 1
 

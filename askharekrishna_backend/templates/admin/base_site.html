@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></div>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var sidebar = document.getElementById('nav-sidebar') || document.querySelector('#nav-sidebar') || document.querySelector('.nav-sidebar');
+    if (!sidebar) return;
+
+    // Restore saved scroll position immediately
+    var savedScroll = sessionStorage.getItem('django_sidebar_scroll_position');
+    if (savedScroll !== null) {
+        sidebar.scrollTop = parseInt(savedScroll, 10);
+    }
+
+    // Save scroll position when scrolling
+    sidebar.addEventListener('scroll', function() {
+        sessionStorage.setItem('django_sidebar_scroll_position', sidebar.scrollTop);
+    }, { passive: true });
+
+    // Save scroll position when clicking any sidebar link
+    sidebar.addEventListener('click', function(e) {
+        if (e.target.closest('a')) {
+            sessionStorage.setItem('django_sidebar_scroll_position', sidebar.scrollTop);
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -5,6 +5,7 @@ from .views import (
     DebateCategoryViewSet,
     DebateQuestionViewSet,
     DebateQuestionOptionViewSet,
+    DebateArticleTranslationViewSet,
 )
 
 router = DefaultRouter()
@@ -12,6 +13,7 @@ router.register(r'articles', DebateArticleViewSet, basename='debate-article')
 router.register(r'categories', DebateCategoryViewSet, basename='debate-category')
 router.register(r'questions', DebateQuestionViewSet, basename='debate-question')
 router.register(r'question-options', DebateQuestionOptionViewSet, basename='debate-question-option')
+router.register(r'translations', DebateArticleTranslationViewSet, basename='debate-translation')
 
 urlpatterns = [
     path('v1/debate/', include(router.urls)),

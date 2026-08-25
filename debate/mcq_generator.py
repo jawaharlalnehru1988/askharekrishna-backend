@@ -13,14 +13,26 @@ def generate_mcqs(article_text: str, language: str = "en") -> list:
     )
 
 
-def save_mcqs(debate_article, questions: list) -> int:
+def save_mcqs(debate_article, questions: list, language: str = "en") -> int:
     from .models import DebateQuestion, DebateQuestionOption
 
-    return shared_save_mcqs(
-        debate_article,
-        questions,
-        question_model=DebateQuestion,
-        option_model=DebateQuestionOption,
-        parent_field_name="debate_article",
-        question_field_name="question_text",
-    )
+    # Delete existing questions for this specific language
+    debate_article.questions.filter(language=language).delete()
+
+    for q_data in questions:
+        question = DebateQuestion.objects.create(
+            debate_article=debate_article,
+            language=language,
+            question_text=q_data["question"],
+            order=q_data["order"],
+            is_active=True,
+        )
+        for opt in q_data["options"]:
+            DebateQuestionOption.objects.create(
+                question=question,
+                option_text=opt["text"],
+                order=opt["order"],
+                is_correct=opt["is_correct"],
+            )
+
+    return len(questions)

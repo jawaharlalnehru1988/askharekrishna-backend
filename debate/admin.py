@@ -5,55 +5,51 @@ from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 from .models import (
     DebateArticle,
+    DebateArticleTranslation,
     DebateCategory,
+    DebateCategoryTranslation,
     DebateQuestion,
     DebateQuestionOption,
 )
 
-
-DEBATE_LANGUAGE_NAMES = {
-    "en": "English",
-    "ta": "Tamil",
-    "hi": "Hindi",
-    "te": "Telugu",
-    "kn": "Kannada",
-    "ml": "Malayalam",
-    "bn": "Bengali",
-}
-
-DEBATE_LANGUAGE_CHOICES = tuple((code, f"{name} ({code})") for code, name in DEBATE_LANGUAGE_NAMES.items())
-
+class DebateCategoryTranslationInline(admin.StackedInline):
+    model = DebateCategoryTranslation
+    extra = 1
+    fields = ('language', 'translated_name', 'description')
 
 @admin.register(DebateCategory)
 class DebateCategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'image')
+    list_display = ('name', 'description', 'image', 'order')
     search_fields = ('name', 'description')
+    ordering = ('order', 'name')
+    inlines = [DebateCategoryTranslationInline]
 
 
-class DebateArticleAdminForm(forms.ModelForm):
-    class Meta:
-        model = DebateArticle
-        fields = '__all__'
+class DebateArticleTranslationInline(admin.StackedInline):
+    model = DebateArticleTranslation
+    extra = 7
+    max_num = 7
+    fields = ('language', 'debateCategory', 'subTopic', 'article', 'audioPath', 'generate_mcq_action')
+    readonly_fields = ('generate_mcq_action',)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        language_choices = list(DEBATE_LANGUAGE_CHOICES)
-        current_language = (getattr(self.instance, 'language', '') or '').strip()
-        if current_language and current_language not in {code for code, _ in language_choices}:
-            language_choices.append((current_language, current_language))
-
-        self.fields['language'].widget = forms.Select(choices=language_choices)
-        if not self.instance or not self.instance.pk:
-            self.fields['language'].initial = 'en'
+    def generate_mcq_action(self, obj):
+        if obj and obj.pk:
+            url = reverse('admin:debate_debatearticle_generate_mcqs', args=[obj.article_parent_id, obj.language])
+            return format_html(
+                '<a href="{}" class="button" style="background:#417690;color:#fff;padding:6px 12px;border-radius:4px;text-decoration:none;" onclick="return confirm(\'This will REPLACE all existing MCQs for {}. Continue?\');">&#129302; Generate MCQs ({})</a>',
+                url, obj.language.upper(), obj.language.upper()
+            )
+        return 'Save this translation first to generate MCQs.'
+    generate_mcq_action.short_description = 'AI Actions'
 
 
 class DebateQuestionInline(admin.StackedInline):
     model = DebateQuestion
     extra = 0
-    max_num = 10
-    fields = ('order', 'question_text', 'options_preview', 'is_active')
+    max_num = 70
+    fields = ('language', 'order', 'question_text', 'options_preview', 'is_active')
     readonly_fields = ('options_preview',)
-    ordering = ('order', 'id')
+    ordering = ('language', 'order', 'id')
 
     def options_preview(self, obj):
         if not obj or not obj.pk:
@@ -84,234 +80,142 @@ class DebateQuestionInline(admin.StackedInline):
 
 @admin.register(DebateArticle)
 class DebateArticleAdmin(admin.ModelAdmin):
-    change_form_template = 'admin/debate/debatearticle/change_form.html'
-    translation_language_choices = DEBATE_LANGUAGE_CHOICES
-    form = DebateArticleAdminForm
     list_display = (
-        'subTopic',
-        'mcq_exists',
-        'mainTopic',
-        'debateCategory',
-        'language',
+        'get_subtopic',
         'articleImage',
-        'audioPath',
-        'created_at',
+        'order',
+        'has_en',
+        'has_en_mcq',
+        'has_ta',
+        'has_ta_mcq',
+        'has_hi',
+        'has_hi_mcq',
+        'has_kn',
+        'has_kn_mcq',
+        'has_te',
+        'has_te_mcq',
+        'has_ml',
+        'has_ml_mcq',
     )
-    list_filter = ('language', 'debateCategory', 'mainTopic', 'subTopic')
-    search_fields = ('mainTopic', 'subTopic', 'debateCategory__name', 'article')
+    list_filter = ('translations__debateCategory',)
+    search_fields = ('translations__debateCategory__name',)
     fields = (
-        'language',
-        'source_article',
-        'debateCategory',
-        'mainTopic',
-        'subTopic',
-        'article',
         'slug',
         'order',
         'articleImage',
-        'audioPath',
     )
-    readonly_fields = ('source_article',)
-    ordering = ('order', 'mainTopic', 'subTopic')
-    inlines = [DebateQuestionInline]
-
-    def mcq_exists(self, obj):
-        return obj.questions.exists()
-
-    mcq_exists.boolean = True
-    mcq_exists.short_description = 'MCQ Exists'
+    ordering = ('order', 'slug')
+    inlines = [DebateArticleTranslationInline, DebateQuestionInline]
+    change_form_template = 'admin/debate/debatearticle/change_form.html'
 
     def get_urls(self):
         urls = super().get_urls()
-        custom = [
-            path(
-                '<int:pk>/translate-article/',
-                self.admin_site.admin_view(self.translate_article_view),
-                name='debate_debatearticle_translate_article',
-            ),
-            path(
-                '<int:pk>/generate-mcqs/',
-                self.admin_site.admin_view(self.generate_mcqs_view),
-                name='debate_debatearticle_generate_mcqs',
-            ),
+        custom_urls = [
+            path('<path:object_id>/generate-mcqs/<str:language>/', self.admin_site.admin_view(self.generate_mcqs_view), name='debate_debatearticle_generate_mcqs'),
         ]
-        return custom + urls
+        return custom_urls + urls
 
-    def _resolve_source_article(self, article: DebateArticle) -> DebateArticle:
-        return article.source_article or article
+    def generate_mcqs_view(self, request, object_id, language):
+        article = self.get_object(request, object_id)
+        if not article:
+            return HttpResponseRedirect("..")
 
-    def translate_article_view(self, request, pk):
-        article = self.get_object(request, pk)
-        if article is None:
-            messages.error(request, 'Debate article not found.')
-            return HttpResponseRedirect('../../')
-
-        if request.method != 'POST':
-            return HttpResponseRedirect(f'../../{pk}/change/')
-
-        source_language = (article.language or '').strip().lower()
-        if source_language not in DEBATE_LANGUAGE_NAMES:
-            messages.error(request, 'Translation is supported only for configured source languages.')
-            return HttpResponseRedirect(f'../../{pk}/change/')
-
-        target_language = (request.POST.get('target_language') or '').strip().lower()
-        allowed_codes = {code for code, _ in self.translation_language_choices}
-        if target_language not in allowed_codes:
-            messages.error(request, 'Please select a valid target language.')
-            return HttpResponseRedirect(f'../../{pk}/change/')
-
-        if target_language == source_language:
-            messages.error(request, 'Source and target languages must be different.')
-            return HttpResponseRedirect(f'../../{pk}/change/')
-
-        if not article.article or not article.article.strip():
-            messages.error(request, 'Source article has no text to translate.')
-            return HttpResponseRedirect(f'../../{pk}/change/')
-
-        replace_existing = (request.POST.get('_replace_existing_translation') or '').strip() in {'1', 'true', 'yes'}
+        translation = article.translations.filter(language=language).first()
+        if not translation:
+            self.message_user(request, f"No translation found for {language}. Cannot generate MCQs.", level=messages.ERROR)
+            return HttpResponseRedirect("..")
 
         try:
-            from .translation_generator import translate_debate_content
+            from .mcq_generator import generate_mcqs, save_mcqs
+            questions_data = generate_mcqs(translation.article, language=language)
+            count = save_mcqs(article, questions_data, language=language)
+            self.message_user(request, f"Successfully generated {count} MCQs for {language}.", level=messages.SUCCESS)
+        except Exception as e:
+            self.message_user(request, f"Error generating MCQs: {e}", level=messages.ERROR)
 
-            translated = translate_debate_content(
-                main_topic=article.mainTopic,
-                sub_topic=article.subTopic,
-                article_text=article.article,
-                source_language=source_language,
-                target_language=target_language,
-            )
+        return HttpResponseRedirect("..")
 
-            translated_main_topic = (translated.get('mainTopic') or '').strip()
-            translated_sub_topic = (translated.get('subTopic') or '').strip()
-            translated_article = (translated.get('article') or '').strip()
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        if object_id:
+            article = self.get_object(request, object_id)
+            if article:
+                extra_context['available_languages'] = [t.language for t in article.translations.all()]
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
-            if not translated_main_topic or not translated_sub_topic or not translated_article:
-                raise ValueError('AI translation returned empty required fields.')
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.prefetch_related('translations', 'questions')
 
-            source_article = self._resolve_source_article(article)
-            existing_article = DebateArticle.objects.filter(
-                source_article=source_article,
-                language=target_language,
-            ).order_by('id').first()
+    def get_subtopic(self, obj):
+        translations = list(obj.translations.all())
+        t = next((t for t in translations if t.language == 'en'), None)
+        if not t and translations:
+            t = translations[0]
+        return t.subTopic if t else '-'
+    get_subtopic.short_description = 'Subtopic'
 
-            if existing_article and not replace_existing:
-                language_name = dict(self.translation_language_choices).get(target_language, target_language)
-                messages.warning(
-                    request,
-                    (
-                        f'A {language_name} translation already exists '
-                        f'(Article ID: {existing_article.pk}). Click Translate again and confirm to replace it.'
-                    ),
-                )
-                return HttpResponseRedirect(
-                    f'../../{pk}/change/?replace_lang={target_language}&replace_article_id={existing_article.pk}'
-                )
+    def has_en(self, obj):
+        return any(t.language == 'en' for t in obj.translations.all())
+    has_en.boolean = True
+    has_en.short_description = 'En'
 
-            if existing_article and replace_existing:
-                existing_article.source_article = source_article
-                existing_article.debateCategory = article.debateCategory
-                existing_article.mainTopic = translated_main_topic
-                existing_article.subTopic = translated_sub_topic
-                existing_article.article = translated_article
-                existing_article.order = source_article.order
-                if article.articleImage:
-                    existing_article.articleImage = article.articleImage
-                if article.audioPath:
-                    existing_article.audioPath = article.audioPath
-                existing_article.save()
+    def has_en_mcq(self, obj):
+        return any(q.language == 'en' for q in obj.questions.all())
+    has_en_mcq.boolean = True
+    has_en_mcq.short_description = 'En-MCQ'
 
-                messages.success(
-                    request,
-                    (
-                        f'Existing {target_language} translation was replaced successfully. '
-                        'Review and edit it if needed.'
-                    ),
-                )
-                return HttpResponseRedirect(reverse('admin:debate_debatearticle_change', args=[existing_article.pk]))
+    def has_ta(self, obj):
+        return any(t.language == 'ta' for t in obj.translations.all())
+    has_ta.boolean = True
+    has_ta.short_description = 'Ta'
 
-            translated_article_obj = DebateArticle(
-                language=target_language,
-                source_article=source_article,
-                debateCategory=article.debateCategory,
-                mainTopic=translated_main_topic,
-                subTopic=translated_sub_topic,
-                article=translated_article,
-                order=source_article.order,
-            )
-            if article.articleImage:
-                translated_article_obj.articleImage = article.articleImage
-            if article.audioPath:
-                translated_article_obj.audioPath = article.audioPath
-            translated_article_obj.save()
+    def has_ta_mcq(self, obj):
+        return any(q.language == 'ta' for q in obj.questions.all())
+    has_ta_mcq.boolean = True
+    has_ta_mcq.short_description = 'Ta-MCQ'
 
-            messages.success(
-                request,
-                'Translated article created successfully. Review and edit it if needed.',
-            )
-            return HttpResponseRedirect(reverse('admin:debate_debatearticle_change', args=[translated_article_obj.pk]))
-        except ValueError as exc:
-            messages.error(request, f'Article translation failed: {exc}')
-        except Exception as exc:
-            messages.error(request, f'Unexpected error during translation: {exc}')
+    def has_hi(self, obj):
+        return any(t.language == 'hi' for t in obj.translations.all())
+    has_hi.boolean = True
+    has_hi.short_description = 'Hi'
 
-        return HttpResponseRedirect(f'../../{pk}/change/')
+    def has_hi_mcq(self, obj):
+        return any(q.language == 'hi' for q in obj.questions.all())
+    has_hi_mcq.boolean = True
+    has_hi_mcq.short_description = 'Hi-MCQ'
 
-    def generate_mcqs_view(self, request, pk):
-        from .mcq_generator import generate_mcqs, save_mcqs
+    def has_kn(self, obj):
+        return any(t.language == 'kn' for t in obj.translations.all())
+    has_kn.boolean = True
+    has_kn.short_description = 'Ka'
 
-        article = self.get_object(request, pk)
-        if article is None:
-            messages.error(request, 'Debate article not found.')
-            return HttpResponseRedirect('../../')
+    def has_kn_mcq(self, obj):
+        return any(q.language == 'kn' for q in obj.questions.all())
+    has_kn_mcq.boolean = True
+    has_kn_mcq.short_description = 'Ka-MCQ'
 
-        if not article.article or not article.article.strip():
-            messages.error(request, 'This article has no text to generate MCQs from.')
-            return HttpResponseRedirect(f'../../{pk}/change/')
+    def has_te(self, obj):
+        return any(t.language == 'te' for t in obj.translations.all())
+    has_te.boolean = True
+    has_te.short_description = 'Tl'
 
-        try:
-            questions = generate_mcqs(article.article, language=article.language or 'en')
-            count = save_mcqs(article, questions)
-            messages.success(
-                request,
-                f'Successfully generated and saved {count} MCQ questions for "{article.subTopic}".',
-            )
-        except ValueError as exc:
-            messages.error(request, f'MCQ generation failed: {exc}')
-        except Exception as exc:
-            messages.error(request, f'Unexpected error while generating MCQs: {exc}')
+    def has_te_mcq(self, obj):
+        return any(q.language == 'te' for q in obj.questions.all())
+    has_te_mcq.boolean = True
+    has_te_mcq.short_description = 'Tl-MCQ'
 
-        return HttpResponseRedirect(f'../../{pk}/change/')
+    def has_ml(self, obj):
+        return any(t.language == 'ml' for t in obj.translations.all())
+    has_ml.boolean = True
+    has_ml.short_description = 'Ml'
 
-    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        if request.method == 'POST' and request.POST.get('_translate_article'):
-            return self.translate_article_view(request, object_id)
-        return super().changeform_view(request, object_id, form_url, extra_context)
+    def has_ml_mcq(self, obj):
+        return any(q.language == 'ml' for q in obj.questions.all())
+    has_ml_mcq.boolean = True
+    has_ml_mcq.short_description = 'Ml-MCQ'
 
-    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
-        context['translation_language_choices'] = self.translation_language_choices
-        source_obj = obj or context.get('original')
-        source_language_code = ''
-        if source_obj and getattr(source_obj, 'language', None):
-            source_language_code = (source_obj.language or '').strip().lower()
 
-        context['translation_source_language_code'] = source_language_code
-        context['translation_source_language_name'] = DEBATE_LANGUAGE_NAMES.get(
-            source_language_code,
-            source_language_code,
-        )
-        context['translation_source_supported'] = source_language_code in DEBATE_LANGUAGE_NAMES
-        replace_lang = (request.GET.get('replace_lang') or '').strip().lower()
-        replace_article_id = (request.GET.get('replace_article_id') or '').strip()
-        if replace_lang:
-            context['replace_translation_language'] = replace_lang
-            context['replace_translation_language_name'] = dict(self.translation_language_choices).get(replace_lang, replace_lang)
-        if replace_article_id.isdigit():
-            context['replace_translation_article_id'] = replace_article_id
-            context['replace_translation_article_change_url'] = reverse(
-                'admin:debate_debatearticle_change',
-                args=[int(replace_article_id)],
-            )
-        return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
 
 class DebateQuestionOptionInline(admin.TabularInline):
@@ -325,8 +229,8 @@ class DebateQuestionOptionInline(admin.TabularInline):
 @admin.register(DebateQuestion)
 class DebateQuestionAdmin(admin.ModelAdmin):
     list_display = ('id', 'debate_article', 'order', 'short_question', 'is_active', 'options_count')
-    list_filter = ('is_active', 'debate_article__language', 'debate_article__mainTopic')
-    search_fields = ('debate_article__subTopic', 'debate_article__slug', 'question_text')
+    list_filter = ('is_active', 'debate_article__translations__debateCategory__name')
+    search_fields = ('debate_article__slug', 'question_text', 'debate_article__translations__debateCategory__name')
     ordering = ('debate_article_id', 'order', 'id')
     inlines = [DebateQuestionOptionInline]
 
@@ -345,6 +249,6 @@ class DebateQuestionAdmin(admin.ModelAdmin):
 @admin.register(DebateQuestionOption)
 class DebateQuestionOptionAdmin(admin.ModelAdmin):
     list_display = ('id', 'question', 'order', 'option_text', 'is_correct')
-    list_filter = ('is_correct', 'question__debate_article__language')
-    search_fields = ('question__question_text', 'option_text', 'question__debate_article__subTopic')
+    list_filter = ('is_correct',)
+    search_fields = ('question__question_text', 'option_text')
     ordering = ('question_id', 'order', 'id')

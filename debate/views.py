@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, pagination, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import DebateArticle, DebateCategory, DebateQuestion, DebateQuestionOption
+from .models import DebateArticle, DebateCategory, DebateQuestion, DebateQuestionOption, DebateArticleTranslation
 from .serializers import (
     DebateArticleSerializer,
     DebateCategoryNestedSerializer,
@@ -11,6 +11,7 @@ from .serializers import (
     DebateCategoryArticleListSerializer,
     DebateQuestionSerializer,
     DebateQuestionOptionSerializer,
+    DebateArticleTranslationUpdateSerializer,
 )
 
 
@@ -21,22 +22,21 @@ class DebateArticlePagination(pagination.PageNumberPagination):
 
 
 class DebateArticleViewSet(viewsets.ModelViewSet):
-    queryset = DebateArticle.objects.prefetch_related('questions__options').all().order_by('order', 'mainTopic', 'subTopic', 'id')
+    queryset = DebateArticle.objects.prefetch_related('questions__options', 'translations').all().order_by('order', 'id')
     serializer_class = DebateArticleSerializer
     pagination_class = DebateArticlePagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = {
         'id': ['exact'],
-        'mainTopic': ['exact', 'icontains'],
-        'debateCategory': ['exact'],
-        'debateCategory__name': ['exact', 'icontains'],
-        'subTopic': ['exact', 'icontains'],
+        'translations__debateCategory': ['exact'],
+        'translations__debateCategory__name': ['exact', 'icontains'],
+        'translations__subTopic': ['exact', 'icontains'],
         'slug': ['exact'],
-        'language': ['exact'],
+        'translations__language': ['exact'],
     }
-    search_fields = ['mainTopic', 'subTopic', 'article', 'debateCategory__name']
-    ordering_fields = ['id', 'order', 'created_at', 'mainTopic', 'subTopic']
-    ordering = ['order', 'mainTopic', 'subTopic', 'id']
+    search_fields = ['translations__debateCategory__name', 'translations__subTopic', 'translations__article']
+    ordering_fields = ['id', 'order', 'created_at']
+    ordering = ['order', 'id']
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -44,13 +44,17 @@ class DebateArticleViewSet(viewsets.ModelViewSet):
         grouped_articles = {}
         uncategorized = []
 
+        # Group by the translation's category for the requested language
+        req_lang = request.query_params.get('language', 'en')
+        
         for article in queryset:
-            if article.debateCategory_id is None:
+            t = article.translations.filter(language=req_lang).first()
+            if not t or t.debateCategory_id is None:
                 uncategorized.append(article)
                 continue
-            grouped_articles.setdefault(article.debateCategory_id, []).append(article)
+            grouped_articles.setdefault(t.debateCategory_id, []).append(article)
 
-        categories = DebateCategory.objects.filter(id__in=grouped_articles.keys()).order_by('name')
+        categories = DebateCategory.objects.filter(id__in=grouped_articles.keys()).order_by('order', 'name')
         category_data = DebateCategoryArticleListSerializer(
             categories,
             many=True,
@@ -83,45 +87,46 @@ class DebateArticleViewSet(viewsets.ModelViewSet):
         category = self.request.query_params.get('category')
         main_topic = self.request.query_params.get('mainTopic') or self.request.query_params.get('topic')
         query = self.request.query_params.get('query')
+        lang = self.request.query_params.get('language', 'en')
 
         if category:
-            queryset = queryset.filter(debateCategory__name__icontains=category)
+            queryset = queryset.filter(translations__language=lang, translations__debateCategory__name__icontains=category)
 
         if main_topic:
-            queryset = queryset.filter(mainTopic__icontains=main_topic)
+            # We don't have mainTopic directly anymore, we filter by category name
+            queryset = queryset.filter(translations__language=lang, translations__debateCategory__name__icontains=main_topic)
 
         if query:
             queryset = queryset.filter(
-                Q(mainTopic__icontains=query)
-                | Q(subTopic__icontains=query)
-                | Q(debateCategory__name__icontains=query)
-                | Q(article__icontains=query)
+                Q(translations__debateCategory__name__icontains=query)
+                | Q(translations__subTopic__icontains=query)
+                | Q(translations__article__icontains=query)
             )
 
-        return queryset.distinct().order_by('order', 'mainTopic', 'subTopic', 'id')
+        return queryset.distinct().order_by('order', 'id')
 
     @action(detail=False, methods=['get'], url_path='categories')
     def categories(self, request):
+        lang = request.query_params.get('language', 'en')
         categories = list(
-            DebateArticle.objects.exclude(mainTopic__exact='')
-            .values_list('mainTopic', flat=True)
+            DebateArticle.objects.filter(translations__language=lang).exclude(translations__debateCategory__isnull=True)
+            .values_list('translations__debateCategory__name', flat=True)
             .distinct()
-            .order_by('mainTopic')
         )
         return Response({'categories': categories})
 
 
 class DebateCategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = DebateCategory.objects.all().prefetch_related('articles').order_by('name')
+    queryset = DebateCategory.objects.all().prefetch_related('articles').order_by('order', 'name')
     serializer_class = DebateCategoryNestedSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = {
         'id': ['exact'],
         'name': ['exact', 'icontains'],
     }
-    search_fields = ['name', 'description', 'articles__mainTopic', 'articles__subTopic']
-    ordering_fields = ['id', 'name']
-    ordering = ['name']
+    search_fields = ['name', 'description', 'articles__debateCategory__name', 'articles__translations__subTopic']
+    ordering_fields = ['id', 'order', 'name']
+    ordering = ['order', 'name']
 
 
 class DebateQuestionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -132,10 +137,10 @@ class DebateQuestionViewSet(viewsets.ReadOnlyModelViewSet):
         'id': ['exact'],
         'debate_article': ['exact'],
         'debate_article__slug': ['exact'],
-        'debate_article__language': ['exact'],
+        'debate_article__translations__language': ['exact'],
         'is_active': ['exact'],
     }
-    search_fields = ['question_text', 'debate_article__mainTopic', 'debate_article__subTopic']
+    search_fields = ['question_text', 'debate_article__translations__debateCategory__name', 'debate_article__translations__subTopic']
     ordering_fields = ['id', 'order', 'debate_article_id']
     ordering = ['debate_article_id', 'order', 'id']
 
@@ -158,3 +163,14 @@ class DebateQuestionOptionViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['option_text', 'question__question_text']
     ordering_fields = ['id', 'order', 'question_id']
     ordering = ['question_id', 'order', 'id']
+
+
+class DebateArticleTranslationViewSet(viewsets.ModelViewSet):
+    queryset = DebateArticleTranslation.objects.all()
+    serializer_class = DebateArticleTranslationUpdateSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = {
+        'id': ['exact'],
+        'article_parent': ['exact'],
+        'language': ['exact'],
+    }
