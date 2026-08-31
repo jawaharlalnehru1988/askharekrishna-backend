@@ -12,6 +12,10 @@ from .models import (
     RagamLesson,
     RagamLessonAudio,
     RagamLessonVideo,
+    MridangaLesson,
+    MridangaLessonAudio,
+    MridangaLessonVideo,
+    MridangaLessonKirtanDemo,
 )
 
 
@@ -47,6 +51,7 @@ class CarnaticLessonPracticeSerializer(serializers.ModelSerializer):
             'category_colorCode',
             'PracticeCategory',
             'lessonName',
+            'swarams',
             'audioPath',
             'audios',
             'videos',
@@ -262,4 +267,51 @@ class RagamLessonSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class MridangaLessonAudioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MridangaLessonAudio
+        fields = ['id', 'songName', 'audioPath', 'mantras_and_notes', 'sort_order', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class MridangaLessonVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MridangaLessonVideo
+        fields = ['id', 'title', 'youtubevideoUrl', 'mantras_and_notes', 'sort_order', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class MridangaLessonKirtanDemoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MridangaLessonKirtanDemo
+        fields = ['id', 'title', 'youtubevideoUrl', 'mantras_and_notes', 'sort_order', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class MridangaLessonSerializer(serializers.ModelSerializer):
+    audios = MridangaLessonAudioSerializer(many=True, read_only=True)
+    videos = MridangaLessonVideoSerializer(many=True, read_only=True)
+    kirtan_demos = MridangaLessonKirtanDemoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = MridangaLesson
+        fields = [
+            'id',
+            'tala_name',
+            'tala_category',
+            'level',
+            'matras',
+            'mantras_and_notes',
+            'description',
+            'sort_order',
+            'audios',
+            'videos',
+            'kirtan_demos',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
 

@@ -96,6 +96,7 @@ class CarnaticLessonPractice(models.Model):
         verbose_name="Practice Category",
     )
     lessonName = models.CharField(max_length=255)
+    swarams = models.TextField(blank=True, default='', verbose_name="Swarams")
     audioPath = models.FileField(upload_to='carnatic_lesson_practice/', max_length=500, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -308,6 +309,163 @@ def auto_delete_ragam_audio_on_change(sender, instance, **kwargs):
         if not RagamLessonAudio.objects.filter(audioPath=old_audio.name).exclude(pk=instance.pk).exists():
             if old_audio.storage.exists(old_audio.name):
                 old_audio.storage.delete(old_audio.name)
+
+
+class MridangaLesson(models.Model):
+    LEVEL_CHOICES = [
+        ('beginner', 'Beginner'),
+        ('medium', 'Medium'),
+        ('advanced', 'Advanced'),
+    ]
+
+    TALA_CATEGORY_CHOICES = [
+        ('daspahira', 'Daspahira'),
+        ('kaharba', 'Kaharba'),
+        ('dadra', 'Dadra'),
+        ('lofa', 'Lofa'),
+        ('rupak', 'Rupak'),
+        ('jhap', 'Jhap'),
+        ('teen', 'Teen'),
+        ('matan', 'Matan'),
+        ('rela', 'Rela'),
+        ('duggi', 'Duggi Style'),
+    ]
+
+    tala_name = models.CharField(max_length=255, verbose_name="Tala Name")
+    tala_category = models.CharField(
+        max_length=50,
+        choices=TALA_CATEGORY_CHOICES,
+        default='daspahira',
+        db_index=True,
+        verbose_name="Tala Category",
+    )
+    level = models.CharField(
+        max_length=20,
+        choices=LEVEL_CHOICES,
+        default='beginner',
+        db_index=True,
+        verbose_name="Level",
+    )
+    matras = models.PositiveIntegerField(null=True, blank=True, verbose_name="Matras (Beats)")
+    mantras_and_notes = models.TextField(blank=True, verbose_name="Mantras and Notes")
+    description = models.TextField(blank=True, verbose_name="Description")
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Sort Order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'tala_category', 'level', 'matras', 'tala_name']
+        verbose_name = 'Mridanga Lesson'
+        verbose_name_plural = 'Mridanga Lessons'
+
+    def __str__(self):
+        if self.matras:
+            return f"{self.tala_name} ({self.matras} Matras)"
+        return self.tala_name
+
+
+class MridangaLessonAudio(models.Model):
+    mridanga_lesson = models.ForeignKey(
+        MridangaLesson,
+        on_delete=models.CASCADE,
+        related_name='audios',
+        verbose_name='Mridanga Lesson',
+    )
+    songName = models.CharField(max_length=255, verbose_name="Audio Title / Song Name")
+    audioPath = models.FileField(
+        upload_to='carnatic_mridanga_lessons/audio/',
+        max_length=500,
+        verbose_name="Audio File",
+    )
+    mantras_and_notes = models.TextField(blank=True, default='', verbose_name="Mantras and Notes")
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Sort Order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = 'Mridanga Lesson Audio'
+        verbose_name_plural = 'Mridanga Lesson Audios'
+
+    def __str__(self):
+        return f"{self.songName} ({self.mridanga_lesson.tala_name})"
+
+
+class MridangaLessonVideo(models.Model):
+    mridanga_lesson = models.ForeignKey(
+        MridangaLesson,
+        on_delete=models.CASCADE,
+        related_name='videos',
+        verbose_name='Mridanga Lesson',
+    )
+    title = models.CharField(max_length=255, blank=True, default='', verbose_name="Video Title")
+    youtubevideoUrl = models.URLField(max_length=500, verbose_name="YouTube Video URL")
+    mantras_and_notes = models.TextField(blank=True, default='', verbose_name="Mantras and Notes")
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Sort Order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = 'Mridanga Lesson Video'
+        verbose_name_plural = 'Mridanga Lesson Videos'
+
+    def __str__(self):
+        if self.title:
+            return f"{self.title} ({self.mridanga_lesson.tala_name})"
+        return f"Video for {self.mridanga_lesson.tala_name}"
+
+
+class MridangaLessonKirtanDemo(models.Model):
+    mridanga_lesson = models.ForeignKey(
+        MridangaLesson,
+        on_delete=models.CASCADE,
+        related_name='kirtan_demos',
+        verbose_name='Mridanga Lesson',
+    )
+    title = models.CharField(max_length=255, blank=True, default='', verbose_name="Kirtan Demo Title")
+    youtubevideoUrl = models.URLField(max_length=500, verbose_name="YouTube Video URL")
+    mantras_and_notes = models.TextField(blank=True, default='', verbose_name="Mantras and Notes")
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Sort Order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = 'Mridanga Lesson Kirtan Demo'
+        verbose_name_plural = 'Mridanga Lesson Kirtan Demos'
+
+    def __str__(self):
+        if self.title:
+            return f"{self.title} ({self.mridanga_lesson.tala_name})"
+        return f"Kirtan Demo for {self.mridanga_lesson.tala_name}"
+
+
+@receiver(post_delete, sender=MridangaLessonAudio)
+def auto_delete_mridanga_audio_on_delete(sender, instance, **kwargs):
+    if instance.audioPath:
+        if not MridangaLessonAudio.objects.filter(audioPath=instance.audioPath.name).exclude(pk=instance.pk).exists():
+            if instance.audioPath.storage.exists(instance.audioPath.name):
+                instance.audioPath.storage.delete(instance.audioPath.name)
+
+
+@receiver(pre_save, sender=MridangaLessonAudio)
+def auto_delete_mridanga_audio_on_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return False
+    try:
+        old_instance = MridangaLessonAudio.objects.get(pk=instance.pk)
+    except MridangaLessonAudio.DoesNotExist:
+        return False
+
+    old_audio = old_instance.audioPath
+    new_audio = instance.audioPath
+
+    if old_audio and old_audio != new_audio:
+        if not MridangaLessonAudio.objects.filter(audioPath=old_audio.name).exclude(pk=instance.pk).exists():
+            if old_audio.storage.exists(old_audio.name):
+                old_audio.storage.delete(old_audio.name)
+
 
 
 

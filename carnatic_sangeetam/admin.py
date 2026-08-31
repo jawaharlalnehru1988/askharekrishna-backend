@@ -12,6 +12,10 @@ from .models import (
 	RagamLesson,
 	RagamLessonAudio,
 	RagamLessonVideo,
+	MridangaLesson,
+	MridangaLessonAudio,
+	MridangaLessonVideo,
+	MridangaLessonKirtanDemo,
 )
 
 
@@ -96,16 +100,31 @@ class CarnaticLessonPracticeAdmin(admin.ModelAdmin):
 		'lessonName',
 		'category',
 		'orderNumber',
+		'swarams_preview',
 		'number_of_audio_lessons',
 		'is_video_available',
 	)
 	list_display_links = ('lessonName',)
 	list_editable = ('orderNumber',)
 	list_filter = ('category',)
-	search_fields = ('lessonName', 'category__name')
+	search_fields = ('lessonName', 'category__name', 'swarams')
 	readonly_fields = ('created_at', 'updated_at')
-	fields = ('orderNumber', 'category', 'lessonName', 'created_at', 'updated_at')
+	fields = ('orderNumber', 'category', 'lessonName', 'swarams', 'created_at', 'updated_at')
 	inlines = [CarnaticLessonPracticeAudioInline, CarnaticLessonPracticeVideoInline]
+
+	def swarams_preview(self, obj):
+		if not obj.swarams:
+			return '-'
+		lines = [line.strip() for line in obj.swarams.strip().splitlines() if line.strip()]
+		if not lines:
+			return '-'
+		if len(lines) > 2:
+			preview_text = '\n'.join(lines[:2]) + '\n...'
+		else:
+			preview_text = '\n'.join(lines)
+		return format_html('<pre style="margin: 0; font-family: monospace; font-size: 11px; white-space: pre-wrap; max-width: 320px; line-height: 1.3;">{}</pre>', preview_text)
+
+	swarams_preview.short_description = 'Swarams'
 
 	def number_of_audio_lessons(self, obj):
 		return obj.audios.count()
@@ -177,5 +196,82 @@ class RagamLessonAdmin(admin.ModelAdmin):
 		return obj.videos.count()
 
 	video_count.short_description = 'Videos'
+
+
+class MridangaLessonAudioInline(admin.StackedInline):
+	model = MridangaLessonAudio
+	extra = 1
+	readonly_fields = ('audio_preview', 'created_at', 'updated_at')
+	fields = ('songName', 'audioPath', 'audio_preview', 'mantras_and_notes', 'sort_order')
+
+	def audio_preview(self, obj):
+		if obj and obj.audioPath:
+			return format_html(
+				'<audio controls preload="none" style="max-width: 280px;"><source src="{}">Your browser does not support the audio element.</audio>',
+				obj.audioPath.url,
+			)
+		return 'No audio uploaded yet.'
+
+	audio_preview.short_description = 'Audio Preview'
+
+
+class MridangaLessonVideoInline(admin.StackedInline):
+	model = MridangaLessonVideo
+	extra = 1
+	fields = ('title', 'youtubevideoUrl', 'mantras_and_notes', 'sort_order')
+
+
+class MridangaLessonKirtanDemoInline(admin.StackedInline):
+	model = MridangaLessonKirtanDemo
+	extra = 1
+	fields = ('title', 'youtubevideoUrl', 'mantras_and_notes', 'sort_order')
+
+
+@admin.register(MridangaLesson)
+class MridangaLessonAdmin(admin.ModelAdmin):
+	list_display = (
+		'tala_name',
+		'tala_category',
+		'level',
+		'matras',
+		'sort_order',
+		'audio_count',
+		'video_count',
+		'kirtan_demo_count',
+		'created_at',
+	)
+	list_display_links = ('tala_name',)
+	list_editable = ('sort_order', 'tala_category', 'level')
+	list_filter = ('tala_category', 'level', 'matras')
+	search_fields = ('tala_name', 'description')
+	readonly_fields = ('created_at', 'updated_at')
+	fields = (
+		'sort_order',
+		'tala_name',
+		'tala_category',
+		'level',
+		'matras',
+		'description',
+		'created_at',
+		'updated_at',
+	)
+	inlines = [MridangaLessonAudioInline, MridangaLessonVideoInline, MridangaLessonKirtanDemoInline]
+
+	def audio_count(self, obj):
+		return obj.audios.count()
+
+	audio_count.short_description = 'Audios'
+
+	def video_count(self, obj):
+		return obj.videos.count()
+
+	video_count.short_description = 'Videos'
+
+	def kirtan_demo_count(self, obj):
+		return obj.kirtan_demos.count()
+
+	kirtan_demo_count.short_description = 'Kirtan Demos'
+
+
 
 

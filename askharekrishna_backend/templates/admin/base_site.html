@@ -35,6 +35,34 @@ document.addEventListener('DOMContentLoaded', function() {
             sessionStorage.setItem('django_sidebar_scroll_position', sidebar.scrollTop);
         }
     });
+
+    // Ensure all URL/media/external links open in a new tab
+    function openExternalLinksInNewTab() {
+        var links = document.querySelectorAll('p.url a, p.file-upload a, .field-youtubevideoUrl a, .field-videoUrl a, .field-audioPath a, .field-url a, a[href^="http://"], a[href^="https://"]');
+        links.forEach(function(link) {
+            if (link.hostname && link.hostname !== window.location.hostname) {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+            } else if (link.closest('p.url, p.file-upload, .field-youtubevideoUrl, .field-videoUrl, .field-audioPath, .field-url')) {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+            }
+        });
+    }
+
+    openExternalLinksInNewTab();
+
+    document.addEventListener('click', function(e) {
+        var link = e.target.closest('a');
+        if (!link || !link.href) return;
+        var isExternal = (link.hostname && link.hostname !== window.location.hostname);
+        var isMediaOrFile = link.href.includes('/media/') || link.closest('.url') || link.closest('.file-upload') || link.closest('.field-youtubevideoUrl') || link.closest('.field-videoUrl') || link.closest('.field-audioPath') || link.closest('.field-url');
+        if (isExternal || isMediaOrFile) {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+        }
+    });
 });
 </script>
 {% endblock %}
+

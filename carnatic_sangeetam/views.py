@@ -4,13 +4,21 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from askharekrishna_backend.permissions import IsAdminOrReadOnly
-from .models import CarnaticKacheri, CarnaticLessonPractice, CarnaticSyllabus, Category, RagamLesson
+from .models import (
+    CarnaticKacheri,
+    CarnaticLessonPractice,
+    CarnaticSyllabus,
+    Category,
+    RagamLesson,
+    MridangaLesson,
+)
 from .serializers import (
     CarnaticLessonPracticeSerializer,
     CategorySerializer,
     CarnaticKacheriSerializer,
     CarnaticSyllabusSerializer,
     RagamLessonSerializer,
+    MridangaLessonSerializer,
 )
 
 
@@ -157,4 +165,38 @@ class RagamLessonViewSet(viewsets.ModelViewSet):
             )
 
         return queryset
+
+
+class MridangaLessonViewSet(viewsets.ModelViewSet):
+    queryset = MridangaLesson.objects.prefetch_related('audios', 'videos', 'kirtan_demos').all()
+    serializer_class = MridangaLessonSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    pagination_class = CarnaticSyllabusPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        tala_category = self.request.query_params.get('tala_category')
+        level = self.request.query_params.get('level')
+        matras = self.request.query_params.get('matras')
+        query = self.request.query_params.get('query')
+
+        if tala_category:
+            queryset = queryset.filter(tala_category__iexact=tala_category)
+
+        if level:
+            queryset = queryset.filter(level__iexact=level)
+
+        if matras:
+            queryset = queryset.filter(matras=matras)
+
+        if query:
+            queryset = queryset.filter(
+                Q(tala_name__icontains=query)
+                | Q(tala_category__icontains=query)
+                | Q(mantras_and_notes__icontains=query)
+                | Q(description__icontains=query)
+            )
+
+        return queryset
+
 

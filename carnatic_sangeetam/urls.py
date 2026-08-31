@@ -6,6 +6,7 @@ from .views import (
     CategoryViewSet,
     CarnaticLessonPracticeViewSet,
     RagamLessonViewSet,
+    MridangaLessonViewSet,
 )
 
 
@@ -15,7 +16,9 @@ router.register(r'carnatic-kacheri', CarnaticKacheriViewSet, basename='carnatic-
 router.register(r'carnatic-syllabus', CarnaticSyllabusViewSet, basename='carnatic-syllabus')
 router.register(r'carnatic-lesson-practice', CarnaticLessonPracticeViewSet, basename='carnatic-lesson-practice')
 router.register(r'carnatic-ragam-lessons', RagamLessonViewSet, basename='carnatic-ragam-lessons')
+router.register(r'carnatic-mridanga-lessons', MridangaLessonViewSet, basename='carnatic-mridanga-lessons')
 
 urlpatterns = [
     path('v1/', include(router.urls)),
 ]
+

@@ -413,8 +413,9 @@ Use this API for lesson practice tracks (e.g. Sarali Varisaigal, Jantai Varisaig
 [
   {
     "id": 1,
-    "PracticeCategory": "Sarali Varisaigal",
+    "PracticeCategory": "Swaravali/Sarali Varisaigal",
     "lessonName": "Sarali Varisai 1",
+    "swarams": "S R G M | P D | N S ||\nS N D P | M G | R S ||",
     "audioPath": "https://admin.askharekrishna.com/media/carnatic_lesson_practice/sarali_varisai_1.mp3",
     "audios": [
       {
@@ -472,3 +473,62 @@ On the home page under "Listening Focused Practice":
 - When reordering syllabus videos, send the full `videoSamples` array.
 - Use `carnatic-kacheri` for singer/ragam/video URL based content.
 - Use `carnatic-lesson-practice` for lesson cards and detail pages with multiple `audios` and `videos`.
+- Use `carnatic-ragam-lessons` for Ragam Lakshana lessons with audios and YouTube video samples.
+- Use `carnatic-mridanga-lessons` for Mridanga Tala lessons with Matras, Mantras/Notes, Audios, YouTube Videos, and Kirtan Demo Videos.
+
+## Mridanga Lessons API
+
+Endpoint: `GET, POST /api/v1/carnatic-mridanga-lessons/`
+Detail: `GET, PUT, PATCH, DELETE /api/v1/carnatic-mridanga-lessons/:id/`
+
+### Response Shape
+
+```json
+{
+  "id": 1,
+  "tala_name": "Kaharwa Tala",
+  "level": "beginner",
+  "matras": 8,
+  "mantras_and_notes": "Dha Ge Na Tin | Ta Ke Na Dhin",
+  "description": "Standard 8-beat cycle widely used in ISKCON kirtan.",
+  "sort_order": 0,
+  "audios": [
+    {
+      "id": 1,
+      "songName": "Prabhupada Style Kaharwa 1st Speed",
+      "audioPath": "https://admin.askharekrishna.com/media/carnatic_mridanga_lessons/audio/kaharwa_speed1.mp3",
+      "sort_order": 0,
+      "created_at": "2026-08-29T17:15:00Z",
+      "updated_at": "2026-08-29T17:15:00Z"
+    }
+  ],
+  "videos": [
+    {
+      "id": 1,
+      "title": "Kaharwa Hand Technique Tutorial",
+      "youtubevideoUrl": "https://www.youtube.com/watch?v=tutorial123",
+      "sort_order": 0,
+      "created_at": "2026-08-29T17:15:00Z",
+      "updated_at": "2026-08-29T17:15:00Z"
+    }
+  ],
+  "kirtan_demos": [
+    {
+      "id": 1,
+      "title": "Kaharwa in Live Mangala Arati",
+      "youtubevideoUrl": "https://www.youtube.com/watch?v=kirtandemo123",
+      "sort_order": 0,
+      "created_at": "2026-08-29T17:15:00Z",
+      "updated_at": "2026-08-29T17:15:00Z"
+    }
+  ],
+  "created_at": "2026-08-29T17:15:00Z",
+  "updated_at": "2026-08-29T17:15:00Z"
+}
+```
+
+### Filters
+
+- `level=<beginner|medium|advanced>` (e.g., `?level=beginner`)
+- `matras=<number>` (e.g., `?matras=8`)
+- `query=<text>` (searches Tala name, mantras/notes, and description)
