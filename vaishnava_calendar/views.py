@@ -28,10 +28,18 @@ class CalendarDayViewSet(viewsets.ModelViewSet):
         if end_date:
             qs = qs.filter(event_date__lte=end_date)
 
-        # Filter by year and month
+        # Filter by year and month (with on-demand calculation if year missing)
         year = params.get('year')
         month = params.get('month')
         if year:
+            try:
+                year_int = int(year)
+                # If year not generated yet, calculate it dynamically on-demand
+                if not CalendarDay.objects.filter(event_date__year=year_int).exists():
+                    from .services.generator import generate_calendar_for_year
+                    generate_calendar_for_year(year=year_int)
+            except (ValueError, TypeError):
+                pass
             qs = qs.filter(event_date__year=year)
         if month:
             qs = qs.filter(event_date__month=month)
@@ -45,10 +53,34 @@ class CalendarDayViewSet(viewsets.ModelViewSet):
         Query param 'limit' can specify max records (default 10).
         """
         today = date.today()
+        # Ensure current year and next year are available if upcoming reaches into next year
+        if not CalendarDay.objects.filter(event_date__year=today.year).exists():
+            from .services.generator import generate_calendar_for_year
+            generate_calendar_for_year(year=today.year)
+
         limit = int(request.query_params.get('limit', 10))
         queryset = self.get_queryset().filter(event_date__gte=today)[:limit]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], url_path='generate')
+    def generate(self, request):
+        """
+        Explicitly triggers calendar generation for a given year.
+        Payload: {"year": 2027, "force": false}
+        """
+        year = request.data.get('year')
+        if not year:
+            return Response({'error': 'year parameter is required'}, status=400)
+        try:
+            year_int = int(year)
+        except (ValueError, TypeError):
+            return Response({'error': 'invalid year parameter'}, status=400)
+
+        force = bool(request.data.get('force', False))
+        from .services.generator import generate_calendar_for_year
+        result = generate_calendar_for_year(year=year_int, force=force)
+        return Response(result)
 
 
 class CalendarObservanceViewSet(viewsets.ModelViewSet):

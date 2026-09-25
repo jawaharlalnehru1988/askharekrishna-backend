@@ -11,6 +11,11 @@ LANGUAGE_CHOICES = [
     ('hi', 'Hindi'),
     ('ml', 'Malayalam'),
     ('bn', 'Bengali'),
+    ('mr', 'Marathi'),
+    ('gu', 'Gujarati'),
+    ('or', 'Odia'),
+    ('pa', 'Punjabi'),
+    ('sa', 'Sanskrit'),
 ]
 
 
@@ -56,15 +61,17 @@ class PoojaVidhi(models.Model):
         verbose_name_plural = 'Pooja Vidhis'
 
     def __str__(self):
-        trans = self.get_translation('en') or self.translations.first()
+        trans = self.get_translation('en') or (self.translations.first() if self.pk else None)
         if trans:
             return f"[{trans.language_code.upper()}] {trans.mainTopic} - {trans.subTopic}"
-        return f"Pooja Vidhi {self.id}"
+        return f"Pooja Vidhi {self.id or 'new'}"
 
     def effective_image(self):
         return self.articleImage
 
     def get_translation(self, lang_code='en'):
+        if not self.pk:
+            return None
         trans = self.translations.filter(language_code=lang_code).first()
         if not trans:
             trans = self.translations.filter(language_code='en').first()
@@ -85,7 +92,7 @@ class PoojaVidhi(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            trans = self.get_translation('en') or self.translations.first()
+            trans = self.get_translation('en') or (self.translations.first() if self.pk else None)
             if trans:
                 base_slug = slugify(f"{trans.mainTopic} {trans.subTopic}", allow_unicode=True)
             else:

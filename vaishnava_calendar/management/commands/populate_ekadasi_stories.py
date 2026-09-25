@@ -5,178 +5,141 @@ from vaishnava_calendar.models import CalendarObservance, CalendarObservanceTran
 
 logger = logging.getLogger(__name__)
 
-EXACT_NAME_MAP = {
-    'sat-tila': 'Sattila Ekadashi',
-    'bhaimi': 'Jaya Ekadashi',
-    'vijaya': 'Vijaya Ekadashi',
-    'amalaki': 'Amalaki Ekadashi',
-    'papamocani': 'Papamocani Ekadashi',
-    'kamada': 'Kamada Ekadashi',
-    'varuthini': 'Varuthini Ekadashi',
-    'mohini': 'Mohini Ekadashi',
-    'apara': 'Aparaa Ekadasi',
-    'padmini': 'Padmini Ekadashi',
-    'parama': 'Parama Ekadasi',
-    'pandava nirjala': 'Nirjala Ekadashi',
-    'nirjala': 'Nirjala Ekadashi',
-    'yogini': 'Yogini Ekadashi',
-    'sayana': 'Devashayani Ekadashi',
-    'kamika': 'Kamika Ekadashi',
-    'pavitraropana': 'Putrada Ekadashi',
-    'pavitropana': 'Putrada Ekadashi',
-    'annada': 'Aja Ekadashi',
-    'parsva': 'Padma Ekadashi',
-    'indira': 'Indira Ekadashi',
-    'pasankusa': 'Papankusha Ekadashi',
-    'rama': 'Rama Ekadashi',
-    'utthana': 'Prabodhini Ekadashi',
-    'utpanna': 'The History of How Ekadashi Came to Be',
-    'moksada': 'Mokshada Ekadashi',
+# Direct, authoritative mapping from CalendarDay.ekadashi_name to Story ID
+EKADASHI_NAME_TO_STORY_ID = {
+    'sat-tila': 148,        # Sattila Ekadashi
+    'bhaimi': 147,          # Jaya Ekadashi
+    'vijaya': 146,          # Vijaya Ekadashi
+    'amalaki': 144,         # Amalaki Ekadashi
+    'papamocani': 143,      # Papamocani Ekadashi
+    'kamada': 128,          # Kamada Ekadashi
+    'varuthini': 110,       # Varuthini Ekadashi
+    'mohini': 142,          # Mohini Ekadashi
+    'apara': 114,           # Aparaa Ekadasi
+    'padmini': 127,         # Padmini Ekadashi
+    'parama': 177,          # Parama Ekadasi
+    'pandava nirjala': 140, # Nirjala Ekadashi
+    'nirjala': 140,         # Nirjala Ekadashi
+    'yogini': 139,          # Yogini Ekadashi
+    'sayana': 138,          # Devashayani Ekadashi
+    'kamika': 137,          # Kamika Ekadashi
+    'pavitraropana': 136,   # Putrada Ekadashi
+    'pavitropana': 136,     # Putrada Ekadashi
+    'annada': 135,          # Aja Ekadashi
+    'parsva': 134,          # Padma Ekadashi (Parsva / Parivartini)
+    'indira': 133,          # Indira Ekadashi
+    'pasankusa': 131,       # Papankusha Ekadashi
+    'rama': 130,            # Rama Ekadashi
+    'utthana': 129,         # Prabodhini Ekadashi
+    'utpanna': 109,         # The History of How Ekadashi Came to Be
+    'moksada': 145,         # Mokshada Ekadashi
 }
 
-TA_NAME_MAP = {
-    'sat-tila': 'சத்தில',
-    'bhaimi': 'ஜெயா',
-    'vijaya': 'விஜயா',
-    'amalaki': 'அமலகி',
-    'papamocani': 'பாபமோசனி',
-    'kamada': 'காமதா',
-    'varuthini': 'வருத்தினி',
-    'mohini': 'மோஹினி',
-    'apara': 'அபரா',
-    'padmini': 'பத்மினி',
-    'parama': 'பரம',
-    'pandava nirjala': 'நிர்ஜல',
-    'nirjala': 'நிர்ஜல',
-    'yogini': 'யோகினி',
-    'sayana': 'தேவஷயனி',
-    'kamika': 'காமிகா',
-    'pavitraropana': 'பவித்ராரோபண',
-    'pavitropana': 'பவித்ரோபன',
-    'annada': 'அஜா',
-    'parsva': 'பத்ம',
-    'indira': 'இந்திர',
-    'pasankusa': 'பாபாங்குஷ',
-    'rama': 'ரமா',
-    'utthana': 'ப்ரபோதினி',
-    'utpanna': 'ஏகாதசி உருவான வரலாறு',
-    'moksada': 'மோக்ஷதா',
-}
+LANGUAGES = ['en', 'ta', 'hi', 'kn', 'te']
 
 
-def get_story_for_observance(title_or_name, lang_code='en'):
-    clean = title_or_name.replace('Fasting for', '').replace('vrata', '').replace('Ekadasi', '').replace('Ekadashi', '').strip().lower()
-    
+def get_story_for_observance(obs, stories_by_id):
+    name = (obs.day.ekadashi_name or '').lower()
+    for key, story_id in EKADASHI_NAME_TO_STORY_ID.items():
+        if key in name:
+            return stories_by_id.get(story_id)
+
+    # Fallback to checking existing translation title if day.ekadashi_name is empty
+    en_t = obs.translations.filter(language_code='en').first()
+    title = (en_t.title if en_t else '').lower()
+    for key, story_id in EKADASHI_NAME_TO_STORY_ID.items():
+        if key in title:
+            return stories_by_id.get(story_id)
+
+    return None
+
+
+def get_formatted_title(base_title, is_fasting, lang_code):
+    base_clean = base_title.strip()
+    if not is_fasting:
+        return base_clean
+
     if lang_code == 'en':
-        target_subtopic = None
-        for k in sorted(EXACT_NAME_MAP.keys(), key=len, reverse=True):
-            if k in clean:
-                target_subtopic = EXACT_NAME_MAP[k]
-                break
-        if not target_subtopic:
-            target_subtopic = clean
-        return Story.objects.filter(language__code='en', subTopic__iexact=target_subtopic).first() or \
-               Story.objects.filter(language__code='en', subTopic__icontains=target_subtopic).first()
+        if not base_clean.lower().startswith('fasting'):
+            return f"Fasting for {base_clean}"
+        return base_clean
     elif lang_code == 'ta':
-        target_ta = None
-        for k in sorted(TA_NAME_MAP.keys(), key=len, reverse=True):
-            if k in clean:
-                target_ta = TA_NAME_MAP[k]
-                break
-        if target_ta:
-            story = Story.objects.filter(language__code='ta', subTopic__icontains=target_ta).first()
-            if story:
-                return story
-        # Fallback to translation of en story
-        en_story = get_story_for_observance(title_or_name, 'en')
-        if en_story:
-            return en_story.translations.filter(language__code='ta').first() or \
-                   (en_story.source_story if en_story.source_story and en_story.source_story.language.code == 'ta' else None)
-    return None
+        if not base_clean.endswith('விரதம்'):
+            return f"{base_clean} விரதம்"
+        return base_clean
+    elif lang_code == 'hi':
+        if not base_clean.endswith('व्रत'):
+            return f"{base_clean} व्रत"
+        return base_clean
+    elif lang_code == 'kn':
+        if not base_clean.endswith('ವ್ರತ'):
+            return f"{base_clean} ವ್ರತ"
+        return base_clean
+    elif lang_code == 'te':
+        if not base_clean.endswith('వ్రతం'):
+            return f"{base_clean} వ్రతం"
+        return base_clean
+    return base_clean
 
 
-def get_tamil_title_for_observance(title):
-    is_fasting = 'fasting' in title.lower()
-    clean = title.replace('Fasting for', '').replace('vrata', '').replace('Ekadasi', '').replace('Ekadashi', '').strip().lower()
-    ta_name = None
-    for k in sorted(TA_NAME_MAP.keys(), key=len, reverse=True):
-        if k in clean:
-            ta_name = TA_NAME_MAP[k]
-            break
-    if ta_name:
-        if not ta_name.endswith('ஏகாதசி'):
-            ta_name = f"{ta_name} ஏகாதசி"
-        if is_fasting:
-            return f"{ta_name} விரதம்"
-        return ta_name
-    return None
+def populate_all_ekadasi_languages():
+    stories_by_id = {s.id: s for s in Story.objects.filter(topic_id=11).prefetch_related('translations')}
+    ek_observances = CalendarObservance.objects.filter(category='Ekadashi').select_related('day').order_by('day__event_date')
 
-
-def populate_stories():
-    updated_en_count = 0
-    updated_ta_count = 0
-
-    ek_observances = CalendarObservance.objects.filter(category='Ekadashi')
+    stats = {lang: 0 for lang in LANGUAGES}
+    images_updated = 0
 
     for obs in ek_observances:
-        en_trans = obs.translations.filter(language_code='en').first()
-        title = en_trans.title if en_trans else obs.day.ekadashi_name or ''
-
-        if title.startswith('Ksaya'):
+        story = get_story_for_observance(obs, stories_by_id)
+        if not story:
             continue
 
-        # English story
-        en_story = get_story_for_observance(title, 'en')
-        if en_story:
-            if not en_trans:
-                en_trans = CalendarObservanceTranslation.objects.create(
-                    observance=obs,
-                    language_code='en',
-                    title=title,
-                    description=en_story.article
-                )
-            else:
-                en_trans.description = en_story.article
-                en_trans.save()
-            updated_en_count += 1
+        is_fasting = (obs.order > 0)
 
-            # Attach story image to observance if missing
-            eff_image = en_story.effective_image_path()
-            if eff_image and not obs.image:
-                obs.image = eff_image
-                obs.save()
+        # Update observance image from story
+        if story.imagePath and (not obs.image or 'rituals_for_lord_krishna' in str(obs.image)):
+            obs.image = story.imagePath
+            obs.save(update_fields=['image'])
+            images_updated += 1
 
-        # Tamil story
-        ta_story = get_story_for_observance(title, 'ta')
-        if ta_story:
-            derived_ta_title = get_tamil_title_for_observance(title) or ta_story.subTopic
-            ta_trans, created = CalendarObservanceTranslation.objects.get_or_create(
+        for lang in LANGUAGES:
+            trans = story.get_translation(lang)
+            if not trans or not trans.article:
+                continue
+
+            title = get_formatted_title(trans.subTopic, is_fasting, lang)
+
+            obs_trans, _ = CalendarObservanceTranslation.objects.get_or_create(
                 observance=obs,
-                language_code='ta',
+                language_code=lang,
                 defaults={
-                    'title': derived_ta_title,
-                    'description': ta_story.article,
+                    'title': title,
+                    'description': trans.article,
                 }
             )
-            if not created:
-                ta_trans.description = ta_story.article
-                ta_trans.title = derived_ta_title
-                ta_trans.save()
-            else:
-                ta_trans.title = derived_ta_title
-                ta_trans.save()
-            updated_ta_count += 1
+            obs_trans.title = title
+            obs_trans.description = trans.article
+            if trans.audioPath and not obs_trans.audio_file:
+                obs_trans.audio_file = trans.audioPath
+            obs_trans.save()
+            stats[lang] += 1
 
-    return updated_en_count, updated_ta_count
+    return stats, images_updated
 
 
 class Command(BaseCommand):
-    help = 'Populate Ekadasi descriptions in Vaishnava Calendar observances using stories database.'
+    help = 'Populate Ekadasi descriptions and titles in Vaishnava Calendar for all 5 languages (en, ta, hi, kn, te) using stories database.'
 
     def handle(self, *args, **options):
-        en_count, ta_count = populate_stories()
+        stats, images_updated = populate_all_ekadasi_languages()
         self.stdout.write(
             self.style.SUCCESS(
-                f"Successfully updated Ekadasi story descriptions for {en_count} English and {ta_count} Tamil observances."
+                f"Successfully updated Ekadasi observances for all languages:\n"
+                f" - English: {stats['en']}\n"
+                f" - Tamil: {stats['ta']}\n"
+                f" - Hindi: {stats['hi']}\n"
+                f" - Kannada: {stats['kn']}\n"
+                f" - Telugu: {stats['te']}\n"
+                f" - Images updated: {images_updated}"
             )
         )

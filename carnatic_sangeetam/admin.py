@@ -4,7 +4,6 @@ from .models import (
 	Category,
 	CarnaticSyllabus,
 	CarnaticSyllabusVideoSample,
-	CarnaticKacheri,
 	CarnaticClassAudio,
 	CarnaticLessonPractice,
 	CarnaticLessonPracticeAudio,
@@ -12,6 +11,8 @@ from .models import (
 	RagamLesson,
 	RagamLessonAudio,
 	RagamLessonVideo,
+	RagamFamousComposition,
+	RagamCompositionVideo,
 	MridangaLesson,
 	MridangaLessonAudio,
 	MridangaLessonVideo,
@@ -35,22 +36,12 @@ class CarnaticSyllabusVideoSampleInline(admin.TabularInline):
 
 @admin.register(CarnaticSyllabus)
 class CarnaticSyllabusAdmin(admin.ModelAdmin):
-	list_display = ('topic', 'id', 'category', 'created_at')
+	list_display = ('topic', 'id', 'created_at')
 	list_display_links = ('topic',)
-	list_filter = ('category',)
-	search_fields = ('category__name', 'topic', 'lesson')
-	list_select_related = ('category',)
+	search_fields = ('topic', 'lesson')
 	readonly_fields = ('created_at', 'updated_at')
-	fields = ('category', 'topic', 'lesson', 'audioPath', 'created_at', 'updated_at')
+	fields = ('topic', 'lesson', 'audioPath', 'created_at', 'updated_at')
 	inlines = [CarnaticSyllabusVideoSampleInline]
-
-
-@admin.register(CarnaticKacheri)
-class CarnaticKacheriAdmin(admin.ModelAdmin):
-	list_display = ('id', 'title', 'singer', 'ragam', 'created_at')
-	search_fields = ('title', 'singer', 'ragam', 'description')
-	readonly_fields = ('created_at', 'updated_at')
-	fields = ('title', 'singer', 'ragam', 'videoUrl', 'description', 'created_at', 'updated_at')
 
 
 @admin.register(CarnaticClassAudio)
@@ -161,12 +152,20 @@ class RagamLessonVideoInline(admin.TabularInline):
 	fields = ('title', 'youtubevideoUrl', 'sort_order')
 
 
+class RagamFamousCompositionInline(admin.TabularInline):
+	model = RagamFamousComposition
+	extra = 1
+	show_change_link = True
+	fields = ('title', 'talam', 'composer', 'sort_order')
+
+
 @admin.register(RagamLesson)
 class RagamLessonAdmin(admin.ModelAdmin):
 	list_display = (
 		'raga_name',
 		'melakarthaNumber',
 		'swarasthanas',
+		'composition_count',
 		'audio_count',
 		'video_count',
 		'created_at',
@@ -185,7 +184,12 @@ class RagamLessonAdmin(admin.ModelAdmin):
 		'created_at',
 		'updated_at',
 	)
-	inlines = [RagamLessonAudioInline, RagamLessonVideoInline]
+	inlines = [RagamFamousCompositionInline, RagamLessonAudioInline, RagamLessonVideoInline]
+
+	def composition_count(self, obj):
+		return obj.famous_compositions.count()
+
+	composition_count.short_description = 'Compositions'
 
 	def audio_count(self, obj):
 		return obj.audios.count()
@@ -196,6 +200,46 @@ class RagamLessonAdmin(admin.ModelAdmin):
 		return obj.videos.count()
 
 	video_count.short_description = 'Videos'
+
+
+class RagamCompositionVideoInline(admin.TabularInline):
+	model = RagamCompositionVideo
+	extra = 4
+	fields = ('title', 'youtubevideoUrl', 'sort_order')
+
+
+@admin.register(RagamFamousComposition)
+class RagamFamousCompositionAdmin(admin.ModelAdmin):
+	list_display = (
+		'title',
+		'ragam_lesson',
+		'talam',
+		'composer',
+		'video_count',
+		'sort_order',
+		'created_at',
+	)
+	list_display_links = ('title',)
+	list_filter = ('ragam_lesson', 'talam')
+	search_fields = ('title', 'composer', 'lyrics', 'meaning', 'ragam_lesson__raga_name')
+	readonly_fields = ('created_at', 'updated_at')
+	fields = (
+		'ragam_lesson',
+		'title',
+		'talam',
+		'composer',
+		'lyrics',
+		'meaning',
+		'sort_order',
+		'created_at',
+		'updated_at',
+	)
+	inlines = [RagamCompositionVideoInline]
+
+	def video_count(self, obj):
+		return obj.videos.count()
+
+	video_count.short_description = 'Demo Videos'
 
 
 class MridangaLessonAudioInline(admin.StackedInline):

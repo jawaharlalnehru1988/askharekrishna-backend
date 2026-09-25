@@ -1,6 +1,105 @@
+import datetime
 from django.contrib import admin
+from django.utils import timezone
 from django.utils.html import format_html
 from .models import CalendarDay, CalendarObservance, CalendarObservanceTranslation
+
+
+class UpcomingObservancePeriodFilter(admin.SimpleListFilter):
+    title = 'Date Period'
+    parameter_name = 'period'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('upcoming', 'Upcoming (From Today)'),
+            ('today', 'Today'),
+            ('this_week', 'Next 7 Days'),
+            ('this_month', 'This Month'),
+            ('past', 'Past Events'),
+            ('all', 'All Dates (Full Archive)'),
+        )
+
+    def choices(self, changelist):
+        for lookup, title in self.lookup_choices:
+            yield {
+                'selected': self.value() == lookup or (self.value() is None and lookup == 'upcoming'),
+                'query_string': changelist.get_query_string({self.parameter_name: lookup}, []),
+                'display': title,
+            }
+
+    def queryset(self, request, queryset):
+        today = timezone.localdate()
+        val = self.value()
+
+        # If user searches or uses date hierarchy, don't restrict unless explicitly chosen
+        if 'q' in request.GET or any(k.startswith('day__event_date') for k in request.GET):
+            if val == 'upcoming':
+                return queryset.filter(day__event_date__gte=today)
+            elif val == 'past':
+                return queryset.filter(day__event_date__lt=today)
+            return queryset
+
+        if val == 'upcoming' or val is None:
+            return queryset.filter(day__event_date__gte=today)
+        elif val == 'today':
+            return queryset.filter(day__event_date=today)
+        elif val == 'this_week':
+            return queryset.filter(day__event_date__gte=today, day__event_date__lte=today + datetime.timedelta(days=7))
+        elif val == 'this_month':
+            return queryset.filter(day__event_date__year=today.year, day__event_date__month=today.month)
+        elif val == 'past':
+            return queryset.filter(day__event_date__lt=today)
+        elif val == 'all':
+            return queryset
+        return queryset
+
+
+class UpcomingDayPeriodFilter(admin.SimpleListFilter):
+    title = 'Date Period'
+    parameter_name = 'period'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('upcoming', 'Upcoming (From Today)'),
+            ('today', 'Today'),
+            ('this_week', 'Next 7 Days'),
+            ('this_month', 'This Month'),
+            ('past', 'Past Days'),
+            ('all', 'All Days (Full Archive)'),
+        )
+
+    def choices(self, changelist):
+        for lookup, title in self.lookup_choices:
+            yield {
+                'selected': self.value() == lookup or (self.value() is None and lookup == 'upcoming'),
+                'query_string': changelist.get_query_string({self.parameter_name: lookup}, []),
+                'display': title,
+            }
+
+    def queryset(self, request, queryset):
+        today = timezone.localdate()
+        val = self.value()
+
+        if 'q' in request.GET or any(k.startswith('event_date') for k in request.GET):
+            if val == 'upcoming':
+                return queryset.filter(event_date__gte=today)
+            elif val == 'past':
+                return queryset.filter(event_date__lt=today)
+            return queryset
+
+        if val == 'upcoming' or val is None:
+            return queryset.filter(event_date__gte=today)
+        elif val == 'today':
+            return queryset.filter(event_date=today)
+        elif val == 'this_week':
+            return queryset.filter(event_date__gte=today, event_date__lte=today + datetime.timedelta(days=7))
+        elif val == 'this_month':
+            return queryset.filter(event_date__year=today.year, event_date__month=today.month)
+        elif val == 'past':
+            return queryset.filter(event_date__lt=today)
+        elif val == 'all':
+            return queryset
+        return queryset
 
 
 class CalendarObservanceTranslationInline(admin.StackedInline):
@@ -27,7 +126,7 @@ class CalendarDayAdmin(admin.ModelAdmin):
         'break_fast_window_display',
         'observances_count',
     )
-    list_filter = ('is_ekadashi', 'is_fast_day', 'event_date')
+    list_filter = (UpcomingDayPeriodFilter, 'is_ekadashi', 'is_fast_day')
     search_fields = ('event_date', 'ekadashi_name', 'observances__translations__title', 'fast_details')
     date_hierarchy = 'event_date'
     ordering = ('event_date',)
@@ -72,15 +171,21 @@ class CalendarDayAdmin(admin.ModelAdmin):
 
 @admin.register(CalendarObservance)
 class CalendarObservanceAdmin(admin.ModelAdmin):
-    list_display = ('title_display', 'category', 'day', 'order', 'has_image')
-    list_filter = ('category', 'day__event_date')
+    list_display = ('title_display', 'category', 'day', 'languages_list', 'order', 'has_image')
+    list_filter = (UpcomingObservancePeriodFilter, 'category', 'translations__language_code')
     search_fields = ('translations__title', 'translations__description', 'day__event_date')
+    date_hierarchy = 'day__event_date'
     ordering = ('day__event_date', 'order')
     inlines = [CalendarObservanceTranslationInline]
 
     @admin.display(description='Title (English)')
     def title_display(self, obj):
         return obj.title
+
+    @admin.display(description='Languages')
+    def languages_list(self, obj):
+        langs = [t.language_code.upper() for t in obj.translations.all().order_by('language_code')]
+        return ', '.join(langs) if langs else '-'
 
     @admin.display(description='Image', boolean=True)
     def has_image(self, obj):

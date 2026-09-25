@@ -7,6 +7,7 @@ from .views import (
     CarnaticLessonPracticeViewSet,
     RagamLessonViewSet,
     MridangaLessonViewSet,
+    CarnaticSearchIndexView,
 )
 
 
@@ -19,6 +20,7 @@ router.register(r'carnatic-ragam-lessons', RagamLessonViewSet, basename='carnati
 router.register(r'carnatic-mridanga-lessons', MridangaLessonViewSet, basename='carnatic-mridanga-lessons')
 
 urlpatterns = [
+    path('v1/carnatic-search-index/', CarnaticSearchIndexView.as_view(), name='carnatic-search-index'),
     path('v1/', include(router.urls)),
 ]
 

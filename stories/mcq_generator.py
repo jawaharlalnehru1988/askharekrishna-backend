@@ -18,14 +18,14 @@ def generate_mcqs(article_text: str, language: str = "en") -> list:
     )
 
 
-def save_mcqs(story, questions: list) -> int:
+def save_mcqs(story_translation, questions: list) -> int:
     from .models import StoryQuestion, StoryQuestionOption
 
     return shared_save_mcqs(
-        story,
+        story_translation,
         questions,
         question_model=StoryQuestion,
         option_model=StoryQuestionOption,
-        parent_field_name="story",
+        parent_field_name="translation",
         question_field_name="question_text",
     )

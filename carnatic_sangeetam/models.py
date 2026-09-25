@@ -20,7 +20,6 @@ class Category(models.Model):
 
 
 class CarnaticSyllabus(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='syllabus_items', blank=True, null=True)
     topic = models.CharField(max_length=255)
     lesson = models.TextField()
     audioPath = models.FileField(upload_to='carnatic_syllabus/audio/', max_length=500, blank=True, null=True)
@@ -28,9 +27,9 @@ class CarnaticSyllabus(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['category__name', 'topic', 'lesson']
-        verbose_name = 'Carnatic Syllabus'
-        verbose_name_plural = 'Carnatic Syllabus'
+        ordering = ['topic', 'lesson']
+        verbose_name = 'Carnatic Theory'
+        verbose_name_plural = 'Carnatic Theory'
 
     def __str__(self):
         return self.topic
@@ -45,8 +44,8 @@ class CarnaticSyllabusVideoSample(models.Model):
 
     class Meta:
         ordering = ['sort_order', 'id']
-        verbose_name = 'Carnatic Syllabus Video Sample'
-        verbose_name_plural = 'Carnatic Syllabus Video Samples'
+        verbose_name = 'Carnatic Theory Video Sample'
+        verbose_name_plural = 'Carnatic Theory Video Samples'
 
     def __str__(self):
         return f"Video sample for {self.syllabus.topic}"
@@ -283,6 +282,55 @@ class RagamLessonVideo(models.Model):
         if self.title:
             return f"{self.title} ({self.ragam_lesson.raga_name})"
         return f"Video for {self.ragam_lesson.raga_name}"
+
+
+class RagamFamousComposition(models.Model):
+    ragam_lesson = models.ForeignKey(
+        RagamLesson,
+        on_delete=models.CASCADE,
+        related_name='famous_compositions',
+        verbose_name='Ragam Lesson',
+    )
+    title = models.CharField(max_length=255, verbose_name="Composition Title")
+    composer = models.CharField(max_length=255, blank=True, default='', verbose_name="Author / Composer")
+    talam = models.CharField(max_length=100, blank=True, default='', verbose_name="Talam")
+    lyrics = models.TextField(blank=True, default='', verbose_name="Lyrics (Sahityam)")
+    meaning = models.TextField(blank=True, default='', verbose_name="Meaning / Translation")
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Sort Order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = 'Ragam Famous Composition'
+        verbose_name_plural = 'Ragam Famous Compositions'
+
+    def __str__(self):
+        return f"{self.title} - {self.ragam_lesson.raga_name}"
+
+
+class RagamCompositionVideo(models.Model):
+    composition = models.ForeignKey(
+        RagamFamousComposition,
+        on_delete=models.CASCADE,
+        related_name='videos',
+        verbose_name='Famous Composition',
+    )
+    title = models.CharField(max_length=255, blank=True, default='', verbose_name="Video Title / Description")
+    youtubevideoUrl = models.URLField(max_length=500, verbose_name="YouTube Video URL")
+    sort_order = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Sort Order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        verbose_name = 'Ragam Composition Video'
+        verbose_name_plural = 'Ragam Composition Videos'
+
+    def __str__(self):
+        if self.title:
+            return f"{self.title} ({self.composition.title})"
+        return f"Video for {self.composition.title}"
 
 
 @receiver(post_delete, sender=RagamLessonAudio)

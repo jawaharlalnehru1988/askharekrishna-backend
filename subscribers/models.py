@@ -3,9 +3,12 @@ from django.db import models
 
 class Subscriber(models.Model):
     name = models.CharField(max_length=150)
-    phone_number = models.CharField(max_length=20, unique=True)
-    language = models.CharField(max_length=80)
-    place = models.CharField(max_length=120)
+    email = models.EmailField(max_length=254, blank=True, null=True, unique=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    picture = models.URLField(max_length=500, blank=True, default='')
+    google_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    language = models.CharField(max_length=80, blank=True, default='en')
+    place = models.CharField(max_length=120, blank=True, default='')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -13,14 +16,16 @@ class Subscriber(models.Model):
     class Meta:
         ordering = ['-created_at']
         indexes = [
+            models.Index(fields=['email'], name='subscriber_email_idx'),
             models.Index(fields=['phone_number'], name='subscriber_phone_idx'),
+            models.Index(fields=['google_id'], name='subscriber_google_idx'),
             models.Index(fields=['language'], name='subscriber_language_idx'),
         ]
         verbose_name = 'Subscriber'
         verbose_name_plural = 'Subscribers'
 
     def __str__(self):
-        return f"{self.name} ({self.phone_number})"
+        return f"{self.name} ({self.email or self.phone_number or 'Subscriber'})"
 
 
 class SubscriberQuizAttempt(models.Model):
@@ -52,4 +57,5 @@ class SubscriberQuizAttempt(models.Model):
         verbose_name_plural = 'Subscriber Quiz Attempts'
 
     def __str__(self):
-        return f"{self.subscriber.phone_number} | {self.quiz_type} | {self.article_title} | {self.score}/{self.total_questions}"
+        identifier = self.subscriber.email or self.subscriber.phone_number or self.subscriber.name
+        return f"{identifier} | {self.quiz_type} | {self.article_title} | {self.score}/{self.total_questions}"

@@ -12,6 +12,8 @@ from .models import (
     RagamLesson,
     RagamLessonAudio,
     RagamLessonVideo,
+    RagamFamousComposition,
+    RagamCompositionVideo,
     MridangaLesson,
     MridangaLessonAudio,
     MridangaLessonVideo,
@@ -110,6 +112,7 @@ class CarnaticSyllabusVideoSampleSerializer(serializers.ModelSerializer):
 
 
 class CarnaticSyllabusSerializer(serializers.ModelSerializer):
+    category = serializers.SerializerMethodField(read_only=True)
     category_name = serializers.SerializerMethodField(read_only=True)
     category_order = serializers.SerializerMethodField(read_only=True)
     category_colorCode = serializers.SerializerMethodField(read_only=True)
@@ -134,22 +137,24 @@ class CarnaticSyllabusSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
         extra_kwargs = {
-            'category': {'required': False, 'allow_null': True},
             'audioPath': {'required': False, 'allow_null': True},
         }
+
+    def get_category(self, obj):
+        return None
 
     def get_videoPath(self, obj):
         first_sample = obj.video_samples.order_by('sort_order', 'id').first()
         return first_sample.url if first_sample else None
 
     def get_category_name(self, obj):
-        return obj.category.name if obj.category else None
+        return None
 
     def get_category_order(self, obj):
-        return obj.category.order if obj.category else None
+        return None
 
     def get_category_colorCode(self, obj):
-        return obj.category.colorCode if obj.category else None
+        return None
 
     def _extract_video_samples(self):
         request = self.context.get('request')
@@ -247,9 +252,37 @@ class RagamLessonVideoSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
+class RagamCompositionVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RagamCompositionVideo
+        fields = ['id', 'title', 'youtubevideoUrl', 'sort_order', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class RagamFamousCompositionSerializer(serializers.ModelSerializer):
+    videos = RagamCompositionVideoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = RagamFamousComposition
+        fields = [
+            'id',
+            'title',
+            'composer',
+            'talam',
+            'lyrics',
+            'meaning',
+            'sort_order',
+            'videos',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
 class RagamLessonSerializer(serializers.ModelSerializer):
     audios = RagamLessonAudioSerializer(many=True, read_only=True)
     videos = RagamLessonVideoSerializer(many=True, read_only=True)
+    famous_compositions = RagamFamousCompositionSerializer(many=True, read_only=True)
 
     class Meta:
         model = RagamLesson
@@ -260,6 +293,7 @@ class RagamLessonSerializer(serializers.ModelSerializer):
             'arohanam_avarohanam',
             'description',
             'famousCompositions',
+            'famous_compositions',
             'melakarthaNumber',
             'audios',
             'videos',

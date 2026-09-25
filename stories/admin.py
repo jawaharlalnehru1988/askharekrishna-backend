@@ -1,39 +1,86 @@
-from django.contrib import admin
 from django import forms
-from django.urls import path
-from django.http import HttpResponseRedirect
-from django.utils.html import format_html, format_html_join
-from django.utils.text import slugify
+from django.contrib import admin
 from django.contrib import messages
-from django.urls import reverse
-from .models import Story, StoryMainTopic, StoryQuestion, StoryQuestionOption
+from django.http import HttpResponseRedirect
+from django.urls import path, reverse
+from django.utils.html import format_html, format_html_join
+from django.utils.safestring import mark_safe
+from pooja_vidhis.models import LANGUAGE_CHOICES
+from .models import (
+    Story,
+    StoryTranslation,
+    StoryMainTopic,
+    StoryQuestion,
+    StoryQuestionOption,
+)
 
 
-STORY_LANGUAGE_NAMES = {
-    "en": "English",
-    "ta": "Tamil",
-    "hi": "Hindi",
-    "te": "Telugu",
-    "kn": "Kannada",
-    "ml": "Malayalam",
-    "bn": "Bengali",
-}
+class StoryTranslationInlineForm(forms.ModelForm):
+    mainTopic = forms.ChoiceField(required=True)
 
-STORY_LANGUAGE_CHOICES = tuple((code, f"{name} ({code})") for code, name in STORY_LANGUAGE_NAMES.items())
+    class Meta:
+        model = StoryTranslation
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        topic_names = list(
+            StoryMainTopic.objects.filter(is_active=True).order_by('order', 'name').values_list('name', flat=True)
+        )
+        choices = [('', '---------')] + [(name, name) for name in topic_names]
+
+        current_value = getattr(self.instance, 'mainTopic', '') if self.instance else ''
+        if current_value and current_value not in topic_names:
+            choices.append((current_value, current_value))
+
+        self.fields['mainTopic'].choices = choices
 
 
-@admin.register(StoryMainTopic)
-class StoryMainTopicAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'image')
-    search_fields = ('name', 'description')
+class StoryTranslationInline(admin.StackedInline):
+    model = StoryTranslation
+    form = StoryTranslationInlineForm
+    extra = 1
+    readonly_fields = ('manage_mcqs_info',)
+
+    def manage_mcqs_info(self, obj):
+        if not obj or not getattr(obj, 'pk', None):
+            return mark_safe('<em style="color:#888;">Save this translation first to manage MCQs.</em>')
+
+        try:
+            q_count = obj.questions.count()
+            edit_url = reverse('admin:stories_storytranslation_change', args=[obj.pk])
+            gen_url = reverse('admin:stories_storytranslation_generate_mcqs', args=[obj.pk])
+
+            status_color = '#16a34a' if q_count > 0 else '#dc2626'
+            status_text = f"{q_count} MCQ Questions attached" if q_count > 0 else "No MCQs attached"
+
+            return format_html(
+                '<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;margin-top:6px;">'
+                '<strong style="color:{}; font-size:13px;">📝 {}</strong> &nbsp;|&nbsp; '
+                '<a href="{}" class="button" style="background:#2563eb;color:#fff;padding:6px 14px;border-radius:4px;text-decoration:none;font-weight:600;font-size:12px;">'
+                '✏️ View / Edit MCQs for [{}]'
+                '</a> '
+                '<a href="{}" class="button" style="background:#7c3aed;color:#fff;padding:6px 14px;border-radius:4px;text-decoration:none;font-weight:600;font-size:12px;" onclick="return confirm(\'Generate / Regenerate MCQs via AI for this translation?\');">'
+                '🤖 Generate AI MCQs'
+                '</a>'
+                '</div>',
+                status_color,
+                status_text,
+                edit_url,
+                obj.language_code.upper() if obj.language_code else 'EN',
+                gen_url,
+            )
+        except Exception:
+            return mark_safe('<em style="color:#888;">Save translation to activate MCQ links.</em>')
+
+    manage_mcqs_info.short_description = 'Language MCQs'
 
 
 class StoryQuestionInline(admin.StackedInline):
     model = StoryQuestion
     extra = 0
-    max_num = 10
-    fields = ('order', 'question_text', 'options_preview', 'is_active')
-    readonly_fields = ('options_preview',)
+    fields = ('order', 'question_text', 'options_preview', 'edit_question_link', 'is_active')
+    readonly_fields = ('options_preview', 'edit_question_link')
     ordering = ('order', 'id')
 
     def options_preview(self, obj):
@@ -52,10 +99,8 @@ class StoryQuestionInline(admin.StackedInline):
                 (
                     (
                         opt.option_text,
-                        format_html(
-                            '<strong style="color:#4caf50;">{}</strong>',
-                            '(Correct)',
-                        ) if opt.is_correct else '',
+                        format_html('<strong style="color:#4caf50;">{}</strong>', '(Correct)')
+                        if opt.is_correct else '',
                     )
                     for opt in options
                 ),
@@ -64,52 +109,114 @@ class StoryQuestionInline(admin.StackedInline):
 
     options_preview.short_description = 'Options'
 
+    def edit_question_link(self, obj):
+        if not obj or not obj.pk:
+            return mark_safe('<em style="color:#888;">Save translation first to edit options.</em>')
+        url = reverse('admin:stories_storyquestion_change', args=[obj.pk])
+        return format_html(
+            '<a href="{}" class="button" style="background:#0284c7;color:#fff;padding:4px 12px;border-radius:4px;text-decoration:none;font-size:12px;font-weight:600;">'
+            '✏️ Edit Question & Options'
+            '</a>',
+            url,
+        )
+
+    edit_question_link.short_description = 'Edit Question & Options'
+
+
+@admin.register(StoryMainTopic)
+class StoryMainTopicAdmin(admin.ModelAdmin):
+    list_display = ('name', 'order', 'is_active', 'stories_count', 'image')
+    search_fields = ('name', 'description')
+    list_filter = ('is_active',)
+    ordering = ('order', 'name')
+    fields = ('name', 'order', 'is_active', 'description', 'image', 'name_translations')
+
+    def stories_count(self, obj):
+        return obj.stories.count()
+
+    stories_count.short_description = 'Stories Count'
+
+
 @admin.register(Story)
 class StoryAdmin(admin.ModelAdmin):
-    change_form_template = 'admin/stories/story/change_form.html'
-    translation_language_choices = (
-        *STORY_LANGUAGE_CHOICES,
-    )
-
-    list_display = (
-        'subTopic',
-        'mainTopic',
-        'mcq_exists',
-        'id',
-        'source_id',
-        'image_preview',
-        'audioPath',
-    )
-    list_display_links = ('subTopic',)
-    list_filter = ('language', 'mainTopic', 'subTopic')
-    search_fields = ('mainTopic__name', 'subTopic', 'article')
-    fields = (
-        'id',
-        'language',
-        'translated_from',
-        'source_story',
-        'mainTopic',
-        'subTopic',
-        'article',
-        'slug',
-        'order',
-        'audioPath',
-        'imagePath',
-        'image_preview',
-    )
+    list_display = ('get_title', 'get_main_topic', 'id', 'order', 'image_preview', 'translations_list')
+    list_display_links = ('get_title',)
+    search_fields = ('topic__name', 'translations__mainTopic', 'translations__subTopic', 'translations__article')
+    list_filter = ('topic', 'translations__language_code')
+    fields = ('id', 'topic', 'slug', 'order', 'imagePath', 'image_preview')
     readonly_fields = ('id', 'slug', 'image_preview')
-    ordering = ('order', 'mainTopic__name', 'subTopic')
+    ordering = ('order', 'id')
+    save_as = True
+    inlines = [StoryTranslationInline]
+
+    def get_title(self, obj):
+        trans = obj.get_translation('en') or obj.translations.first()
+        if trans:
+            return f"{trans.subTopic} [{trans.language_code.upper()}]"
+        return f"Story {obj.id}"
+
+    get_title.short_description = 'Title'
+
+    def get_main_topic(self, obj):
+        if obj.topic:
+            return obj.topic.name
+        trans = obj.get_translation('en') or obj.translations.first()
+        return trans.mainTopic if trans else '-'
+
+    get_main_topic.short_description = 'Main Topic'
+
+    def translations_list(self, obj):
+        langs = [t.language_code.upper() for t in obj.translations.all()]
+        return ', '.join(langs) if langs else '-'
+
+    translations_list.short_description = 'Languages'
+
+    def image_preview(self, obj):
+        image = obj.effective_image_path()
+        if image:
+            return format_html('<img src="{}" style="max-height: 50px; max-width: 90px; border-radius: 4px; border: 1px solid #ccc; object-fit: cover;" />', image.url)
+        return '-'
+
+    image_preview.short_description = 'Image Preview'
+
+
+@admin.register(StoryTranslation)
+class StoryTranslationAdmin(admin.ModelAdmin):
+    list_display = ('subTopic', 'mainTopic', 'language_code', 'story', 'audioPath', 'mcq_count', 'id')
+    list_filter = ('language_code', 'mainTopic')
+    search_fields = ('mainTopic', 'subTopic', 'article')
+    readonly_fields = ('parent_story_link',)
+    fields = ('parent_story_link', 'story', 'language_code', 'mainTopic', 'subTopic', 'article', 'audioPath')
     inlines = [StoryQuestionInline]
+    ordering = ('story_id', 'language_code')
 
-    def source_id(self, obj):
-        return obj.source_story_id or '-'
-    source_id.short_description = 'Source ID'
+    def has_module_permission(self, request):
+        return False
 
-    def mcq_exists(self, obj):
-        return obj.questions.exists()
+    def response_change(self, request, obj):
+        if "_continue" not in request.POST and "_addanother" not in request.POST:
+            if obj.story_id:
+                return HttpResponseRedirect(reverse('admin:stories_story_change', args=[obj.story_id]))
+        return super().response_change(request, obj)
 
-    mcq_exists.boolean = True
-    mcq_exists.short_description = 'MCQ Exists'
+    def parent_story_link(self, obj):
+        if obj and obj.story_id:
+            url = reverse('admin:stories_story_change', args=[obj.story_id])
+            return format_html(
+                '<a href="{}" class="button" style="background:#475569;color:#fff;padding:6px 14px;border-radius:4px;text-decoration:none;font-weight:600;font-size:12px;">'
+                '⬅️ Back to Parent Story (ID: {})'
+                '</a>',
+                url,
+                obj.story_id,
+            )
+        return '-'
+
+    parent_story_link.short_description = 'Parent Story'
+
+    def mcq_count(self, obj):
+        return obj.questions.count()
+
+    mcq_count.short_description = 'MCQ Questions'
 
     def get_urls(self):
         urls = super().get_urls()
@@ -117,364 +224,36 @@ class StoryAdmin(admin.ModelAdmin):
             path(
                 '<int:pk>/generate-mcqs/',
                 self.admin_site.admin_view(self.generate_mcqs_view),
-                name='stories_story_generate_mcqs',
-            ),
-            path(
-                '<int:pk>/translate-story/',
-                self.admin_site.admin_view(self.translate_story_view),
-                name='stories_story_translate_story',
+                name='stories_storytranslation_generate_mcqs',
             ),
         ]
         return custom + urls
 
-    def _build_transliterated_slug(self, main_topic_name: str, sub_topic: str, target_language: str) -> str:
-        base_slug = slugify(f"{main_topic_name} {sub_topic}", allow_unicode=False) or "story"
-        base_slug = f"{base_slug}-{target_language}"
-        base_slug = base_slug[:280]
-        slug = base_slug
-        counter = 1
-
-        while Story.objects.filter(slug=slug).exists():
-            suffix = f"-{counter}"
-            slug = f"{base_slug[:280 - len(suffix)]}{suffix}"
-            counter += 1
-
-        return slug
-
-    def translate_story_view(self, request, pk):
-        story = self.get_object(request, pk)
-        if story is None:
-            messages.error(request, "Story not found.")
-            return HttpResponseRedirect("../../")
-
-        if request.method != 'POST':
-            return HttpResponseRedirect(f"../../{pk}/change/")
-
-        source_language = (story.language.code if story.language_id else '').strip().lower()
-        if source_language not in STORY_LANGUAGE_NAMES:
-            messages.error(request, "Translation is supported only for stories whose language is configured in the system.")
-            return HttpResponseRedirect(f"../../{pk}/change/")
-
-        target_language = (request.POST.get('target_language') or '').strip().lower()
-        allowed_codes = {code for code, _ in self.translation_language_choices}
-        if target_language not in allowed_codes:
-            messages.error(request, "Please select a valid target language.")
-            return HttpResponseRedirect(f"../../{pk}/change/")
-
-        if target_language == source_language:
-            messages.error(request, "Source and target languages must be different.")
-            return HttpResponseRedirect(f"../../{pk}/change/")
-
-        if not story.article or not story.article.strip():
-            messages.error(request, "Source story has no article text to translate.")
-            return HttpResponseRedirect(f"../../{pk}/change/")
-
-        replace_existing = (request.POST.get('_replace_existing_translation') or '').strip() in {'1', 'true', 'yes'}
-        chosen_main_topic = (request.POST.get('translate_main_topic') or '').strip()
-
-        try:
-            from .translation_generator import translate_story_content
-            from pooja_vidhis.models import Language
-
-            translated = translate_story_content(
-                main_topic=story.mainTopic.name if story.mainTopic else '',
-                sub_topic=story.subTopic,
-                article_text=story.article,
-                source_language=source_language,
-                target_language=target_language,
-            )
-
-            translated_main_topic = (translated.get('mainTopic') or '').strip()
-            if chosen_main_topic:
-                translated_main_topic = chosen_main_topic
-            translated_sub_topic = (translated.get('subTopic') or '').strip()
-            translated_article = (translated.get('article') or '').strip()
-
-            if not translated_main_topic or not translated_sub_topic or not translated_article:
-                raise ValueError("AI translation returned empty required fields.")
-
-            translated_topic, _ = StoryMainTopic.objects.get_or_create(name=translated_main_topic)
-            generated_slug = self._build_transliterated_slug(
-                main_topic_name=translated_topic.name,
-                sub_topic=translated_sub_topic,
-                target_language=target_language,
-            )
-
-            target_lang_obj = Language.objects.get(code=target_language)
-            source_lang_obj = Language.objects.get(code=source_language)
-            
-            existing_story = Story.objects.filter(
-                source_story=story,
-                language=target_lang_obj,
-            ).order_by('id').first()
-
-            if existing_story and not replace_existing:
-                language_name = dict(self.translation_language_choices).get(target_language, target_language)
-                messages.warning(
-                    request,
-                    (
-                        f"A {language_name} translation already exists "
-                        f"(Story ID: {existing_story.pk}). Click Translate again and confirm to replace it."
-                    ),
-                )
-                return HttpResponseRedirect(
-                    f"../../{pk}/change/?replace_lang={target_language}&replace_story_id={existing_story.pk}"
-                )
-
-            if existing_story and replace_existing:
-                existing_story.source_story = story
-                existing_story.mainTopic = translated_topic
-                existing_story.subTopic = translated_sub_topic
-                existing_story.article = translated_article
-                existing_story.order = story.order
-                existing_story.language = target_lang_obj
-                existing_story.translated_from = source_lang_obj
-                # Set imagePath to None so it dynamically inherits the source image via effective_image_path
-                existing_story.imagePath = None
-                existing_story.save()
-
-                messages.success(
-                    request,
-                    (
-                        f"Existing {target_language} translation was replaced successfully. "
-                        "Review and edit it if needed."
-                    ),
-                )
-                return HttpResponseRedirect(
-                    reverse('admin:stories_story_change', args=[existing_story.pk])
-                )
-
-            translated_story = Story(
-                language=target_lang_obj,
-                translated_from=source_lang_obj,
-                source_story=story,
-                mainTopic=translated_topic,
-                subTopic=translated_sub_topic,
-                article=translated_article,
-                slug=generated_slug,
-                order=story.order,
-                imagePath=None, # Inherits from source_story
-            )
-            translated_story.save()
-
-            messages.success(
-                request,
-                "Translated story created successfully. Review and edit it if needed.",
-            )
-            return HttpResponseRedirect(
-                reverse('admin:stories_story_change', args=[translated_story.pk])
-            )
-        except ValueError as exc:
-            messages.error(request, f"Story translation failed: {exc}")
-        except Exception as exc:
-            messages.error(request, f"Unexpected error during translation: {exc}")
-
-        return HttpResponseRedirect(f"../../{pk}/change/")
-
-    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        if request.method == 'POST':
-            if request.POST.get('_translate_story'):
-                return self.translate_story_view(request, object_id)
-
-            if request.POST.get('_resolve_image_conflict'):
-                keep_choice = request.POST.get('keep_image_choice')
-                source_id = request.POST.get('source_story')
-                temp_image_path = request.POST.get('temp_image_path')
-                
-                story = Story.objects.get(pk=object_id) if object_id else None
-                source_story = Story.objects.filter(pk=source_id).first()
-                
-                if source_story:
-                    post_data = request.POST.copy()
-                    
-                    if keep_choice == 'current':
-                        # Keep current, delete source
-                        if source_story.imagePath:
-                            storage = source_story._meta.get_field('imagePath').storage
-                            if storage.exists(source_story.imagePath.name):
-                                storage.delete(source_story.imagePath.name)
-                            source_story.imagePath = None
-                            source_story.save()
-                        
-                        if temp_image_path:
-                            post_data['_resolved_temp_image_path'] = temp_image_path
-                            
-                    elif keep_choice == 'source':
-                        # Keep source, delete current
-                        if story and story.imagePath:
-                            storage = story._meta.get_field('imagePath').storage
-                            if storage.exists(story.imagePath.name):
-                                storage.delete(story.imagePath.name)
-                        
-                        # Clear imagePath
-                        post_data['imagePath'] = ''
-                        if 'imagePath-clear' not in post_data:
-                            post_data['imagePath-clear'] = 'on'
-                            
-                        if temp_image_path:
-                            from django.core.files.storage import default_storage
-                            if default_storage.exists(temp_image_path):
-                                default_storage.delete(temp_image_path)
-                                
-                    request.POST = post_data
-            else:
-                source_story_id = request.POST.get('source_story')
-                if source_story_id:
-                    source_story = Story.objects.filter(pk=source_story_id).first()
-                    
-                    current_image = None
-                    if request.FILES.get('imagePath'):
-                        current_image = request.FILES['imagePath']
-                    elif object_id:
-                        story = Story.objects.filter(pk=object_id).first()
-                        if story and story.imagePath and not request.POST.get('imagePath-clear'):
-                            current_image = story.imagePath
-                            
-                    source_image = source_story.imagePath if source_story else None
-                    
-                    if current_image and source_image and current_image.name != source_image.name:
-                        # Conflict detected!
-                        temp_image_path = ''
-                        if request.FILES.get('imagePath'):
-                            from django.core.files.storage import default_storage
-                            from django.core.files.base import ContentFile
-                            uploaded_file = request.FILES['imagePath']
-                            temp_image_path = default_storage.save(
-                                f"stories/temp/{uploaded_file.name}", 
-                                ContentFile(uploaded_file.read())
-                            )
-                        
-                        story_instance = Story.objects.filter(pk=object_id).first() if object_id else Story()
-                        if not story_instance.pk:
-                            story_instance.subTopic = request.POST.get('subTopic', '')
-                            
-                        from django.shortcuts import render
-                        context = {
-                            'story': story_instance,
-                            'source_story': source_story,
-                            'post_data': request.POST,
-                            'temp_image_path': temp_image_path,
-                        }
-                        if temp_image_path:
-                            from django.core.files.storage import default_storage
-                            story_instance.imagePath = default_storage.open(temp_image_path)
-                        elif story_instance.imagePath:
-                            # Use current image if it exists and wasn't cleared
-                            pass
-                            
-                        return render(request, 'admin/stories/story/conflict_resolution.html', context)
-                    
-                    elif not current_image and not source_image:
-                        request.session['show_no_images_popup'] = True
-
-        return super().changeform_view(request, object_id, form_url, extra_context)
-
     def generate_mcqs_view(self, request, pk):
         from .mcq_generator import generate_mcqs, save_mcqs
-        story = self.get_object(request, pk)
-        if story is None:
-            messages.error(request, "Story not found.")
-            return HttpResponseRedirect("../../")
 
-        if not story.article or not story.article.strip():
-            messages.error(request, "This story has no article text to generate MCQs from.")
-            return HttpResponseRedirect(f"../../{pk}/change/")
+        trans = self.get_object(request, pk)
+        if trans is None:
+            messages.error(request, 'Story translation not found.')
+            return HttpResponseRedirect('../../')
+
+        if not trans.article or not trans.article.strip():
+            messages.error(request, 'This translation has no text to generate MCQs from.')
+            return HttpResponseRedirect(f'../../{pk}/change/')
 
         try:
-            questions = generate_mcqs(story.article, language=story.language.code if story.language_id else "en")
-            count = save_mcqs(story, questions)
+            questions = generate_mcqs(trans.article, language=trans.language_code)
+            count = save_mcqs(trans, questions)
             messages.success(
                 request,
-                f"Successfully generated and saved {count} MCQ questions for \"{story.subTopic}\"."
+                f'Successfully generated and saved {count} MCQ questions for "{trans.subTopic}" ({trans.language_code.upper()}).',
             )
         except ValueError as exc:
-            messages.error(request, f"MCQ generation failed: {exc}")
+            messages.error(request, f'MCQ generation failed: {exc}')
         except Exception as exc:
-            messages.error(request, f"Unexpected error while generating MCQs: {exc}")
+            messages.error(request, f'Unexpected error while generating MCQs: {exc}')
 
-        return HttpResponseRedirect(f"../../{pk}/change/")
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name == 'article':
-            kwargs['widget'] = forms.Textarea(
-                attrs={
-                    'rows': 20,
-                    'cols': 200,
-                    'class': 'vLargeTextField article-editor-fullwidth',
-                    'style': 'width:calc(100vw - 560px);max-width:100%;min-width:780px;box-sizing:border-box;',
-                }
-            )
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
-
-    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
-        if request.session.get('show_no_images_popup'):
-            context['show_no_images_popup'] = True
-            request.session.pop('show_no_images_popup', None)
-
-        context['translation_language_choices'] = self.translation_language_choices
-        context['active_topics'] = list(
-            StoryMainTopic.objects.all().order_by('name').values_list('name', flat=True)
-        )
-        context['copy_image_from_story_id'] = request.GET.get('_copy_image_from_story_id', '')
-        source_obj = obj or context.get('original')
-        source_language_code = ''
-        if source_obj and getattr(source_obj, 'language_id', None):
-            source_language_code = (source_obj.language.code or '').strip().lower()
-
-        context['translation_source_language_code'] = source_language_code
-        context['translation_source_language_name'] = STORY_LANGUAGE_NAMES.get(
-            source_language_code,
-            source_language_code,
-        )
-        context['translation_source_supported'] = source_language_code in STORY_LANGUAGE_NAMES
-        replace_lang = (request.GET.get('replace_lang') or '').strip().lower()
-        replace_story_id = (request.GET.get('replace_story_id') or '').strip()
-        if replace_lang:
-            context['replace_translation_language'] = replace_lang
-            context['replace_translation_language_name'] = dict(self.translation_language_choices).get(replace_lang, replace_lang)
-        if replace_story_id.isdigit():
-            context['replace_translation_story_id'] = replace_story_id
-            context['replace_translation_story_change_url'] = reverse(
-                'admin:stories_story_change',
-                args=[int(replace_story_id)],
-            )
-        return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
-
-    def save_model(self, request, obj, form, change):
-        # Handle resolved temp image from conflict resolution
-        temp_image_path = request.POST.get('_resolved_temp_image_path')
-        if temp_image_path:
-            import os
-            from django.core.files.storage import default_storage
-            from django.core.files import File
-            if default_storage.exists(temp_image_path):
-                f = default_storage.open(temp_image_path)
-                obj.imagePath.save(os.path.basename(temp_image_path), File(f), save=False)
-                
-                # Delete the temp file now that it is saved
-                try:
-                    default_storage.delete(temp_image_path)
-                except Exception:
-                    pass
-
-        if not change and not obj.imagePath:
-            source_story_id = (request.POST.get('_copy_image_from_story_id') or '').strip()
-            if source_story_id.isdigit():
-                source_story = Story.objects.filter(pk=int(source_story_id)).first()
-                if source_story and source_story.imagePath:
-                    obj.imagePath = source_story.imagePath
-        super().save_model(request, obj, form, change)
-
-    def image_preview(self, obj):
-        image = obj.effective_image_path() if hasattr(obj, 'effective_image_path') else obj.imagePath
-        if image:
-            return format_html(
-                '<img src="{}" style="max-height:80px;max-width:120px;border-radius:4px;" />',
-                image.url,
-            )
-        return '-'
-
-    image_preview.short_description = 'Image Preview'
+        return HttpResponseRedirect(f'../../{pk}/change/')
 
 
 class StoryQuestionOptionInline(admin.TabularInline):
@@ -487,11 +266,36 @@ class StoryQuestionOptionInline(admin.TabularInline):
 
 @admin.register(StoryQuestion)
 class StoryQuestionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'story', 'order', 'short_question', 'is_active', 'options_count')
-    list_filter = ('is_active', 'story__language', 'story__mainTopic')
-    search_fields = ('story__subTopic', 'story__slug', 'question_text')
-    ordering = ('story_id', 'order', 'id')
+    list_display = ('id', 'translation', 'order', 'short_question', 'is_active', 'options_count')
+    list_filter = ('is_active', 'translation__language_code')
+    search_fields = ('question_text', 'translation__subTopic')
+    readonly_fields = ('parent_translation_link',)
+    fields = ('parent_translation_link', 'translation', 'order', 'question_text', 'is_active')
+    ordering = ('translation_id', 'order', 'id')
     inlines = [StoryQuestionOptionInline]
+
+    def has_module_permission(self, request):
+        return False
+
+    def response_change(self, request, obj):
+        if "_continue" not in request.POST and "_addanother" not in request.POST:
+            if obj.translation_id:
+                return HttpResponseRedirect(reverse('admin:stories_storytranslation_change', args=[obj.translation_id]))
+        return super().response_change(request, obj)
+
+    def parent_translation_link(self, obj):
+        if obj and obj.translation_id:
+            url = reverse('admin:stories_storytranslation_change', args=[obj.translation_id])
+            return format_html(
+                '<a href="{}" class="button" style="background:#475569;color:#fff;padding:6px 14px;border-radius:4px;text-decoration:none;font-weight:600;font-size:12px;">'
+                '⬅️ Back to Translation (ID: {})'
+                '</a>',
+                url,
+                obj.translation_id,
+            )
+        return '-'
+
+    parent_translation_link.short_description = 'Parent Translation'
 
     def short_question(self, obj):
         text = (obj.question_text or '').strip()
@@ -508,6 +312,15 @@ class StoryQuestionAdmin(admin.ModelAdmin):
 @admin.register(StoryQuestionOption)
 class StoryQuestionOptionAdmin(admin.ModelAdmin):
     list_display = ('id', 'question', 'order', 'option_text', 'is_correct')
-    list_filter = ('is_correct', 'question__story__language')
-    search_fields = ('question__question_text', 'option_text', 'question__story__subTopic')
+    list_filter = ('is_correct',)
+    search_fields = ('question__question_text', 'option_text')
     ordering = ('question_id', 'order', 'id')
+
+    def has_module_permission(self, request):
+        return False
+
+    def response_change(self, request, obj):
+        if "_continue" not in request.POST and "_addanother" not in request.POST:
+            if obj.question_id:
+                return HttpResponseRedirect(reverse('admin:stories_storyquestion_change', args=[obj.question_id]))
+        return super().response_change(request, obj)
