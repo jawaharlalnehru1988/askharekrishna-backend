@@ -73,10 +73,13 @@ class DebateArticleListItemSerializer(serializers.ModelSerializer):
     article = serializers.SerializerMethodField()
     language = serializers.SerializerMethodField()
     audioPath = serializers.SerializerMethodField()
+    previousArticle = serializers.SerializerMethodField()
+    nextArticle = serializers.SerializerMethodField()
 
     class Meta:
         model = DebateArticle
         fields = [
+            'id',
             'mainTopic',
             'subTopic',
             'article',
@@ -84,12 +87,14 @@ class DebateArticleListItemSerializer(serializers.ModelSerializer):
             'order',
             'language',
             'articleImage',
-            'articleImage',
             'audioPath',
-            # 'debateCategory' removed
+            'previousArticle',
+            'nextArticle',
         ]
 
     def _get_translation(self, obj):
+        if hasattr(obj, 'cached_trans') and obj.cached_trans:
+            return obj.cached_trans[0]
         request = self.context.get('request')
         lang = request.query_params.get('language', 'en') if request else 'en'
         return obj.translations.filter(language=lang).first() or obj.translations.first()
@@ -99,17 +104,29 @@ class DebateArticleListItemSerializer(serializers.ModelSerializer):
         return t.subTopic if t else ''
 
     def get_mainTopic(self, obj):
+        t = self._get_translation(obj)
+        if not t or not t.debateCategory_id:
+            return ''
+        cat_names = self.context.get('category_names')
+        if cat_names and t.debateCategory_id in cat_names:
+            return cat_names[t.debateCategory_id]
+        cat = t.debateCategory
+        if hasattr(cat, 'cached_cat_trans') and cat.cached_cat_trans:
+            cat_t = cat.cached_cat_trans[0]
+            return cat_t.translated_name if cat_t.translated_name else cat.name
         request = self.context.get('request')
         lang = request.query_params.get('language', 'en') if request else 'en'
-        t = obj.translations.filter(language=lang).first()
-        if not t or not t.debateCategory:
-            return ''
-        cat_t = t.debateCategory.translations.filter(language=lang).first()
-        return cat_t.translated_name if cat_t else t.debateCategory.name
+        cat_t = cat.translations.filter(language=lang).first()
+        return cat_t.translated_name if cat_t else cat.name
 
     def get_article(self, obj):
-        t = self._get_translation(obj)
-        return t.article if t else ''
+        request = self.context.get('request')
+        # If slug is passed or include_content is true, provide the full markdown body.
+        # Otherwise for catalog lists, omit to keep payload 97% lighter and ultra-fast.
+        if request and (request.query_params.get('slug') or request.query_params.get('include_content') == 'true'):
+            t = self._get_translation(obj)
+            return t.article if t else ''
+        return ''
 
     def get_language(self, obj):
         t = self._get_translation(obj)
@@ -119,6 +136,36 @@ class DebateArticleListItemSerializer(serializers.ModelSerializer):
         t = self._get_translation(obj)
         return t.audioPath.url if t and t.audioPath else None
 
+    def get_previousArticle(self, obj):
+        request = self.context.get('request')
+        if not request or not request.query_params.get('slug'):
+            return None
+        prev_art = DebateArticle.objects.filter(order__lt=obj.order).order_by('-order').first()
+        if not prev_art:
+            return None
+        lang = request.query_params.get('language', 'en')
+        t = prev_art.translations.filter(language=lang).first() or prev_art.translations.first()
+        return {
+            'slug': prev_art.slug,
+            'subTopic': t.subTopic if t else '',
+            'order': prev_art.order,
+        }
+
+    def get_nextArticle(self, obj):
+        request = self.context.get('request')
+        if not request or not request.query_params.get('slug'):
+            return None
+        next_art = DebateArticle.objects.filter(order__gt=obj.order).order_by('order').first()
+        if not next_art:
+            return None
+        lang = request.query_params.get('language', 'en')
+        t = next_art.translations.filter(language=lang).first() or next_art.translations.first()
+        return {
+            'slug': next_art.slug,
+            'subTopic': t.subTopic if t else '',
+            'order': next_art.order,
+        }
+
 
 class DebateCategoryArticleListSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
@@ -127,9 +174,11 @@ class DebateCategoryArticleListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DebateCategory
-        fields = ['name', 'description', 'image', 'articleList']
+        fields = ['id', 'name', 'description', 'image', 'articleList']
 
     def _get_translation(self, obj):
+        if hasattr(obj, 'cached_cat_trans') and obj.cached_cat_trans:
+            return obj.cached_cat_trans[0]
         request = self.context.get('request')
         lang = request.query_params.get('language', 'en') if request else 'en'
         return obj.translations.filter(language=lang).first()
@@ -144,7 +193,7 @@ class DebateCategoryArticleListSerializer(serializers.ModelSerializer):
 
     def get_articleList(self, obj):
         grouped_articles = self.context.get('grouped_articles', {})
-        queryset = grouped_articles.get(obj.id, DebateArticle.objects.none())
+        queryset = grouped_articles.get(obj.id, [])
         return DebateArticleListItemSerializer(
             queryset,
             many=True,

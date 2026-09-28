@@ -28,12 +28,13 @@ class StoryViewSet(viewsets.ModelViewSet):
     ordering = ['order', 'id']
 
     def get_queryset(self):
-        qs = super().get_queryset()
         if self.action == 'list':
+            qs = Story.objects.select_related('topic').prefetch_related('translations').all().order_by('order', 'id')
             language = self.request.query_params.get('language') or self.request.query_params.get('lang')
             if language:
                 qs = qs.filter(translations__language_code=language.strip().lower()).distinct()
-        return qs
+            return qs
+        return super().get_queryset()
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

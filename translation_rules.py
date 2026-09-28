@@ -28,6 +28,7 @@ def get_language_specific_rules(target_language: str) -> str:
 - Do NOT translate "Lord" or "God" as "ஆண்டவர்" or "கர்த்தர்" in this devotional context.
 - Translate "deity" as "விக்ரஹம்" in devotional temple/worship context.
 - Do NOT translate "deity" as "தெய்வம்" in this devotional context.
+- Instead of using the words "இந்து" or "இந்து மதம்", strictly use "சனாதன" or "சனாதன தர்மம்" (for example: "சனாதன தர்மம்", "சனாதன தத்துவ", "சனாதன பாரம்பரியம்", "சனாதன தர்மத்தைப் பின்பற்றுவோர்").
 """
 
     if language_code == "kn":
@@ -47,6 +48,70 @@ def get_language_specific_rules(target_language: str) -> str:
 - If the English source contains "divine", render as "ದಿವ್ಯ" or "ದೈವಿಕ".
 - Translate "deity" as "ವಿಗ್ರಹ" or "ಶ್ರೀಮೂರ್ತಿ" in temple/worship context.
 - All Sanskrit shlokas, mantras, and quotes MUST be transliterated accurately into Kannada script with proper pronunciation.
+"""
+
+    if language_code == "hi":
+        return """Hindi-specific rules:
+- Use only pure Devanagari script for translated text.
+- If the English source contains the name "Krishna", translate/render it as "भगवान श्री कृष्ण".
+- In this devotional context, "भगवान" is strictly reserved for Lord Krishna and His Vishnu-tattva forms/avataras (श्री कृष्ण, विष्णु, नारायण, नृसिंह, राम, बलराम, वराह, वामन, आदि).
+- Do NOT use "भगवान" for demigods (use "देवता", e.g., "शिव जी" / "महादेव", "ब्रह्मा जी", "इंद्र देव", "श्री गणेश").
+- If the English source contains "Supreme Personality of Godhead", render as "परम पुरुषोत्तम भगवान श्री कृष्ण".
+- If the English source contains "Personality of Godhead", render as "पुरुषोत्तम भगवान".
+- If the English source contains "Supreme Lord", render as "परमेश्वर भगवान".
+- If the English source contains "transcendental", render as "दिव्य" or "चिन्मय".
+- If the English source contains "divine", render as "दिव्य" or "दैवीय".
+- Translate "deity" as "श्री विग्रह" in temple/worship context.
+- All Sanskrit shlokas, mantras, and quotes MUST be written accurately in Devanagari script with correct pronunciation.
+- Philosophy must adhere strictly to Srila Prabhupada's authentic Gaudiya Vaishnava siddhanta.
+"""
+
+    if language_code == "te":
+        return """Telugu-specific rules:
+- Use only pure Telugu script for translated text.
+- If the English source contains the name "Krishna", translate/render it as "భగవాన్ శ్రీకృష్ణుడు" or "శ్రీకృష్ణ భగవానుడు".
+- In this devotional context, "భగవాన్" / "భగవంతుడు" is strictly reserved for Lord Krishna and His Vishnu-tattva forms/avataras (కృష్ణ, విష్ణు, నారాయణ, నరసింహ, రామ, బలరామ, వరాహ, వామన, మొదలైనవి).
+- Do NOT use "భగవాన్" for demigods (use "దేవతలు", e.g., "పరమశివుడు / శివుడు", "బ్రహ్మ దేవుడు", "ఇంద్రుడు", "గణపతి").
+- If the English source contains "Supreme Personality of Godhead", render as "పరమ పురుషోత్తమ భగవానుడు".
+- If the English source contains "Personality of Godhead", render as "పురుషోత్తమ భగవంతుడు".
+- If the English source contains "Supreme Lord", render as "పరమేశ్వరుడైన భగవానుడు".
+- If the English source contains "transcendental", render as "దివ్యమైన" or "చిన్మయ".
+- If the English source contains "divine", render as "దివ్య" or "దైవిక".
+- Translate "deity" as "శ్రీ విగ్రహం" in temple/worship context.
+- All Sanskrit shlokas, mantras, and quotes MUST be transliterated accurately into Telugu script.
+- Philosophy must adhere strictly to Srila Prabhupada's authentic Gaudiya Vaishnava siddhanta.
+"""
+
+    if language_code == "ml":
+        return """Malayalam-specific rules:
+- Use only pure Malayalam script for translated text.
+- If the English source contains the name "Krishna", translate/render it as "ഭഗവാൻ ശ്രീകൃഷ്ണൻ".
+- In this devotional context, "ഭഗവാൻ" is strictly reserved for Lord Krishna and His Vishnu-tattva forms/avataras (കൃഷ്ണൻ, വിഷ്ണു, നാരായണൻ, നരസിംഹം, രാമൻ, ബലരാമൻ, വരാഹം, വാമനൻ, മുതലായവ).
+- Do NOT use "ഭഗവാൻ" for demigods (use "ദേവന്മാർ", e.g., "പരമശിവൻ / മഹാദേവൻ", "ബ്രഹ്മാവ്", "ഇന്ദ്രൻ", "ഗണപതി").
+- If the English source contains "Supreme Personality of Godhead", render as "പരമ പുരുഷോത്തമ ഭഗവാൻ".
+- If the English source contains "Personality of Godhead", render as "പുരുഷോത്തമനായ ഭഗവാൻ".
+- If the English source contains "Supreme Lord", render as "പരമേശ്വരനായ ഭഗവാൻ".
+- If the English source contains "transcendental", render as "ദിവ്യമായ" or "ചിന്മയമായ".
+- If the English source contains "divine", render as "ദിവ്യ".
+- Translate "deity" as "ശ്രീ വിഗ്രഹം" in temple/worship context.
+- All Sanskrit shlokas, mantras, and quotes MUST be transliterated accurately into Malayalam script.
+- Philosophy must adhere strictly to Srila Prabhupada's authentic Gaudiya Vaishnava siddhanta.
+"""
+
+    if language_code == "bn":
+        return """Bengali-specific rules:
+- Use only pure Bengali script for translated text.
+- If the English source contains the name "Krishna", translate/render it as "ভগবান শ্রীকৃষ্ণ".
+- In this devotional context, "ভগবান" is strictly reserved for Lord Krishna and His Vishnu-tattva forms/avataras (শ্রীকৃষ্ণ, বিষ্ণু, নারায়ণ, নৃসিংহ, রাম, বলরাম, বরাহ, বামন, ইত্যাদি).
+- Do NOT use "ভগবান" for demigods (use "দেবগণ", e.g., "মহাদেব / শিবঠাকুর", "ব্রহ্মা", "ইন্দ্র", "শ্রীগণেশ").
+- If the English source contains "Supreme Personality of Godhead", render as "পরম পুরুষোত্তম ভগবান শ্রীকৃষ্ণ".
+- If the English source contains "Personality of Godhead", render as "পুরুষোত্তম ভগবান".
+- If the English source contains "Supreme Lord", render as "পরমেশ্বর ভগবান".
+- If the English source contains "transcendental", render as "দিব্য" or "চিন্ময়".
+- If the English source contains "divine", render as "দিব্য" or "দৈবী".
+- Translate "deity" as "শ্রী বিগ্রহ" in temple/worship context.
+- All Sanskrit shlokas, mantras, and quotes MUST be written accurately in Bengali script with proper pronunciation.
+- Philosophy must adhere strictly to Srila Prabhupada's authentic Gaudiya Vaishnava siddhanta.
 """
 
     return ""

@@ -34,3 +34,7 @@ htmlcov/
 
 # Node (if any tooling is added later)
 node_modules/
+
+# Temporary / batch migration scripts
+scripts/*.py
+!scripts/deploy_vps.sh

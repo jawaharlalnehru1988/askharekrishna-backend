@@ -131,8 +131,78 @@ class StorySerializer(serializers.ModelSerializer):
         ]
 
 
-class StoryListItemSerializer(StorySerializer):
-    pass
+class StoryListItemSerializer(serializers.ModelSerializer):
+    mainTopic = serializers.SerializerMethodField()
+    subTopic = serializers.SerializerMethodField()
+    audioPath = serializers.SerializerMethodField()
+    language = serializers.SerializerMethodField()
+    imageUrl = serializers.SerializerMethodField()
+    imagePath = serializers.SerializerMethodField()
+    articleImage = serializers.SerializerMethodField()
+
+    def _get_requested_lang(self):
+        request = self.context.get('request')
+        if request:
+            query_params = getattr(request, 'query_params', None)
+            if query_params is None:
+                query_params = getattr(request, 'GET', {})
+            lang = query_params.get('language') or query_params.get('lang')
+            if lang:
+                return lang.strip().lower()
+        return 'en'
+
+    def get_mainTopic(self, obj):
+        trans = obj.get_translation(self._get_requested_lang())
+        return trans.mainTopic if trans else ''
+
+    def get_subTopic(self, obj):
+        trans = obj.get_translation(self._get_requested_lang())
+        return trans.subTopic if trans else ''
+
+    def get_audioPath(self, obj):
+        trans = obj.get_translation(self._get_requested_lang())
+        if trans and trans.audioPath:
+            return trans.audioPath.url
+        return None
+
+    def get_language(self, obj):
+        trans = obj.get_translation(self._get_requested_lang())
+        return trans.language_code if trans else 'en'
+
+    def get_imageUrl(self, obj):
+        image = obj.effective_image_path()
+        return image.url if image else None
+
+    def get_imagePath(self, obj):
+        image = obj.effective_image_path()
+        return image.url if image else None
+
+    def get_articleImage(self, obj):
+        image = obj.effective_image_path()
+        if image:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        return None
+
+    class Meta:
+        model = Story
+        fields = [
+            'id',
+            'topic_id',
+            'mainTopic',
+            'subTopic',
+            'slug',
+            'order',
+            'language',
+            'audioPath',
+            'imagePath',
+            'imageUrl',
+            'articleImage',
+            'created_at',
+            'updated_at',
+        ]
 
 
 class StoryMainTopicGroupedSerializer(serializers.ModelSerializer):

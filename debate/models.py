@@ -168,3 +168,16 @@ class DebateQuestionOption(models.Model):
         existing_count = self.question.options.exclude(pk=self.pk).count() if self.question_id else 0
         if existing_count >= 4:
             raise ValidationError('A question can have a maximum of 4 options.')
+
+
+from django.db.models.signals import post_save, post_delete
+from django.core.cache import cache
+
+def invalidate_debate_cache(sender, **kwargs):
+    cache_keys = [f"debate_catalog_v2_{lang}" for lang in DEBATE_LANGUAGE_NAMES.keys()]
+    cache.delete_many(cache_keys)
+
+for _model in [DebateCategory, DebateCategoryTranslation, DebateArticle, DebateArticleTranslation]:
+    post_save.connect(invalidate_debate_cache, sender=_model)
+    post_delete.connect(invalidate_debate_cache, sender=_model)
+

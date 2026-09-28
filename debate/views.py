@@ -39,28 +39,57 @@ class DebateArticleViewSet(viewsets.ModelViewSet):
     ordering = ['order', 'id']
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        req_lang = request.query_params.get('language', 'en')
+        slug = request.query_params.get('slug')
+        category_param = request.query_params.get('category')
+        query_param = request.query_params.get('query')
+
+        # Cache standard catalog requests
+        from django.core.cache import cache
+        is_standard_catalog = not slug and not category_param and not query_param
+        cache_key = f"debate_catalog_v2_{req_lang}" if is_standard_catalog else None
+
+        if cache_key:
+            cached_data = cache.get(cache_key)
+            if cached_data is not None:
+                return Response(cached_data)
+
+        from django.db.models import Prefetch
+        from .models import DebateArticleTranslation, DebateCategoryTranslation
+
+        art_trans_qs = DebateArticleTranslation.objects.filter(language=req_lang).select_related('debateCategory')
+        queryset = self.filter_queryset(self.get_queryset()).prefetch_related(
+            Prefetch('translations', queryset=art_trans_qs, to_attr='cached_trans')
+        )
 
         grouped_articles = {}
         uncategorized = []
 
-        # Group by the translation's category for the requested language
-        req_lang = request.query_params.get('language', 'en')
-        
         for article in queryset:
-            t = article.translations.filter(language=req_lang).first()
+            t = article.cached_trans[0] if (hasattr(article, 'cached_trans') and article.cached_trans) else None
             if not t or t.debateCategory_id is None:
                 uncategorized.append(article)
                 continue
             grouped_articles.setdefault(t.debateCategory_id, []).append(article)
 
-        categories = DebateCategory.objects.filter(id__in=grouped_articles.keys()).order_by('order', 'name')
+        cat_trans_qs = DebateCategoryTranslation.objects.filter(language=req_lang)
+        categories = list(
+            DebateCategory.objects.filter(id__in=grouped_articles.keys())
+            .prefetch_related(Prefetch('translations', queryset=cat_trans_qs, to_attr='cached_cat_trans'))
+            .order_by('order', 'name')
+        )
+        cat_names = {}
+        for c in categories:
+            trans = c.cached_cat_trans[0] if (hasattr(c, 'cached_cat_trans') and c.cached_cat_trans) else None
+            cat_names[c.id] = (trans.translated_name if (trans and trans.translated_name) else c.name)
+
         category_data = DebateCategoryArticleListSerializer(
             categories,
             many=True,
             context={
                 'request': request,
                 'grouped_articles': grouped_articles,
+                'category_names': cat_names,
             },
         ).data
 
@@ -68,16 +97,23 @@ class DebateArticleViewSet(viewsets.ModelViewSet):
             uncategorized_data = DebateArticleListItemSerializer(
                 uncategorized,
                 many=True,
-                context={'request': request},
+                context={
+                    'request': request,
+                    'category_names': cat_names,
+                },
             ).data
             category_data.append(
                 {
+                    'id': None,
                     'name': '',
                     'description': '',
                     'image': None,
                     'articleList': uncategorized_data,
                 }
             )
+
+        if cache_key:
+            cache.set(cache_key, category_data, timeout=3600)
 
         return Response(category_data)
 

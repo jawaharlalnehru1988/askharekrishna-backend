@@ -80,6 +80,15 @@ class Story(models.Model):
     def get_translation(self, lang_code='en'):
         if not self.pk:
             return None
+        if hasattr(self, '_prefetched_objects_cache') and 'translations' in self._prefetched_objects_cache:
+            translations = self._prefetched_objects_cache['translations']
+            trans = next((t for t in translations if t.language_code == lang_code), None)
+            if not trans:
+                trans = next((t for t in translations if t.language_code == 'en'), None)
+            if not trans and translations:
+                trans = translations[0]
+            return trans
+
         trans = self.translations.filter(language_code=lang_code).first()
         if not trans:
             trans = self.translations.filter(language_code='en').first()
