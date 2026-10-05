@@ -156,7 +156,7 @@ class DebateArticleAdmin(admin.ModelAdmin):
     get_subtopic.short_description = 'Subtopic'
 
     def has_en(self, obj):
-        return any(t.language == 'en' for t in obj.translations.all())
+        return any(t.language == 'en' and bool(t.article and t.article.strip()) for t in obj.translations.all())
     has_en.boolean = True
     has_en.short_description = 'En'
 
@@ -166,7 +166,7 @@ class DebateArticleAdmin(admin.ModelAdmin):
     has_en_mcq.short_description = 'En-MCQ'
 
     def has_ta(self, obj):
-        return any(t.language == 'ta' for t in obj.translations.all())
+        return any(t.language == 'ta' and bool(t.article and t.article.strip()) for t in obj.translations.all())
     has_ta.boolean = True
     has_ta.short_description = 'Ta'
 
@@ -176,7 +176,7 @@ class DebateArticleAdmin(admin.ModelAdmin):
     has_ta_mcq.short_description = 'Ta-MCQ'
 
     def has_hi(self, obj):
-        return any(t.language == 'hi' for t in obj.translations.all())
+        return any(t.language == 'hi' and bool(t.article and t.article.strip()) for t in obj.translations.all())
     has_hi.boolean = True
     has_hi.short_description = 'Hi'
 
@@ -186,7 +186,7 @@ class DebateArticleAdmin(admin.ModelAdmin):
     has_hi_mcq.short_description = 'Hi-MCQ'
 
     def has_kn(self, obj):
-        return any(t.language == 'kn' for t in obj.translations.all())
+        return any(t.language == 'kn' and bool(t.article and t.article.strip()) for t in obj.translations.all())
     has_kn.boolean = True
     has_kn.short_description = 'Ka'
 
@@ -196,7 +196,7 @@ class DebateArticleAdmin(admin.ModelAdmin):
     has_kn_mcq.short_description = 'Ka-MCQ'
 
     def has_te(self, obj):
-        return any(t.language == 'te' for t in obj.translations.all())
+        return any(t.language == 'te' and bool(t.article and t.article.strip()) for t in obj.translations.all())
     has_te.boolean = True
     has_te.short_description = 'Tl'
 
@@ -206,7 +206,7 @@ class DebateArticleAdmin(admin.ModelAdmin):
     has_te_mcq.short_description = 'Tl-MCQ'
 
     def has_ml(self, obj):
-        return any(t.language == 'ml' for t in obj.translations.all())
+        return any(t.language == 'ml' and bool(t.article and t.article.strip()) for t in obj.translations.all())
     has_ml.boolean = True
     has_ml.short_description = 'Ml'
 

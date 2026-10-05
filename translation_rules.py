@@ -29,6 +29,8 @@ def get_language_specific_rules(target_language: str) -> str:
 - Translate "deity" as "விக்ரஹம்" in devotional temple/worship context.
 - Do NOT translate "deity" as "தெய்வம்" in this devotional context.
 - Instead of using the words "இந்து" or "இந்து மதம்", strictly use "சனாதன" or "சனாதன தர்மம்" (for example: "சனாதன தர்மம்", "சனாதன தத்துவ", "சனாதன பாரம்பரியம்", "சனாதன தர்மத்தைப் பின்பற்றுவோர்").
+- Do NOT include English parenthetical expressions or English terms in brackets (e.g., '(The Postbox Analogy)', '(Omnipresent)', '(Translation)') in headings or body text. Tamil is self-sufficient.
+- All Sanskrit shlokas, verses, mantras, and quotes MUST be transliterated accurately into Tamil script. Do NOT leave shlokas in English, Roman, or IAST script.
 """
 
     if language_code == "kn":
@@ -48,6 +50,7 @@ def get_language_specific_rules(target_language: str) -> str:
 - If the English source contains "divine", render as "ದಿವ್ಯ" or "ದೈವಿಕ".
 - Translate "deity" as "ವಿಗ್ರಹ" or "ಶ್ರೀಮೂರ್ತಿ" in temple/worship context.
 - All Sanskrit shlokas, mantras, and quotes MUST be transliterated accurately into Kannada script with proper pronunciation.
+- Do NOT include English parenthetical expressions or English terms in brackets in headings or body text.
 """
 
     if language_code == "hi":
@@ -63,6 +66,7 @@ def get_language_specific_rules(target_language: str) -> str:
 - If the English source contains "divine", render as "दिव्य" or "दैवीय".
 - Translate "deity" as "श्री विग्रह" in temple/worship context.
 - All Sanskrit shlokas, mantras, and quotes MUST be written accurately in Devanagari script with correct pronunciation.
+- Do NOT include English parenthetical expressions or English terms in brackets in headings or body text.
 - Philosophy must adhere strictly to Srila Prabhupada's authentic Gaudiya Vaishnava siddhanta.
 """
 
@@ -79,6 +83,7 @@ def get_language_specific_rules(target_language: str) -> str:
 - If the English source contains "divine", render as "దివ్య" or "దైవిక".
 - Translate "deity" as "శ్రీ విగ్రహం" in temple/worship context.
 - All Sanskrit shlokas, mantras, and quotes MUST be transliterated accurately into Telugu script.
+- Do NOT include English parenthetical expressions or English terms in brackets in headings or body text.
 - Philosophy must adhere strictly to Srila Prabhupada's authentic Gaudiya Vaishnava siddhanta.
 """
 
@@ -95,6 +100,7 @@ def get_language_specific_rules(target_language: str) -> str:
 - If the English source contains "divine", render as "ദിവ്യ".
 - Translate "deity" as "ശ്രീ വിഗ്രഹം" in temple/worship context.
 - All Sanskrit shlokas, mantras, and quotes MUST be transliterated accurately into Malayalam script.
+- Do NOT include English parenthetical expressions or English terms in brackets in headings or body text.
 - Philosophy must adhere strictly to Srila Prabhupada's authentic Gaudiya Vaishnava siddhanta.
 """
 
@@ -111,6 +117,7 @@ def get_language_specific_rules(target_language: str) -> str:
 - If the English source contains "divine", render as "দিব্য" or "দৈবী".
 - Translate "deity" as "শ্রী বিগ্রহ" in temple/worship context.
 - All Sanskrit shlokas, mantras, and quotes MUST be written accurately in Bengali script with proper pronunciation.
+- Do NOT include English parenthetical expressions or English terms in brackets in headings or body text.
 - Philosophy must adhere strictly to Srila Prabhupada's authentic Gaudiya Vaishnava siddhanta.
 """
 

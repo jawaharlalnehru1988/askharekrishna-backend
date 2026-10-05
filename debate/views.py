@@ -57,7 +57,12 @@ class DebateArticleViewSet(viewsets.ModelViewSet):
         from django.db.models import Prefetch
         from .models import DebateArticleTranslation, DebateCategoryTranslation
 
-        art_trans_qs = DebateArticleTranslation.objects.filter(language=req_lang).select_related('debateCategory')
+        art_trans_qs = (
+            DebateArticleTranslation.objects.filter(language=req_lang)
+            .exclude(article__isnull=True)
+            .exclude(article__exact="")
+            .select_related('debateCategory')
+        )
         queryset = self.filter_queryset(self.get_queryset()).prefetch_related(
             Prefetch('translations', queryset=art_trans_qs, to_attr='cached_trans')
         )
@@ -67,7 +72,9 @@ class DebateArticleViewSet(viewsets.ModelViewSet):
 
         for article in queryset:
             t = article.cached_trans[0] if (hasattr(article, 'cached_trans') and article.cached_trans) else None
-            if not t or t.debateCategory_id is None:
+            if not t or not (t.article and t.article.strip()):
+                continue
+            if t.debateCategory_id is None:
                 uncategorized.append(article)
                 continue
             grouped_articles.setdefault(t.debateCategory_id, []).append(article)
