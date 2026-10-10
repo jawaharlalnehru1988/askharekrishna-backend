@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'djoser',
     'users',
+    'ritvik_system',
 ]
 
 MIDDLEWARE = [

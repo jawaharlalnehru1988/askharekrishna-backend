@@ -47,4 +47,5 @@ urlpatterns = [
     path('api/auth/', include('djoser.urls.jwt')),
     path('api/course-roadmap/', include('courseRoadmap.urls')),
     path('api/vaishnava-calendar/', include('vaishnava_calendar.urls')),
+    path('api/', include('ritvik_system.urls')),
 ]
