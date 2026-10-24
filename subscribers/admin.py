@@ -4,9 +4,9 @@ from .models import Subscriber, SubscriberQuizAttempt
 
 @admin.register(Subscriber)
 class SubscriberAdmin(admin.ModelAdmin):
-    list_display = ('name', 'phone_number', 'language', 'place', 'is_active', 'created_at')
+    list_display = ('name', 'email', 'phone_number', 'language', 'place', 'is_active', 'created_at')
     list_filter = ('is_active', 'language', 'place')
-    search_fields = ('name', 'phone_number', 'language', 'place')
+    search_fields = ('name', 'email', 'phone_number', 'language', 'place', 'google_id')
     readonly_fields = ('created_at', 'updated_at')
 
 

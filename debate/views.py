@@ -44,9 +44,18 @@ class DebateArticleViewSet(viewsets.ModelViewSet):
         category_param = request.query_params.get('category')
         query_param = request.query_params.get('query')
 
-        # Cache standard catalog requests
+        # If slug is numeric, treat it as ID in query parameters so DjangoFilterBackend matches
+        if slug and slug.isdigit():
+            request.GET._mutable = True
+            request.GET.pop('slug', None)
+            request.GET['id'] = slug
+            request.GET._mutable = False
+            slug = None
+
+        # Cache standard catalog requests only (when no filters are provided other than language)
         from django.core.cache import cache
-        is_standard_catalog = not slug and not category_param and not query_param
+        filter_keys = set(request.query_params.keys()) - {'language', 'format'}
+        is_standard_catalog = len(filter_keys) == 0 and not slug
         cache_key = f"debate_catalog_v2_{req_lang}" if is_standard_catalog else None
 
         if cache_key:
@@ -131,6 +140,18 @@ class DebateArticleViewSet(viewsets.ModelViewSet):
         main_topic = self.request.query_params.get('mainTopic') or self.request.query_params.get('topic')
         query = self.request.query_params.get('query')
         lang = self.request.query_params.get('language', 'en')
+
+        slug = self.request.query_params.get('slug')
+        article_id = self.request.query_params.get('id')
+
+        if slug:
+            if slug.isdigit():
+                queryset = queryset.filter(Q(id=int(slug)) | Q(slug=slug))
+            else:
+                queryset = queryset.filter(slug=slug)
+
+        if article_id and article_id.isdigit():
+            queryset = queryset.filter(id=int(article_id))
 
         if category:
             queryset = queryset.filter(translations__language=lang, translations__debateCategory__name__icontains=category)

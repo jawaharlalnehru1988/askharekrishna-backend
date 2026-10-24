@@ -11,6 +11,7 @@ class StoryMainTopic(models.Model):
     name = models.CharField(max_length=255, unique=True, db_index=True)
     name_translations = models.JSONField(default=dict, blank=True, help_text="Localized names: {'ta': '...', 'hi': '...', 'kn': '...', 'te': '...'}")
     description = models.CharField(max_length=200, blank=True, default='')
+    description_translations = models.JSONField(default=dict, blank=True, help_text="Localized descriptions: {'ta': '...', 'hi': '...', 'kn': '...', 'te': '...'}")
     image = models.ImageField(upload_to='stories/main-topic/', max_length=500, blank=True, null=True)
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
@@ -33,6 +34,15 @@ class StoryMainTopic(models.Model):
             if localized:
                 return localized
         return self.name
+
+    def get_localized_description(self, lang_code='en'):
+        if not lang_code or lang_code == 'en':
+            return self.description
+        if isinstance(self.description_translations, dict):
+            localized = self.description_translations.get(lang_code.lower())
+            if localized:
+                return localized
+        return self.description
 
     def save(self, *args, **kwargs):
         old_image_name = None

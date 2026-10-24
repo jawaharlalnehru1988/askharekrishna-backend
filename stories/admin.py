@@ -129,7 +129,7 @@ class StoryMainTopicAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
     list_filter = ('is_active',)
     ordering = ('order', 'name')
-    fields = ('name', 'order', 'is_active', 'description', 'image', 'name_translations')
+    fields = ('name', 'order', 'is_active', 'description', 'description_translations', 'image', 'name_translations')
 
     def stories_count(self, obj):
         return obj.stories.count()

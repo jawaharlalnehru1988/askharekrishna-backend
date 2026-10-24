@@ -377,6 +377,7 @@ class MridangaLesson(models.Model):
         ('matan', 'Matan'),
         ('rela', 'Rela'),
         ('duggi', 'Duggi Style'),
+        ('udaan', 'Udaan (Pickup Beats)'),
     ]
 
     tala_name = models.CharField(max_length=255, verbose_name="Tala Name")

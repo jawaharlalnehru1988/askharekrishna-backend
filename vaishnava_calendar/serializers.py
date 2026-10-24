@@ -130,7 +130,7 @@ class CalendarObservanceSerializer(serializers.ModelSerializer):
 
 
 class CalendarDaySerializer(serializers.ModelSerializer):
-    observances = CalendarObservanceSerializer(many=True, read_only=True)
+    observances = serializers.SerializerMethodField()
     break_fast_date = serializers.SerializerMethodField()
     break_fast_day_of_week = serializers.SerializerMethodField()
     break_fast_window = serializers.SerializerMethodField()
@@ -184,3 +184,35 @@ class CalendarDaySerializer(serializers.ModelSerializer):
     def get_break_fast_window(self, obj):
         info = self._get_break_fast_info(obj)
         return info['window'] if info else None
+
+    def _get_requested_lang(self):
+        request = self.context.get('request')
+        if request:
+            query_params = getattr(request, 'query_params', None)
+            if query_params is None:
+                query_params = getattr(request, 'GET', {})
+            lang = query_params.get('language') or query_params.get('lang')
+            if lang:
+                return lang.strip().lower()
+        return 'en'
+
+    def get_observances(self, obj):
+        lang = self._get_requested_lang()
+        seen = set()
+        unique_observances = []
+        for obs in obj.observances.all():
+            if obs.category == 'Ekadashi':
+                if 'ekadashi' in seen:
+                    continue
+                seen.add('ekadashi')
+            else:
+                trans = obs.get_translation(lang)
+                title = trans.title.strip().lower() if (trans and trans.title) else ''
+                key = (obs.category, title)
+                if title and key in seen:
+                    continue
+                if title:
+                    seen.add(key)
+            unique_observances.append(obs)
+        return CalendarObservanceSerializer(unique_observances, many=True, context=self.context).data
+

@@ -87,6 +87,8 @@ class Command(BaseCommand):
                 observances_list = day_data.get('observances', [])
                 for idx, obs_data in enumerate(observances_list):
                     title = obs_data.get('title', '')
+                    if 'durga puja' in title.lower():
+                        continue
                     category = obs_data.get('category', 'Observance')
 
                     obs = CalendarObservance.objects.create(

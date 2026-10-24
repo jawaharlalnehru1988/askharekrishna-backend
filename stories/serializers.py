@@ -207,6 +207,7 @@ class StoryListItemSerializer(serializers.ModelSerializer):
 
 class StoryMainTopicGroupedSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
     articleList = serializers.SerializerMethodField()
 
     class Meta:
@@ -226,6 +227,9 @@ class StoryMainTopicGroupedSerializer(serializers.ModelSerializer):
 
     def get_name(self, obj):
         return obj.get_localized_name(self._get_lang())
+
+    def get_description(self, obj):
+        return obj.get_localized_description(self._get_lang())
 
     def get_articleList(self, obj):
         grouped_articles = self.context.get('grouped_articles', {})

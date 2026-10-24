@@ -117,7 +117,16 @@ def attach_stories_and_translations():
     except Exception as e:
         logger.error(f"Error populating navadvipa parsadas stories: {e}")
 
+    try:
+        from vaishnava_calendar.management.commands.populate_ramacandra_vijayotsava import (
+            populate_ramacandra_vijayotsava_stories,
+        )
+        summary['ramacandra_vijayotsava'] = populate_ramacandra_vijayotsava_stories()
+    except Exception as e:
+        logger.error(f"Error populating ramacandra vijayotsava stories: {e}")
+
     return summary
+
 
 
 def generate_calendar_for_year(year: int, location_data=None, force: bool = False):
@@ -235,6 +244,15 @@ def generate_calendar_for_year(year: int, location_data=None, force: bool = Fals
 
             for ev in events:
                 text = ev.get('text', '').strip()
+                if 'durga puja' in text.lower():
+                    continue
+
+                category = classify_category(text)
+
+                # Skip duplicate Ekadashi fasting event because primary Ekadashi is already created at order 0
+                if is_ekadashi and ('fasting for' in text.lower() or text.lower().startswith('fasting')):
+                    continue
+
                 obs_image = None
                 if category == 'Parana' or text.startswith('Break fast'):
                     obs_image = 'vaishnava_calendar/images/parana_break_fast.jpg'

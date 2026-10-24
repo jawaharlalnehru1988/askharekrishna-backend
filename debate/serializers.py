@@ -121,9 +121,9 @@ class DebateArticleListItemSerializer(serializers.ModelSerializer):
 
     def get_article(self, obj):
         request = self.context.get('request')
-        # If slug is passed or include_content is true, provide the full markdown body.
+        # If slug or id is passed or include_content is true, provide the full markdown body.
         # Otherwise for catalog lists, omit to keep payload 97% lighter and ultra-fast.
-        if request and (request.query_params.get('slug') or request.query_params.get('include_content') == 'true'):
+        if request and (request.query_params.get('slug') or request.query_params.get('id') or request.query_params.get('include_content') == 'true'):
             t = self._get_translation(obj)
             return t.article if t else ''
         return ''
@@ -138,7 +138,7 @@ class DebateArticleListItemSerializer(serializers.ModelSerializer):
 
     def get_previousArticle(self, obj):
         request = self.context.get('request')
-        if not request or not request.query_params.get('slug'):
+        if not request or not (request.query_params.get('slug') or request.query_params.get('id')):
             return None
         prev_art = DebateArticle.objects.filter(order__lt=obj.order).order_by('-order').first()
         if not prev_art:
@@ -146,14 +146,16 @@ class DebateArticleListItemSerializer(serializers.ModelSerializer):
         lang = request.query_params.get('language', 'en')
         t = prev_art.translations.filter(language=lang).first() or prev_art.translations.first()
         return {
-            'slug': prev_art.slug,
+            'id': prev_art.id,
+            'slug': str(prev_art.id),
+            'fullSlug': prev_art.slug,
             'subTopic': t.subTopic if t else '',
             'order': prev_art.order,
         }
 
     def get_nextArticle(self, obj):
         request = self.context.get('request')
-        if not request or not request.query_params.get('slug'):
+        if not request or not (request.query_params.get('slug') or request.query_params.get('id')):
             return None
         next_art = DebateArticle.objects.filter(order__gt=obj.order).order_by('order').first()
         if not next_art:
@@ -161,7 +163,9 @@ class DebateArticleListItemSerializer(serializers.ModelSerializer):
         lang = request.query_params.get('language', 'en')
         t = next_art.translations.filter(language=lang).first() or next_art.translations.first()
         return {
-            'slug': next_art.slug,
+            'id': next_art.id,
+            'slug': str(next_art.id),
+            'fullSlug': next_art.slug,
             'subTopic': t.subTopic if t else '',
             'order': next_art.order,
         }
@@ -171,10 +175,23 @@ class DebateCategoryArticleListSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
     articleList = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = DebateCategory
         fields = ['id', 'name', 'description', 'image', 'articleList']
+
+    def get_image(self, obj):
+        if not obj.image:
+            return None
+        url = obj.image.url
+        request = self.context.get('request')
+        if request:
+            uri = request.build_absolute_uri(url)
+            if '127.0.0.1' in uri or 'localhost' in uri:
+                return f"https://api.askharekrishna.com{url}"
+            return uri
+        return f"https://api.askharekrishna.com{url}"
 
     def _get_translation(self, obj):
         if hasattr(obj, 'cached_cat_trans') and obj.cached_cat_trans:

@@ -8,7 +8,7 @@ from .serializers import CalendarDaySerializer, CalendarObservanceSerializer
 
 
 class CalendarDayViewSet(viewsets.ModelViewSet):
-    queryset = CalendarDay.objects.prefetch_related('observances').all().order_by('event_date')
+    queryset = CalendarDay.objects.prefetch_related('observances__translations').all().order_by('event_date')
     serializer_class = CalendarDaySerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['is_ekadashi', 'is_fast_day', 'event_date']

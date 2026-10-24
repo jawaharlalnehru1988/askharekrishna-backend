@@ -92,7 +92,16 @@ class SubscriberViewSet(viewsets.ModelViewSet):
             subscriber.language = validated.get('language') or subscriber.language
             subscriber.place = validated.get('place') or subscriber.place
             if phone:
-                subscriber.phone_number = phone
+                existing_phone_sub = Subscriber.objects.filter(phone_number=phone).exclude(id=subscriber.id).first()
+                if existing_phone_sub:
+                    if not existing_phone_sub.email and not existing_phone_sub.google_id:
+                        existing_phone_sub.delete()
+                        subscriber.phone_number = phone
+                    else:
+                        # Keep existing phone as is or allow update
+                        subscriber.phone_number = phone
+                else:
+                    subscriber.phone_number = phone
             if email:
                 subscriber.email = email
             subscriber.save()

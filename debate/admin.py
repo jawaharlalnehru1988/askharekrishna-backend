@@ -20,6 +20,7 @@ class DebateCategoryTranslationInline(admin.StackedInline):
 @admin.register(DebateCategory)
 class DebateCategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'image', 'order')
+    list_editable = ('order',)
     search_fields = ('name', 'description')
     ordering = ('order', 'name')
     inlines = [DebateCategoryTranslationInline]

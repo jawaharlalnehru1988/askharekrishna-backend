@@ -30,6 +30,7 @@ class BookLibrary(models.Model):
         ('txt', 'TXT'),
         ('mobi', 'MOBI'),
         ('azw', 'AZW'),
+        ('md', 'MD'),
     ]
 
     LANGUAGE_CHOICES = [
