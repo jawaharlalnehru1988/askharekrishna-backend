@@ -36,7 +36,7 @@ htmlcov/
 node_modules/
 
 # Temporary / batch migration scripts
-scripts/*.py
+scripts/
 !scripts/deploy_vps.sh
 batch1_source.json
 convert_md_to_pdf.py

@@ -444,51 +444,145 @@ Devotees pray to Srila Vrndavana Dasa Thakura on his Disappearance day for attac
     },
     'Narottama Dasa': {
         'title': 'Srila Narottama Dasa Thakura',
-        'story': """### Srila Narottama Dasa Thakura: Champaka Manjari & Thakura Mahasaya
+        'story': """### The Nectarine Lila of Srila Narottama Dasa Thakura: Sri Champaka Manjari in Gaura-Lila
 
-#### 1. Eternal Identity & Lineage
-In Vraja-lila, Srila Narottama Dasa Thakura (1520–1611 CE) is **Champaka Manjari**. Born as the royal prince of Kheturi (Garanhati, Rajshahi, Bangladesh) to King Krishnananda Datta and Narayani Devi, he renounced royal luxury to seek initiation under Srila Lokanatha Gosvami in Vrindavan. He is glorified as **Thakura Mahasaya**—the crown jewel of Gaudiya kirtaniyas and author of *Prārthanā* and *Prema-bhakti-candrikā*.
-
----
-
-#### 2. Sacred Pastimes from Bhakti-ratnakara, Narottama-vilasa & Prema-vilasa
-
-##### Pastime 1: Lord Caitanya Depositing Prema in the Padma River
-When Lord Caitanya traveled through East Bengal years before Narottama's birth, He deposited His divine love (*prema*) in the waters of the Padma River at Kanair Natshala, crying: *"Padma! Keep this prema safe for My Narottama when he comes to bathe here!"* 
-
-When young Narottama entered the Padma River years later, the river surged with golden light, and the prema of Lord Caitanya entered Narottama's body, turning his skin into molten gold!
-
-##### Pastime 2: Nighttime Latrine Cleaning for Lokanatha Gosvami
-Determined to receive initiation from Srila Lokanatha Gosvami (who had sworn never to accept disciples), Prince Narottama quietly sneaked out of his residence at midnight every night for a full year, cleaning Lokanatha's latrine area and sweeping the forest path with his own hair! 
-
-When Lokanatha caught Narottama in the dark and realized the prince's incredible humility, Lokanatha wept, embraced him, and initiated him as his sole disciple.
-
-##### Pastime 3: Hosting the Historic Kheturi Maha-Festival
-Narottama established six grand Deities in Kheturi (Sri Gauranga, Vallabhikanta, Sri Vrajamohana, Sri Radhakanta, Sri Radharamana, and Sri Gopalaji). 
-
-He organized the first nationwide **Kheturi Festival**, bringing together Mother Jahnava Devi, Srinivasa Acarya, Syamananda Prabhu, and thousands of devotees from Bengal, Odisha, and Vrindavan, introducing the unique *Padāvalī-kīrtana* style.
-
-##### Pastime 4: Disappearance into Milk in the Ganges
-Feeling the end of his earthly pastimes at Garanhati, Narottama instructed his disciples Ramachandra Kaviraja and Narasimha to carry him to the banks of the Ganges. 
-
-As his disciples massaged his body with Ganges water while singing kirtana, Narottama's body melted directly into pure liquid white milk (*kṣīra*) and merged into the sacred waters of Mother Ganges!
+*(A Devotional Upanyasam Delivered on the Holy Disappearance Day of Thakura Mahasaya)*
 
 ---
 
-#### 3. Major Literary Contributions
-- **Prārthanā:** Immortal devotional songs of prayer, humble lamentation, and aspiration (*"Śrī-kṛṣṇa-caitanya prabhu doyā koro more"*, *"Gaurāṅga bolite habe pulaka śarīra"*).
-- **Prema-bhakti-candrikā:** The moonlight of spontaneous love of Godhead (*Rāgānugā-bhakti*).
+My dear assembled devotees, today is the most sacred disappearance day of Srila Narottama Dasa Thakura, lovingly glorified by all Gaudiya Vaishnavas as **Thakura Mahasaya**. 
+
+In the eternal spiritual world of Goloka Vrindavana, in the confidential pastimes of Sri Sri Radha and Krishna, he is none other than **Sri Champaka Manjari**, one of the intimate maidservants who assists Sri Rupa Manjari in personal seva to Srimati Radharani. To fulfill the inner desire of Sri Caitanya Mahaprabhu and spread the highest mellows of pure love of Godhead, that very same manjari descended to this earth as Prince Narottama. Let us quiet our minds, set aside all mundane thoughts, and drink the sweet nectar of his divine pastimes.
 
 ---
 
-#### 4. How to Pray & Seek Blessings
-Devotees pray to Srila Narottama Dasa Thakura on his Disappearance day for weeping affection in chanting the Holy Name and genuine Vaishnava humility.
+#### The Lord Weeps at the Padma River: Safekeeping the Treasure of Prema
+
+Long before Narottama appeared in this world, Sri Caitanya Mahaprabhu was traveling with His associates through the villages of Bengal. As the Lord reached Kanair Natshala along the banks of the sacred Padma River, intense waves of divine love suddenly overwhelmed His heart. Tears flowed like rivers from Mahaprabhu’s lotus eyes, and He began to call out in great longing: *"Narottama! Narottama! Where are you, My dear Narottama?"*
+
+The devotees wondered who this Narottama was, for no one by that name was present. Sri Caitanya Mahaprabhu then stood before the Padma River and called out: *"O Mother Padmavati! Please take this ocean of pure love of Krishna (prema) and keep it safe in your sacred waters. Keep it hidden from the eyes of the world. One day, a royal prince named Narottama will come here to bathe. When he enters your waters, hand this prema over to him!"*
+
+Mother Padmavati humbly folded her hands and asked: *"My dear Lord, how will I recognize Your Narottama when he comes?"*
+
+The Lord smiled with immense love and replied: *"The moment Narottama steps into your currents, your waters will swell with uncontrollable joy. Your waves will dance in ecstasy, and you will feel peace in your heart. You will recognize him without a doubt."*
+
+Years went by. In the royal city of Kheturi (in Rajshahi, modern-day Bangladesh), a divine son was born on the full moon day of Magha to King Raja Krishnananda Datta and Queen Narayani Devi. They named him Narottama—the best among men. Although he was raised in immense wealth, surrounded by servants, jewels, and royal comforts, young Narottama felt no attachment to material life. His heart burned day and night with a mysterious yearning for the lotus feet of Sri Gaurasundara.
+
+One morning, young Prince Narottama went to bathe in the Padma River. As soon as his lotus feet stepped into the water, the river suddenly surged with golden light! Great waves of joy began to roll across the river, just as Lord Caitanya had foretold. Mother Padmavati appeared from the waters and handed over the divine prema that Mahaprabhu had kept in her trust. 
+
+The moment that divine love entered his heart, Narottama’s dark royal complexion transformed into molten gold, mirroring the radiant complexion of Lord Gauranga Himself! Overwhelmed with ecstatic love, Prince Narottama fell unconscious on the riverbank, tears streaming endlessly from his eyes. From that moment, the prince had only one desire: to surrender everything and run to the holy dust of Sri Vrindavan.
+
+---
+
+#### Midnight Tapasya in the Dust of Vrindavan
+
+Leaving behind his kingdom, his royal robes, and all comforts of palace life, Narottama walked barefoot across hundreds of miles through dangerous jungles until he reached Sri Vrindavan Dhama. 
+
+In Vrindavan, he longed to take shelter at the lotus feet of the great associate of Mahaprabhu, **Srila Lokanatha Gosvami**. Lokanatha Gosvami lived in extreme renunciation in the secluded groves of Kishori-kunda. He was absorbed day and night in chanting the Holy Name, weeping for Radha and Krishna. Out of profound humility, Lokanatha Gosvami had made a strict vow before the Lord: *"I am the most fallen soul in this world. I will never accept any disciples."*
+
+When young Narottama fell in the dust at his feet, crying and begging for initiation, Lokanatha Gosvami firmly replied: *"My dear boy, I have vowed never to initiate anyone. Please go to the other Gosvamis and take shelter of them."*
+
+Narottama bowed his head in silence. But in his heart, he made a firm vow: *"Sri Lokanatha Gosvami is my eternal father and spiritual master. Either he accepts me, or I will give up this life. But I will serve him whether he acknowledges me or not."*
+
+Narottama carefully observed where Lokanatha Gosvami went into the forest before sunrise to answer the call of nature. Every night, after midnight, when all of Vrindavan was asleep and the forest was pitch-black, Prince Narottama would quietly sneak into the woods. 
+
+With his own hands, this royal prince cleaned the stool and urine of his spiritual master. He carried clean water from the pond, washed the entire area spotless, and brought soft, clean earth and dry sand to cover the ground so that not a single thorn or pebble would hurt his guru's feet. To remove every speck of dust from the forest path, Narottama even swept the walkway using the long hair of his own head!
+
+Night after night, month after month, for an entire year, Narottama performed this humble service in secret.
+
+Every morning, Lokanatha Gosvami would arrive at the spot and be astonished: *"Who is cleaning this dirty place every night? Is it a demigod? A spirit? Or some exalted Vaishnava?"*
+
+Determined to discover the truth, Lokanatha Gosvami went to the forest late one night and hid behind the dark bushes. Past midnight, he heard soft footsteps. In the faint moonlight, he saw a young man quietly approach, bend down in the dirt, and begin cleaning the place with his bare hands.
+
+Lokanatha Gosvami stepped out from the bushes and called out: *"Who are you? What are you doing in the dark?"*
+
+Terrified that his secret seva had been discovered, Narottama fell flat on his face in the dust, trembling from head to toe: *"Master, please forgive me! It is I, your worthless servant, Narottama."*
+
+Lokanatha Gosvami stood frozen in shock. A wealthy prince, accustomed to silk garments and golden thrones, was cleaning his stool with his own bare hands in the dead of night! Tears burst forth from Lokanatha Gosvami’s eyes. He rushed forward, lifted Narottama from the dirt, and embraced him tightly to his heart. 
+
+*"Narottama, you have purchased me! You have conquered me with your humility!"* Lokanatha Gosvami wept aloud, bathing Narottama with tears of pure love. Setting aside his lifelong vow, Lokanatha Gosvami initiated Narottama as his sole disciple, pouring the complete mercy of Sri Caitanya Mahaprabhu into his heart.
+
+---
+
+#### Thakura Mahasaya & The Mission of the Gosvami Scriptures
+
+In Vrindavan, Narottama joined **Srila Srinivasa Acharya** and **Srila Shyamananda Prabhu**. Together, they sat at the lotus feet of **Srila Jiva Gosvami** at the Radha-Damodara temple, studying the deep philosophical scriptures composed by the Six Gosvamis. 
+
+Srila Jiva Gosvami was so moved by Narottama’s pure devotion, his sweet kirtana, and his profound understanding of bhakti-rasa that he honored him with the glorious title **Thakura Mahasaya**—the great master among devotees. 
+
+When the time came, Srila Jiva Gosvami entrusted Srinivasa, Narottama, and Shyamananda with the historic mission: loading the original handwritten manuscripts of the Six Gosvamis onto a bullock cart and carrying the light of Gaudiya philosophy back to the people of Bengal and Odisha.
+
+---
+
+#### The Historic Kheturi Maha-Mahotsava: Mahaprabhu Manifests in Kirtana
+
+Returning to Kheturi, Srila Narottama Dasa Thakura organized the famous **Kheturi Maha-Festival** on Gaura Purnima. This was the largest and most historic gathering of Gaudiya Vaishnavas following the departure of Sri Caitanya Mahaprabhu. 
+
+Narottama invited devotees from every corner of India. **Mother Jahnava Devi**, the divine consort of Lord Nityananda Prabhu, personally presided over the holy festival. Hundreds of direct associates of Mahaprabhu attended. During this grand festival, Narottama installed six magnificent sets of Deities: **Sri Gauranga, Sri Vallabhikanta, Sri Vrajamohana, Sri Radhakanta, Sri Radharamana, and Sri Gopalaji**.
+
+When the time arrived for kirtana, Narottama picked up his kartalas and began to lead the devotees in singing. He introduced a new, hauntingly beautiful, and deeply emotional melody known as the **Garanhati kirtana**. 
+
+As Narottama sang the sweet names of Sri Gauranga and Nityananda, the entire courtyard erupted in a storm of ecstatic devotion. Devotees cried aloud, rolling in the dust. Suddenly, a miraculous light filled the sky!
+
+Right there, in the midst of the roaring kirtana, **Lord Sri Caitanya Mahaprabhu and Lord Nityananda Prabhu personally appeared before everyone's eyes!** Alongside Them stood Advaita Acharya, Gadadhara Pandita, Srivasa Pandita, and all the departed associates of the Lord! 
+
+Lord Gaurasundara and Lord Nityananda joined hands and danced ecstatically in the center of the kirtana circle, weeping with love and embracing Narottama. Thousands of assembled devotees witnessed this divine vision with their own eyes! They cried out in wonder, unable to tell whether they were on earth or in the spiritual world of Goloka Vrindavana. Such was the unmatched potency of Narottama Dasa Thakura’s love for the Lord!
+
+---
+
+#### The Immortal Songs: Prarthana & Prema-Bhakti-Candrika
+
+Srila Narottama Dasa Thakura left behind two jewel-like songbooks that every Gaudiya Vaishnava holds dear to their heart: **Prarthana** and **Prema-Bhakti-Candrika**. 
+
+Our great acharyas explain that the songs of Narottama are non-different from Vedic mantras. Whenever we feel our hearts turning dry or proud, we turn to Narottama’s prayers:
+
+> *'śrī-kṛṣṇa-caitanya prabhu dayā koro more*  
+> *tomā vinā ke dayālu jagat-saṁsāre'*  
+> *"My dear Lord Caitanya, please bestow Your mercy upon me! Who is more compassionate than You in this entire universe?"*
+
+And when we sing:
+
+> *'śrī-rūpa-mañjarī-pada, sei mora sampada*  
+> *sei mor bhajana-pūjana'*  
+> *"The lotus feet of Sri Rupa Manjari are my true wealth; they are the sole object of my devotion and worship."*
+
+His verses soften the hardest hearts, teaching us that real spiritual advancement does not come from caste, scholarship, or wealth, but from deep humility, sincere crying for Krishna, and service to the Vaishnavas.
+
+---
+
+#### The Final Lila: Melting into Pure Milk in the Sacred Ganges
+
+Towards the end of his earthly pastimes, certain caste-conscious scholars criticized Narottama because, though born in a kayastha family, he was initiating brahmanas and kings into the Vaishnava tradition. Those critics did not understand that a pure Vaishnava is completely transcendental to all material designations.
+
+Knowing that his earthly mission was complete, Srila Narottama traveled to the sacred Ganges at Budhuri Ghat accompanied by his beloved disciples, Ramachandra Kaviraja and Ganga-narayana Chakravarti.
+
+Narottama entered the gentle waters of Mother Ganges and said softly to his disciples: *"My dear children, please pour the waters of Mother Ganges over my body and gently massage me while chanting the Holy Names of the Lord."*
+
+With heavy hearts and tears streaming down their cheeks, the disciples began to pour the holy water over their guru, chanting the Hare Krishna maha-mantra:
+> *Hare Krishna Hare Krishna, Krishna Krishna Hare Hare*  
+> *Hare Rama Hare Rama, Rama Rama Hare Hare*
+
+As their hands massaged his transcendental form, a wonder occurred that left everyone speechless. Narottama’s body did not pass away like an ordinary mortal. Right before their very eyes, his sacred form began to dissolve into pure, white, sweet milk (*ksira*)! 
+
+The milk flowed out into Mother Ganges, turning the entire river milky-white, as Sri Champaka Manjari returned to her eternal service at the lotus feet of Sri Sri Radha and Krishna in Goloka Vrindavana!
+
+The caste-brahmanas and critics standing on the bank watching this divine departure fell to their knees in the mud. Beating their chests in deep remorse and weeping bitterly, they begged for forgiveness, acknowledging that Srila Narottama Dasa Thakura was a divine resident of the spiritual world who had come solely to bestow mercy upon fallen souls.
+
+---
+
+#### How to Pray for Blessings on This Holy Day
+
+My dear devotees, on this sacred disappearance day of Thakura Mahasaya, let us bow our heads to the earth and pray:
+
+*"O Thakura Mahasaya! O beloved Champaka Manjari! We possess no qualification, no knowledge, and no love for Krishna. We are filled with false pride and material desires. But seeing your matchless humility in the forest of Vrindavan, and your boundless mercy at the Padma River, we throw ourselves at your lotus feet. Please grant us just a drop of your humility, a drop of your taste for the Holy Name, and an eternal place in the service of Sri Sri Radha-Krishna and Sri Caitanya Mahaprabhu!"*
 
 **Pranama Mantra:**
-> *namo narottamāya eva rādhā-kṛṣṇa-padātmine*  
-> *caṁpaka-mañjarī-rūpāya kṛpā-sindho namo 'stu te*  
+> *namo narottama-padābja-sevināṁ*  
+> *śrī-lokanātha-priya-dāsātmane*  
+> *prema-bhakti-candrikā-kāriṇe*  
+> *śrī-champaka-mañjarī-rūpiṇe namaḥ*  
 >  
-> *"I offer my respectful obeisances unto Srila Narottama Dasa Thakura, who is Champaka Manjari in Vraja-lila, the supreme singer of Gaura-kirtana, and an ocean of mercy."*
+> *"I offer my respectful obeisances unto the lotus feet of Srila Narottama Dasa Thakura, the beloved disciple of Srila Lokanatha Gosvami, who is Champaka Manjari in Vraja-lila, the composer of the nectarine Prema-bhakti-candrika, and the supreme master of ecstatic kirtana."*
 """
     },
     'Srinivasa Acarya': {

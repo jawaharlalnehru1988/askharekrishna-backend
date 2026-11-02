@@ -176,10 +176,12 @@ class DebateCategoryArticleListSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField()
     articleList = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+    translations = serializers.SerializerMethodField()
+    all_names = serializers.SerializerMethodField()
 
     class Meta:
         model = DebateCategory
-        fields = ['id', 'name', 'description', 'image', 'articleList']
+        fields = ['id', 'name', 'description', 'image', 'articleList', 'translations', 'all_names']
 
     def get_image(self, obj):
         if not obj.image:
@@ -208,6 +210,32 @@ class DebateCategoryArticleListSerializer(serializers.ModelSerializer):
         t = self._get_translation(obj)
         return t.description if t and t.description else obj.description
 
+    def get_translations(self, obj):
+        result = {'en': obj.name}
+        trans_list = getattr(obj, 'all_cat_translations', None)
+        if trans_list is None:
+            trans_list = obj.translations.all()
+        for trans in trans_list:
+            if trans.translated_name:
+                result[trans.language] = trans.translated_name
+        return result
+
+    def get_all_names(self, obj):
+        names = set()
+        result = []
+        if obj.name:
+            names.add(obj.name.strip().lower())
+            result.append(obj.name)
+        trans_list = getattr(obj, 'all_cat_translations', None)
+        if trans_list is None:
+            trans_list = obj.translations.all()
+        for trans in trans_list:
+            t_name = trans.translated_name.strip() if trans.translated_name else ''
+            if t_name and t_name.lower() not in names:
+                names.add(t_name.lower())
+                result.append(t_name)
+        return result
+
     def get_articleList(self, obj):
         grouped_articles = self.context.get('grouped_articles', {})
         queryset = grouped_articles.get(obj.id, [])
@@ -216,6 +244,7 @@ class DebateCategoryArticleListSerializer(serializers.ModelSerializer):
             many=True,
             context=self.context,
         ).data
+
 
 
 class DebateArticleChildSerializer(serializers.ModelSerializer):

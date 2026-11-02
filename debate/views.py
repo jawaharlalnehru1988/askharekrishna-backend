@@ -56,7 +56,7 @@ class DebateArticleViewSet(viewsets.ModelViewSet):
         from django.core.cache import cache
         filter_keys = set(request.query_params.keys()) - {'language', 'format'}
         is_standard_catalog = len(filter_keys) == 0 and not slug
-        cache_key = f"debate_catalog_v2_{req_lang}" if is_standard_catalog else None
+        cache_key = f"debate_catalog_v3_{req_lang}" if is_standard_catalog else None
 
         if cache_key:
             cached_data = cache.get(cache_key)
@@ -91,7 +91,10 @@ class DebateArticleViewSet(viewsets.ModelViewSet):
         cat_trans_qs = DebateCategoryTranslation.objects.filter(language=req_lang)
         categories = list(
             DebateCategory.objects.filter(id__in=grouped_articles.keys())
-            .prefetch_related(Prefetch('translations', queryset=cat_trans_qs, to_attr='cached_cat_trans'))
+            .prefetch_related(
+                Prefetch('translations', queryset=cat_trans_qs, to_attr='cached_cat_trans'),
+                Prefetch('translations', queryset=DebateCategoryTranslation.objects.all(), to_attr='all_cat_translations'),
+            )
             .order_by('order', 'name')
         )
         cat_names = {}

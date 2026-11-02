@@ -94,7 +94,10 @@ class VaishnavaEtiquetteViewSet(viewsets.ModelViewSet):
         cat_trans_qs = EtiquetteCategoryTranslation.objects.filter(language=req_lang)
         categories = list(
             EtiquetteCategory.objects.filter(id__in=grouped_articles.keys())
-            .prefetch_related(Prefetch('translations', queryset=cat_trans_qs, to_attr='cached_cat_trans'))
+            .prefetch_related(
+                Prefetch('translations', queryset=cat_trans_qs, to_attr='cached_cat_trans'),
+                Prefetch('translations', queryset=EtiquetteCategoryTranslation.objects.all(), to_attr='all_cat_translations'),
+            )
             .order_by('order', 'name')
         )
         cat_names = {}
