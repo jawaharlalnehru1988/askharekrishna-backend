@@ -53,13 +53,50 @@ class CookingArticleViewSet(viewsets.ModelViewSet):
     def categories(self, request):
         lang = request.query_params.get('language') or request.query_params.get('lang') or 'en'
         topics = CookingMainTopic.objects.filter(is_active=True).order_by('order', 'name')
-        if topics.exists():
-            category_names = [t.get_localized_name(lang) for t in topics]
-        else:
-            category_names = list(
-                CookingArticle.objects.filter(topic__isnull=False)
-                .values_list('topic__name', flat=True)
-                .distinct()
-                .order_by('topic__name')
-            )
-        return Response({'categories': category_names})
+        category_names = []
+        category_details = []
+        
+        # Category icon map for visual flair
+        icon_map = {
+            'Sambar Items': '🍲',
+            'Rasam Items': '🥣',
+            'Variety Rice Items': '🍚',
+            'Sabji / Vegetable Preparations': '🥗',
+            'Breads / Rotis': '🫓',
+            'Chutneys': '🫙',
+            'Snack Items': '🥟',
+            'Sweet Items': '🍯',
+            'Hot Drinks': '☕',
+            'Hot Drinks (No Coffee / Tea)': '🍵',
+            'Preservative Foods': '🥒',
+            'Ayurvedic Shastra Recipes': '🌿',
+            'Health Care of Devotees': '🧘',
+            'Krishna Conscious Principles for Cooking': '🪷',
+            'Why No Onion & Garlic': '🧅',
+            'Why Veg?': '🌾',
+        }
+        
+        for t in topics:
+            loc_name = t.get_localized_name(lang)
+            count = CookingArticle.objects.filter(topic=t).count()
+            category_names.append(loc_name)
+            icon = icon_map.get(t.name, '🩺' if t.name.startswith('Diet:') else '🥘')
+            category_details.append({
+                'id': t.id,
+                'canonicalName': t.name,
+                'name': loc_name,
+                'count': count,
+                'icon': icon,
+                'isDiet': t.name.startswith('Diet:'),
+                'isPhilosophy': t.name in [
+                    'Krishna Conscious Principles for Cooking',
+                    'Why No Onion & Garlic',
+                    'Why Veg?',
+                    'Health Care of Devotees'
+                ]
+            })
+            
+        return Response({
+            'categories': category_names,
+            'details': category_details
+        })
