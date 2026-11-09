@@ -26,15 +26,50 @@ class CookingArticleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        category = self.request.query_params.get('category') or self.request.query_params.get('mainTopic')
+        category = (
+            self.request.query_params.get('cat')
+            or self.request.query_params.get('category')
+            or self.request.query_params.get('mainTopic')
+        )
+        major = self.request.query_params.get('major') or self.request.query_params.get('majorCategory')
         query = self.request.query_params.get('query')
         lang = self.request.query_params.get('language') or self.request.query_params.get('lang')
 
+        if major:
+            major_clean = str(major).strip().lower()
+            if major_clean in ('1', 'modern'):
+                queryset = queryset.filter(topic__name__in=[
+                    'Breads / Rotis', 'Sambar Items', 'Rasam Items', 'Variety Rice Items',
+                    'Sabji / Vegetable Preparations', 'Chutneys', 'Snack Items', 'Sweet Items',
+                    'Hot Drinks', 'Hot Drinks (No Coffee / Tea)', 'Preservative Foods'
+                ])
+            elif major_clean in ('2', 'ayurvedic'):
+                queryset = queryset.filter(topic__name__in=[
+                    'Ayurvedic Shastra Recipes',
+                    'Diet: Cholesterol (Medoroga)',
+                    'Diet: Diabetes (Madhumeha)',
+                    'Diet: Thyroid (Galaganda)',
+                    'Diet: Urinary Burning (Mutrakrichra)',
+                    'Diet: Weight Gain (Karshya)',
+                    'Diet: Weight Loss (Sthaulya)',
+                ])
+            elif major_clean in ('3', 'philosophy'):
+                queryset = queryset.filter(topic__name__in=[
+                    'Krishna Conscious Principles for Cooking',
+                    'Why No Onion & Garlic',
+                    'Why Veg?',
+                    'Health Care of Devotees',
+                ])
+
         if category:
-            queryset = queryset.filter(
-                Q(topic__name__icontains=category)
-                | Q(translations__mainTopic__icontains=category)
-            )
+            cat_str = str(category).strip()
+            if cat_str.isdigit():
+                queryset = queryset.filter(topic__id=int(cat_str))
+            else:
+                queryset = queryset.filter(
+                    Q(topic__name__icontains=cat_str)
+                    | Q(translations__mainTopic__icontains=cat_str)
+                )
 
         if query:
             queryset = queryset.filter(
@@ -81,19 +116,36 @@ class CookingArticleViewSet(viewsets.ModelViewSet):
             count = CookingArticle.objects.filter(topic=t).count()
             category_names.append(loc_name)
             icon = icon_map.get(t.name, '🩺' if t.name.startswith('Diet:') else '🥘')
+            
+            if t.name in [
+                'Ayurvedic Shastra Recipes',
+                'Diet: Cholesterol (Medoroga)',
+                'Diet: Diabetes (Madhumeha)',
+                'Diet: Thyroid (Galaganda)',
+                'Diet: Urinary Burning (Mutrakrichra)',
+                'Diet: Weight Gain (Karshya)',
+                'Diet: Weight Loss (Sthaulya)',
+            ]:
+                major_group = 'ayurvedic'
+            elif t.name in [
+                'Krishna Conscious Principles for Cooking',
+                'Why No Onion & Garlic',
+                'Why Veg?',
+                'Health Care of Devotees',
+            ]:
+                major_group = 'philosophy'
+            else:
+                major_group = 'modern'
+                
             category_details.append({
                 'id': t.id,
                 'canonicalName': t.name,
                 'name': loc_name,
                 'count': count,
                 'icon': icon,
+                'majorGroup': major_group,
                 'isDiet': t.name.startswith('Diet:'),
-                'isPhilosophy': t.name in [
-                    'Krishna Conscious Principles for Cooking',
-                    'Why No Onion & Garlic',
-                    'Why Veg?',
-                    'Health Care of Devotees'
-                ]
+                'isPhilosophy': major_group == 'philosophy',
             })
             
         return Response({
