@@ -328,9 +328,9 @@ After one year of secret service, Lokanatha caught Narottama in the act, wept in
 #### 3. Spiritual Significance & Observance Guidelines
 Srila Lokanatha Gosvami teaches supreme detachment, humility, and single-minded devotion to Sri Radha-Vinodaji.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Reading *Bhakti-ratnakara* (pastimes of Lokanatha Gosvami and Narottama Dasa Thakura), offering flowers and sweet rice to Sri Radha-Vinodaji.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -666,9 +666,9 @@ When a mad wild elephant charged toward Syamananda's kirtana party in the Odisha
 #### 3. Spiritual Significance & Observance Guidelines
 Srila Syamananda Prabhu exemplifies the highest perfection of *sevan-mārga* and Radharani's direct mercy.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Reading *Bhakti-ratnakara* (pastimes of Syamananda Prabhu at Seva Kunj), offering yellow silk garments, flowers, and kirtana.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 

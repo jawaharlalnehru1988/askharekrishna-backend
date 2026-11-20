@@ -201,7 +201,6 @@ def generate_calendar_for_year(year: int, location_data=None, force: bool = Fals
                             dt_end = datetime.datetime.strptime(f"{date_str} {end_time_str}", "%Y-%m-%d %H:%M").replace(tzinfo=tz)
                             break_fast_start = dt_start
                             break_fast_end = dt_end
-                            is_fast_day = True
                         except Exception as e:
                             logger.warning(f"Error parsing break-fast time for {date_str}: {e}")
 

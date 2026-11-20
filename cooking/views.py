@@ -44,15 +44,9 @@ class CookingArticleViewSet(viewsets.ModelViewSet):
                     'Hot Drinks', 'Hot Drinks (No Coffee / Tea)', 'Preservative Foods'
                 ])
             elif major_clean in ('2', 'ayurvedic'):
-                queryset = queryset.filter(topic__name__in=[
-                    'Ayurvedic Shastra Recipes',
-                    'Diet: Cholesterol (Medoroga)',
-                    'Diet: Diabetes (Madhumeha)',
-                    'Diet: Thyroid (Galaganda)',
-                    'Diet: Urinary Burning (Mutrakrichra)',
-                    'Diet: Weight Gain (Karshya)',
-                    'Diet: Weight Loss (Sthaulya)',
-                ])
+                queryset = queryset.filter(
+                    Q(topic__name='Ayurvedic Shastra Recipes') | Q(topic__name__startswith='Diet:')
+                )
             elif major_clean in ('3', 'philosophy'):
                 queryset = queryset.filter(topic__name__in=[
                     'Krishna Conscious Principles for Cooking',
@@ -117,15 +111,7 @@ class CookingArticleViewSet(viewsets.ModelViewSet):
             category_names.append(loc_name)
             icon = icon_map.get(t.name, '🩺' if t.name.startswith('Diet:') else '🥘')
             
-            if t.name in [
-                'Ayurvedic Shastra Recipes',
-                'Diet: Cholesterol (Medoroga)',
-                'Diet: Diabetes (Madhumeha)',
-                'Diet: Thyroid (Galaganda)',
-                'Diet: Urinary Burning (Mutrakrichra)',
-                'Diet: Weight Gain (Karshya)',
-                'Diet: Weight Loss (Sthaulya)',
-            ]:
+            if t.name == 'Ayurvedic Shastra Recipes' or t.name.startswith('Diet:'):
                 major_group = 'ayurvedic'
             elif t.name in [
                 'Krishna Conscious Principles for Cooking',

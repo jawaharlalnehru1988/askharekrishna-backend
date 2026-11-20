@@ -43,9 +43,9 @@ On his deathbed, Sri Madhavendra Puri continuously recited the ultimate verse of
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Madhavendra Puri planted the seed of pure conjugal love of Godhead that bloomed in Lord Sri Caitanya Mahaprabhu.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Reading *Caitanya-caritamrta* Madhya Lila Chapter 4, offering sweet rice (*kṣīra*), sandalwood pulp (*candana*), and singing devotional kirtana.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -184,9 +184,9 @@ Babaji Maharaj gave direct spiritual direction to Srila Bhaktivinoda Thakura, co
 #### 3. Spiritual Significance & Observance Guidelines
 Srila Jagannatha Dasa Babaji exemplifies absolute absorption in Harinama and veneration of the Holy Dham.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Reading pastimes of Srila Jagannatha Dasa Babaji, chanting extra rounds of Harinama, and offering prasadam.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 

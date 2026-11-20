@@ -56,12 +56,12 @@ Lord Caitanya proclaimed: *"This land of Kumarahatta is worshipable above all pl
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Isvara Puri exemplifies the supreme principle of **Guru-bhakti**—that one receives the highest perfection of *kṛṣṇa-prema* solely through sincere, unconditional service to the spiritual master (*yasya prasādād bhagavat-prasādo*).
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** 
   - Worship Sri Isvara Puri alongside Sri Gaura-Nitai and Srila Madhavendra Puri.
   - Read and discuss the pastimes of Sri Isvara Puri from *Sri Caitanya-caritamrta* (Adi-lila Chapters 9 & 17) and *Sri Caitanya-bhagavata* (Adi-lila Chapters 11 & 17).
   - Perform ecstatic Harinama Sankirtana and offer a royal *bhoga* feast.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -120,12 +120,12 @@ When Pundarika woke up the next morning, his cheeks were swollen and bruised red
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Pundarika Vidyanidhi teaches us never to judge a pure devotee by external appearances (*vaiṣṇava-aparādha*) and reveals the pinnacle of confidential *raganuga-bhakti*.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Pundarika Vidyanidhi alongside Sri Gadadhara Pandita, Sri Gaura-Nitai, and Lord Jagannath.
   - Read and discuss pastimes from *Sri Caitanya-bhagavata* (Madhya-lila Chapter 7) and *Sri Caitanya-caritamrta* (Madhya-lila Chapter 16).
   - Perform Harinama Sankirtana and offer a royal noon *bhoga* feast.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -187,12 +187,12 @@ Murari Gupta recorded the divine childhood, youth, and Navadvipa pastimes of Lor
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Murari Gupta teaches us the supreme standard of **eka-niṣṭhā-bhakti**—unyielding, single-minded loyalty to one's worshipable Lord.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Murari Gupta alongside Lord Ramacandra, Mother Sita, Sri Lakshmana, Sri Hanuman, and Sri Gaura-Nitai.
   - Read and discuss pastimes from *Sri Caitanya-caritamrta* (Madhya-lila Chapter 15) and *Sri Caitanya-bhagavata* (Madhya-lila Chapter 10).
   - Perform Harinama Sankirtana and recite verses glorifying Lord Ramacandra and Sri Caitanya Mahaprabhu.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -250,12 +250,12 @@ When Sri Caitanya Mahaprabhu resided in Jagannath Puri, He organized seven disti
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Mukunda Datta teaches us the power of **kīrtana-rasa**—how pure, unadulterated singing of the Holy Names and Bhagavatam verses directly invokes the presence of Sri Caitanya Mahaprabhu.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Mukunda Datta alongside Sri Gaura-Nitai and Sri Vasudeva Datta.
   - Read and discuss pastimes of Mukunda Datta from *Sri Caitanya-bhagavata* (Madhya-lila Chapter 10) and *Sri Caitanya-caritamrta* (Madhya-lila Chapters 13 & 16).
   - Perform sweet devotional Kirtana and recite Srimad-Bhagavatam verses.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -319,12 +319,12 @@ Although Sridhara spent his days working laboriously in the fields to earn a few
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Kolavecha Sridhara Pandita exemplifies **a-kiñcana-bhakti**—pure devotion unpolluted by desires for material opulence or liberation (*anya-abhilāṣitā-śūnyam*).
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Kolavecha Sridhara Pandita alongside Sri Gaura-Nitai.
   - Read and discuss pastimes of Sridhara Pandita from *Sri Caitanya-bhagavata* (Adi-lila Chapter 12, Madhya-lila Chapters 9 & 10).
   - Offer simple, pure foods (banana items, spinach, Ganges water) to Sri Gaura-Nitai.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -379,12 +379,12 @@ Sivananda Sena brought his 7-year-old son Puri Dasa to Jagannath Puri. Lord Cait
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Sivananda Sena teaches us the pinnacle of **Vaiṣṇava-sevā**—sparing no personal expense, effort, or comfort to serve the devotees of Lord Sri Caitanya Mahaprabhu.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Sivananda Sena alongside Sri Gaura-Nitai and Srila Kavi-karnapura.
   - Read and discuss pastimes of Sivananda Sena from *Sri Caitanya-caritamrta* (Antya-lila Chapters 1 & 12).
   - Perform Harinama Sankirtana and serve prasadam to Vaishnavas.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -437,12 +437,12 @@ When Gauridasa returned, he feigned intense anger: *"You disobeyed your guru's s
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Gauridasa Pandita exemplifies **sakhya-rasa-bhakti**—intimate, unreserved friendship with the Supreme Lord that treats the Deity as a living companion.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Gauridasa Pandita alongside Sri Sri Gaura-Nityananda of Ambika Kalna.
   - Read and discuss pastimes of Gauridasa Pandita from *Bhakti-ratnakara* (Chapter 7) and *Sri Caitanya-caritamrta*.
   - Perform enthusiastic *sakhya-rasa* Kirtanas and offer sweet preparations.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -490,12 +490,12 @@ As Sridama-gopa, Abhirama Thakura shared an intimate, equal friend (*sakhā*) re
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Abhirama Thakura exemplifies the bold, heroic, and affectionate mood of **Sridama-gopa** (*sakhya-rasa*), showing that true devotion is filled with divine strength and intimate love.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Abhirama Thakura alongside Sri Gopinatha Deity and Lord Nityananda Prabhu.
   - Read and discuss pastimes of Abhirama Thakura from *Bhakti-ratnakara* (Chapter 7) and *Caitanya-bhagavata*.
   - Perform heroic cowherd-style Kirtanas and offer sweetmeats and milk offerings.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -543,12 +543,12 @@ Narahari Sarakara authored key Sanskrit instructional manuals including **Kṛ�
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Narahari Sarakara Thakura teaches us the essence of **cāmara-sevā** and **mādhurya-upāsanā**—offering personal, loving service to Lord Caitanya with deep internal sweetness.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Narahari Sarakara Thakura alongside Sri Raghunandana Thakura, Mukunda Dasa, and Sri Gaura-Nitai.
   - Read and discuss pastimes from *Bhakti-ratnakara* (Chapter 13) and *Sri Caitanya-caritamrta* (Adi-lila Chapter 10).
   - Perform sweet Padavali Kirtanas composed by Narahari Sarakara and perform Camara-seva to the Deities.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -592,12 +592,12 @@ Vasudeva Ghosh accompanied Lord Caitanya during the historic sankirtana movement
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Vasudeva Ghosh demonstrates the power of **kīrtana-rasa** and total surrender to the mercy of Sri Caitanya Mahaprabhu.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Vasudeva Ghosh alongside Sri Govinda Ghosh, Sri Madhava Ghosh, and Sri Gaura-Nitai.
   - Read and discuss pastimes of the Ghosh brothers from *Bhakti-ratnakara* (Chapter 13) and *Sri Caitanya-caritamrta* (Adi-lila Chapter 10).
   - Sing the famous songs of Vasudeva Ghosh (*Yadi Gaura Na Ha'ta*, *Gauranga Bolite Habe*) during Harinama Sankirtana.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -643,12 +643,12 @@ To this day, during the historic **Agradwīper Melā** (Agradwipa Fair), the Dei
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Govinda Ghosh reveals **bhakta-vātsalya**—how the Supreme Lord Himself becomes a son to His surrendered servant.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Govinda Ghosh alongside Lord Gopinatha of Agradwipa and Sri Gaura-Nitai.
   - Read and discuss pastimes of Govinda Ghosh from *Bhakti-ratnakara* (Chapter 13) and *Sri Caitanya-caritamrta* (Adi-lila Chapter 10).
   - Perform Harinama Sankirtana and offer a royal feast to Gopinatha.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -700,12 +700,12 @@ Gadadhara Dasa spent his final years absorbed 24 hours a day in Harinama and the
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Gadadhara Dasa Gosvami demonstrates **gaura-kṛpā-sāmarthya**—the unstoppable power of Lord Caitanya's mercy to transform the most inimical souls into pure devotees.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Gadadhara Dasa Gosvami alongside Sri Gaura-Nitai.
   - Read and discuss pastimes of Gadadhara Dasa from *Sri Caitanya-caritamrta* (Adi-lila Chapter 10) and *Sri Caitanya-bhagavata*.
   - Perform enthusiastic Harinama Sankirtana and distribute prasadam.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -747,12 +747,12 @@ Directed by Lord Nityananda Prabhu, Dhananjaya Pandita established the self-mani
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Dhananjaya Pandita demonstrates **a-kiñcana-bhakti**—pure, unadulterated devotion free from material desires.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Dhananjaya Pandita alongside Sri Gopinatha and Sri Gaura-Nitai.
   - Read and discuss pastimes from *Sri Caitanya-caritamrta* (Adi-lila Chapter 11) and *Bhakti-ratnakara*.
   - Perform cowherd-style Harinama Sankirtana.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -794,12 +794,12 @@ Purushottama Dasa Thakura's son, **Sri Kanai Thakura**, was so spiritually empow
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Purushottama Dasa Thakura teaches us **nitāi-caraṇa-āśraya**—taking absolute shelter of Lord Nityananda Prabhu.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Purushottama Dasa Thakura alongside Lord Nityananda Prabhu and Sri Gaura-Nitai.
   - Read and discuss pastimes from *Sri Caitanya-caritamrta* (Adi-lila Chapter 11).
   - Perform cowherd-style (*sakhya-rasa*) Harinama Sankirtana.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -839,12 +839,12 @@ Bhugarbha Gosvami spent his entire life in Vraja-dhama, never leaving Vrindavan.
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Bhugarbha Gosvami demonstrates **vrajavāsa** and profound humility (*tṛṇād api sunīcena*).
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Bhugarbha Gosvami alongside Sri Lokanatha Gosvami and Sri Gaura-Nitai.
   - Read and discuss pastimes from *Bhakti-ratnakara* (Chapter 1).
   - Perform Vrindavan-bhava Harinama Sankirtana.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -882,12 +882,12 @@ Later, Lord Caitanya ordered Kasisvara Pandita to move to Vrindavan to assist Sr
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Kasisvara Pandita teaches us **sevā-niṣṭhā**—unreserved personal protection and physical service to the Lord.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Kasisvara Pandita alongside Sri Gaura-Govinda and Sri Gaura-Nitai.
   - Read and discuss pastimes from *Sri Caitanya-caritamrta* (Adi-lila Chapter 10).
   - Perform sankirtana and offer prasadam.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -928,12 +928,12 @@ Sri Saranga Thakura spent his life in deep absorption in Harinama Sankirtana und
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Saranga Thakura demonstrates **guru-kṛpā-śakti**—the power of pure Vaishnava grace to revive spiritually dead souls.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Saranga Thakura alongside Sri Gopinatha and Sri Gaura-Nitai.
   - Read and discuss pastimes from *Bhakti-ratnakara* (Chapter 13) and *Sri Caitanya-caritamrta* (Adi-lila Chapter 10).
   - Perform Harinama Sankirtana.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -975,12 +975,12 @@ Sri Kaliya Krishnadasa spent his life spreading Harinama and Nityananda-prema th
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Kaliya Krishnadasa demonstrates **sakhya-rasa-saṅkīrtana**—spreading the Holy Name with cowherd joy and vigor.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the Acharya, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:**
   - Worship Sri Kaliya Krishnadasa alongside Lord Nityananda Prabhu and Sri Gaura-Nitai.
   - Read and discuss pastimes from *Sri Caitanya-caritamrta* (Adi-lila Chapter 11).
   - Perform cowherd-style Harinama Sankirtana.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the Acharya, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 

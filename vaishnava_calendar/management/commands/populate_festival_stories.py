@@ -1053,7 +1053,7 @@ Vasanta Panchami invites the warmth of spring devotion into the heart of the pra
 - **Yellow Dress & Decoration (Basanti-Vesha):** Dress the Deities in bright yellow silk garments and decorate the altar with yellow marigolds and mustard flowers.
 - **Yellow Prasadam Offering:** Offer yellow sweet rice (*Kesari Kheer*), saffron sweets, halava, and yellow fruits to the Lord.
 - **First Gulal Offering:** Apply a small pinch of pink/red *Gulal* (colored powder) to the lotus feet of Sri Sri Radha-Krishna and Sri Gaura-Nitai.
-- **Honor Acaryas' Appearance:** Observe fasting until noon (12:00 PM) for Srimati Visnupriya Devi, Srila Raghunatha Dasa Gosvami, Srila Raghunatha Bhatta Gosvami, and Srila Visvanatha Cakravarti Thakura, followed by *anukalpa prasadam*.
+- **Honor Acaryas\' Appearance:** Meditate on the divine appearances and contributions of Srimati Visnupriya Devi, Srila Raghunatha Dasa Gosvami, Srila Raghunatha Bhatta Gosvami, and Srila Visvanatha Cakravarti Thakura, offering special prayers and honoring Krishna-prasadam.
 
 ---
 

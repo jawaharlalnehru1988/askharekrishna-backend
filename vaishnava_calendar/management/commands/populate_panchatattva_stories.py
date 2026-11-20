@@ -91,9 +91,9 @@ Srimati Visnupriya Devi commissioned the carving of the first wooden **Sri Gaura
 #### 3. Spiritual Significance & Observance Guidelines
 Srimati Visnupriya Devi exemplifies the pinnacle of unalloyed devotion in separation (*vipralambha-bhāva*).
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM) on Vasanta Panchami.
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of Srimati Visnupriya Devi, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Worshiping Srimati Visnupriya Devi and Sri Gauranga Mahaprabhu, offering yellow silk garments, flowers, and sweet rice.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the personality, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -139,9 +139,9 @@ Following Sri Advaita Acarya's physical disappearance, Srimati Sita Thakurani gu
 #### 3. Spiritual Significance & Observance Guidelines
 Srimati Sita Thakurani exemplifies maternal love (*vātsalya-rasa*) in Gaura-lila.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the personality, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Worshiping Sita-Advaita Deities and Sri Gaura-Nitai, offering maternal affection, sweet rice, and reading *Caitanya-caritamrta* Adi 13.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the personality, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -187,9 +187,9 @@ While traveling through dense jungles inhabited by dangerous bandits, Jahnava Ma
 #### 3. Spiritual Significance & Observance Guidelines
 Mother Jahnava Devi is worshiped as the universal mother of all Gaudiya Vaishnavas (*jāhnavā-mātā*).
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the personality, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Abhisheka of Sri Sri Gaura-Nitai / Jahnava Devi Deities, offering silk garments, flowers, and reading *Bhakti-ratnakara*.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the personality, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -235,9 +235,9 @@ When Ravana abducted an illusory shadow form (*māyā-sītā*), Lord Rama waged 
 #### 3. Spiritual Significance & Observance Guidelines
 Janaki Navami grants prosperity, purity, and devotion to Lord Ramacandra.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the personality, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Reading *Valmiki Ramayana* (Sita Kalyanam & Janaki Navami chapters), offering lotus flowers, red/yellow garments, and panakam.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the personality, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -291,9 +291,9 @@ Lord Caitanya picked up Haridasa's body in His arms and danced in wild, weeping 
 #### 3. Spiritual Significance & Observance Guidelines
 Srila Haridasa Thakura demonstrates that birth, caste, and social status are completely irrelevant in chanting the Holy Name.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the personality, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Reading *Caitanya-caritamrta* Antya Lila Chapter 11 (Disappearance of Srila Haridasa Thakura), chanting 64 or 192 rounds of the Hare Krishna Maha-Mantra, and kirtana.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the personality, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -338,9 +338,9 @@ Svarupa Damodara maintained a confidential personal diary (**Kaḍacā**), recor
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Svarupa Damodara Gosvami teaches the highest standard of pure Gaudiya *siddhānta* and *vipralambha-bhāva*.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the personality, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Reading *Caitanya-caritamrta* Adi Lila 1.41–46 and Antya Lila, singing *padāvalī-kīrtana*, and studying Gaudiya philosophy.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the personality, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -390,9 +390,9 @@ Ramananda resigned from his royal governorship to live in Jagannath Puri as Maha
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Ramananda Raya teaches the ultimate zenith of *rāgānugā-bhakti* and *radha-dasyam*.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the personality, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Reading *Caitanya-caritamrta* Madhya Lila Chapter 8 (*Rāmānanda-Saṁvāda*), singing *Jagannatha-vallabha* songs, and kirtana.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the personality, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
@@ -437,9 +437,9 @@ Alongside Mother Jahnava Devi, Virabhadra Gosvami organized regional kirtana con
 #### 3. Spiritual Significance & Observance Guidelines
 Sri Virabhadra Gosvami is worshiped on his Appearance day for spiritual strength and freedom from spiritual confusion.
 
-- **Fasting Rules:** Fasting is observed until noon (12:00 PM).
+- **Observance Guidelines:** Devotees honor this auspicious day by meditating on the divine qualities, teachings, and pastimes of the personality, chanting Harinama sankirtana, and offering prayers and pushpanjali. (Fasting is not required).
 - **Festival Activities:** Abhisheka of Sri Sri Gaura-Nitai / Sri Virabhadra Deities, offering white/blue silk garments, flowers, and reading *Caitanya-caritamrta* Adi Lila Chapter 11.
-- **Noon Parana:** Feast offering presented at noon, followed by taking *prasādam* break-fast (*pāraṇā*).
+- **Honoring Prasadam:** Loving bhoga is offered to the Lord and the personality, followed by honoring sumptuous Krishna-prasadam in devotion.
 
 ---
 
