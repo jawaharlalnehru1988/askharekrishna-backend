@@ -174,7 +174,7 @@ from django.db.models.signals import post_save, post_delete
 from django.core.cache import cache
 
 def invalidate_debate_cache(sender, **kwargs):
-    cache_keys = [f"debate_catalog_v2_{lang}" for lang in DEBATE_LANGUAGE_NAMES.keys()]
+    cache_keys = [f"debate_catalog_v3_{lang}" for lang in DEBATE_LANGUAGE_NAMES.keys()] + [f"debate_catalog_v2_{lang}" for lang in DEBATE_LANGUAGE_NAMES.keys()]
     cache.delete_many(cache_keys)
 
 for _model in [DebateCategory, DebateCategoryTranslation, DebateArticle, DebateArticleTranslation]:

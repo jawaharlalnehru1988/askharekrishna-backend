@@ -26,9 +26,14 @@ file under `(REVIEW NEEDED)` so it can be approved later.
 
 1. Tamil-only output for narrative fields such as title, excerpt, and content.
 2. Do not mix other languages (English, Hindi, Telugu, etc.) inside Tamil sentences.
-3. Non-Tamil terms allowed only when scientific/technical and unavoidable — place them in brackets after the Tamil.
-4. Keep DB field keys, API field names, slug values, category strings, and `language` code unchanged.
-5. Keep source meaning accurate; do not shorten critical spiritual or philosophical meaning.
+3. 🚫 Strictly avoid English parenthetical translations or crutches in headings, subtitles, or body text (e.g. NEVER write `**துணைத்தலைப்பு:** ... (Why did Krishna...)` or `மன அழுத்தம் (stress)` or `(ஆததாயிகள் - Atatayis)`). Use pure, self-sufficient Tamil directly.
+4. 🚫 Strictly avoid the archaic letter 'ஶ'. Use standard contemporary Grantha/Tamil letters 'ஸ', 'ஷ', or 'ச'. For Sanskrit 'श' (ś / śa), strictly use 'ஷ' (e.g., `அஷோச்யான்`, `ஷரீராணி`, `ஷாஷ்வத:`).
+5. For Sanskrit Visarga (ः / ḥ) in Tamil script, strictly use colon (`:`) (e.g. `பண்டிதா:`, `ராம:`), NEVER the Tamil Aytham letter `ஃ`.
+6. All quoted scriptural verses (Shastra Pramana) must be transliterated into Tamil script, never left in Roman/English transliteration.
+7. Always use explicit hierarchical scriptural citations (e.g. `பகவத் கீதை, அத்தியாயம் 2, சுலோகம் 11`), never bare numerical codes like `(2.11)`.
+8. Proper Names & Epics: Draupadi must strictly be spelled as 'திரௌபதி' (திரௌபதியின், திரௌபதியை, திரௌபதிக்கு, திரௌபதியிடம்), NEVER as 'துரோபதை' or 'துரோபதி'.
+9. Keep DB field keys, API field names, slug values, category strings, and `language` code unchanged.
+10. Keep source meaning accurate; do not shorten critical spiritual or philosophical meaning.
 
 ## Formatting Rules
 
