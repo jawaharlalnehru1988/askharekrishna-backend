@@ -234,6 +234,21 @@ class DebateCategoryArticleListSerializer(serializers.ModelSerializer):
             if t_name and t_name.lower() not in names:
                 names.add(t_name.lower())
                 result.append(t_name)
+        # Support legacy URL category parameters so old bookmarks and links resolve seamlessly
+        legacy_aliases = {
+            16: [
+                'Political Atheism / Dravidian Ideology Attacks',
+                'அரசியல் நாத்திகமும் திராவிட சித்தாந்த விமர்சனங்களும்',
+                'রাজনৈতিক নাস্তিকতা/দ্রাবিড় মতাদর্শ আক্রমণ',
+                'ರಾಜಕೀಯ ನಾಸ್ತಿಕತೆ / ದ್ರಾವಿಡ ಸಿದ್ಧಾಂತದ ದಾಳಿಗಳು',
+                'രാഷ്ട്രീയ നിരീശ്വരവാദം / ദ്രാവിഡ പ്രത്യയശാസ്ത്ര ആക്രമണങ്ങൾ',
+                'రాజకీయ నాస్తికత్వం / ద్రావిడ భావజాలం దాడులు',
+            ]
+        }
+        for alias in legacy_aliases.get(obj.id, []):
+            if alias.strip().lower() not in names:
+                names.add(alias.strip().lower())
+                result.append(alias)
         return result
 
     def get_articleList(self, obj):
